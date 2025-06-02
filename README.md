@@ -1,3 +1,3 @@
-# Research_Papers_and_Projects
+# Research Papers and Projects
 
 In this repository are a collection of work throughout my educational journey. My work includes marketing plans for local businesses, financial analysis of Dollar Tree and Target, data governance framework for a hypothetical technology company with a federal government contract, analysis of global food production under conditions with and without climate change using regression models in SAS, and economic research analysing conditions in which microgrids become economically and socially viable in rural and urban settings compared to traditional grid expansion utilizing cost-benefit analysis, computable general equilibrium modeling and agent-based modeling. 
