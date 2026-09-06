@@ -1,0 +1,15 @@
+{
+  "stage": "fundamentals_national",
+  "provenance": "fixture",
+  "rows": 1,
+  "written": "2026-09-06T17:35:02",
+  "coefficients": {
+    "a": 6.228,
+    "b_post94": -5.451,
+    "b_mid": -3.87,
+    "b_app": 0.263,
+    "b_cpi": -0.272,
+    "b_war": 1.685,
+    "sigma": 3.973
+  }
+}

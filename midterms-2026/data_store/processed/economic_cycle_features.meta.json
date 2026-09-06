@@ -1,0 +1,8 @@
+{
+  "stage": "economic_cycle_features",
+  "provenance": "mirror",
+  "rows": 21,
+  "written": "2026-09-06T17:20:52",
+  "cpi_unrate_corr": -0.21551424524009433,
+  "use_unemployment": true
+}

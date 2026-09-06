@@ -1,0 +1,24 @@
+{
+  "stage": "fundamentals_estimates_2026",
+  "provenance": "fixture",
+  "rows": 506,
+  "written": "2026-09-06T17:35:02",
+  "seat_coefficients": {
+    "c[House]": 0.827,
+    "c[Senate]": 1.834,
+    "c[Governor]": -3.06,
+    "b_nat[House]": 0.787,
+    "b_nat[Senate]": 0.583,
+    "b_nat[Governor]": 0.687,
+    "b_lean[House]": 0.941,
+    "b_lean[Senate]": 0.86,
+    "b_lean[Governor]": 0.581,
+    "b_inc[House]": 3.471,
+    "b_inc[Senate]": 4.221,
+    "b_inc[Governor]": 6.12,
+    "b_fund": 1.96,
+    "sigma[House]": 6.542,
+    "sigma[Senate]": 7.9,
+    "sigma[Governor]": 14.127
+  }
+}

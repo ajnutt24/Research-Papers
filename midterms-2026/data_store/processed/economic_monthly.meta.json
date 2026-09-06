@@ -1,0 +1,11 @@
+{
+  "stage": "economic_monthly",
+  "provenance": "mirror",
+  "rows": 1365,
+  "written": "2026-09-06T17:20:52",
+  "sources": {
+    "CPIAUCSL": "mirror",
+    "UNRATE": "fixture",
+    "GASREGW": "fixture"
+  }
+}

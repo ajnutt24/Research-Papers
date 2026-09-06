@@ -1,0 +1,10 @@
+{
+  "stage": "polls_2026",
+  "provenance": "fixture",
+  "rows": 510,
+  "written": "2026-09-06T17:26:01",
+  "n_races_polled": 166,
+  "sources": [
+    "fixture"
+  ]
+}

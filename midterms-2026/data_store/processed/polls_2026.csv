@@ -1,0 +1,511 @@
+poll_id,race_id,office,state,district,pollster,sponsor,partisan,start_date,end_date,sample_size,population,methodology,dem_pct,rep_pct,margin,hypothetical,source,provenance
+c938218f15bd,H-AK-01,House,AK,1,Data for Progress,,,2026-05-16,2026-05-19,600,lv,online,45.1,48.7,-3.6000000000000014,False,fixture,fixture
+bb66bdea2864,H-AZ-01,House,AZ,1,Cygnal,,,2026-06-25,2026-06-28,500,rv,mixed,36.7,59.8,-23.099999999999994,False,fixture,fixture
+03d43fd76c95,H-AZ-01,House,AZ,1,Quinnipiac University,,,2026-07-17,2026-07-20,1000,lv,live phone,42.3,51.6,-9.300000000000004,False,fixture,fixture
+33ee89bf263d,H-AZ-02,House,AZ,2,Data for Progress,,,2026-04-17,2026-04-20,500,rv,online,41.2,51.7,-10.5,False,fixture,fixture
+af786099ab3d,H-AZ-04,House,AZ,4,Fox News/Beacon-Shaw,,,2026-07-03,2026-07-06,800,rv,live phone,51.8,44.9,6.899999999999999,False,fixture,fixture
+82c186c8ae6a,H-AZ-04,House,AZ,4,Fox News/Beacon-Shaw,,,2026-04-20,2026-04-23,1000,lv,live phone,46.0,48.3,-2.299999999999997,False,fixture,fixture
+06e4433b197d,H-AZ-04,House,AZ,4,Cygnal,,,2026-08-19,2026-08-22,1000,rv,mixed,48.6,48.7,-0.10000000000000142,False,fixture,fixture
+0cb0e0321f7c,H-AZ-04,House,AZ,4,Marist,,,2026-09-03,2026-09-06,800,rv,live phone,47.8,45.7,2.0999999999999943,False,fixture,fixture
+bed8a087e4c2,H-AZ-04,House,AZ,4,Data for Progress,,,2026-07-31,2026-08-03,1000,lv,online,48.0,43.3,4.700000000000003,False,fixture,fixture
+a548e9c64ea0,H-AZ-06,House,AZ,6,Data for Progress,,,2026-07-02,2026-07-05,600,lv,online,44.6,52.3,-7.699999999999996,False,fixture,fixture
+e93372909bfb,H-AZ-06,House,AZ,6,YouGov/Economist,,,2026-05-06,2026-05-09,400,lv,online,40.9,54.4,-13.5,False,fixture,fixture
+f3bb25a5673b,H-AZ-08,House,AZ,8,Data for Progress,,,2026-07-24,2026-07-27,500,lv,online,35.1,56.9,-21.799999999999997,False,fixture,fixture
+7fc3eb0f0d2c,H-AR-02,House,AR,2,Rasmussen Reports,,,2026-06-24,2026-06-27,500,rv,ivr/online,43.4,50.3,-6.899999999999999,False,fixture,fixture
+e26204870b33,H-CA-01,House,CA,1,Data for Progress,,,2026-07-19,2026-07-22,500,lv,online,41.6,52.7,-11.100000000000001,False,fixture,fixture
+319fc3679382,H-CA-03,House,CA,3,Rasmussen Reports,,,2026-08-23,2026-08-26,1000,lv,ivr/online,45.1,47.8,-2.6999999999999957,False,fixture,fixture
+9402608521ed,H-CA-13,House,CA,13,Trafalgar Group,,,2026-04-27,2026-04-30,1000,rv,mixed,51.1,42.2,8.899999999999999,False,fixture,fixture
+e7894df6f885,H-CA-13,House,CA,13,Rasmussen Reports,,,2026-08-28,2026-08-31,600,lv,ivr/online,48.9,45.6,3.299999999999997,False,fixture,fixture
+8a0712caa978,H-CA-13,House,CA,13,Cygnal,,,2026-07-28,2026-07-31,1000,lv,mixed,51.1,45.1,6.0,False,fixture,fixture
+80563ae7e885,H-CA-23,House,CA,23,Siena/NYT,,,2026-07-30,2026-08-02,1000,lv,live phone,43.3,51.8,-8.5,False,fixture,fixture
+fab5564b07ed,H-CA-23,House,CA,23,Siena/NYT,,,2026-04-12,2026-04-15,1000,rv,live phone,44.1,51.1,-7.0,False,fixture,fixture
+a7914cef1168,H-CA-27,House,CA,27,Emerson College,,,2026-07-01,2026-07-04,400,rv,ivr/online,55.9,39.9,16.0,False,fixture,fixture
+880a18ca5b15,H-CA-40,House,CA,40,Emerson College,,,2026-06-27,2026-06-30,600,lv,ivr/online,45.4,47.5,-2.1000000000000014,False,fixture,fixture
+f9a4e6e47474,H-CA-40,House,CA,40,Emerson College,,,2026-08-04,2026-08-07,1000,rv,ivr/online,50.5,42.3,8.200000000000003,False,fixture,fixture
+da43c7a4b841,H-CA-40,House,CA,40,Public Policy Polling,,,2026-06-28,2026-07-01,1000,lv,ivr,48.0,45.2,2.799999999999997,False,fixture,fixture
+a607381d15f8,H-CA-40,House,CA,40,Quinnipiac University,,,2026-07-18,2026-07-21,400,lv,live phone,46.4,46.2,0.19999999999999574,False,fixture,fixture
+854236a9bfef,H-CA-40,House,CA,40,YouGov/Economist,,,2026-04-21,2026-04-24,600,rv,online,57.2,40.8,16.400000000000006,False,fixture,fixture
+20407ca24b50,H-CA-40,House,CA,40,Data for Progress,,,2026-08-08,2026-08-11,600,lv,online,50.5,40.0,10.5,False,fixture,fixture
+9339933a73db,H-CA-40,House,CA,40,Morning Consult,,,2026-07-05,2026-07-08,600,lv,online,43.3,52.3,-9.0,False,fixture,fixture
+4c11c7d893d4,H-CA-41,House,CA,41,Quinnipiac University,,,2026-07-18,2026-07-21,600,lv,live phone,46.2,47.7,-1.5,False,fixture,fixture
+fb4f8c78a403,H-CA-41,House,CA,41,Fox News/Beacon-Shaw,,,2026-04-17,2026-04-20,400,rv,live phone,44.3,48.5,-4.200000000000003,False,fixture,fixture
+48b7595b0037,H-CA-41,House,CA,41,Trafalgar Group,,,2026-04-20,2026-04-23,500,rv,mixed,43.3,51.3,-8.0,False,fixture,fixture
+855bd2831be8,H-CA-45,House,CA,45,Data for Progress,,,2026-06-04,2026-06-07,1000,lv,online,52.6,42.6,10.0,False,fixture,fixture
+9f76a0804429,H-CA-45,House,CA,45,Quinnipiac University,,,2026-06-19,2026-06-22,500,lv,live phone,48.6,49.3,-0.6999999999999957,False,fixture,fixture
+8d65acb66ab6,H-CA-47,House,CA,47,Trafalgar Group,,,2026-08-20,2026-08-23,600,lv,mixed,54.4,39.3,15.100000000000001,False,fixture,fixture
+397ee0af3e26,H-CA-47,House,CA,47,Morning Consult,,,2026-04-10,2026-04-13,600,rv,online,56.7,36.0,20.700000000000003,False,fixture,fixture
+baabd65f8e06,H-CA-47,House,CA,47,Trafalgar Group,,,2026-07-13,2026-07-16,500,lv,mixed,52.6,44.0,8.600000000000001,False,fixture,fixture
+14462bb24d08,H-CO-03,House,CO,3,Quinnipiac University,,,2026-07-01,2026-07-04,600,lv,live phone,38.8,52.5,-13.700000000000003,False,fixture,fixture
+8a7b6bcd0a6d,H-CO-04,House,CO,4,Quinnipiac University,,,2026-06-12,2026-06-15,1000,lv,live phone,32.6,59.1,-26.5,False,fixture,fixture
+ac46709d01f9,H-CO-06,House,CO,6,Trafalgar Group,,,2026-06-04,2026-06-07,500,rv,mixed,52.1,37.7,14.399999999999999,False,fixture,fixture
+f30f8095feda,H-CO-08,House,CO,8,Emerson College,,,2026-04-08,2026-04-11,1000,lv,ivr/online,49.4,43.7,5.699999999999996,False,fixture,fixture
+7d3734d4ab98,H-CO-08,House,CO,8,Data for Progress,,,2026-04-19,2026-04-22,400,lv,online,54.2,40.1,14.100000000000001,False,fixture,fixture
+b662211439dd,H-CO-08,House,CO,8,Trafalgar Group,,,2026-07-30,2026-08-02,600,lv,mixed,41.6,52.1,-10.5,False,fixture,fixture
+3c76e045207b,H-CO-08,House,CO,8,Rasmussen Reports,,,2026-04-12,2026-04-15,800,lv,ivr/online,44.6,52.0,-7.399999999999999,False,fixture,fixture
+e08873834b0d,H-CO-08,House,CO,8,Public Policy Polling,,,2026-04-27,2026-04-30,400,lv,ivr,48.2,44.5,3.700000000000003,False,fixture,fixture
+4346e1e58c89,H-CO-08,House,CO,8,Marist,,,2026-08-28,2026-08-31,500,lv,live phone,48.2,49.7,-1.5,False,fixture,fixture
+6110356a83aa,H-CO-08,House,CO,8,Trafalgar Group,,,2026-07-02,2026-07-05,1000,lv,mixed,48.6,46.2,2.3999999999999986,False,fixture,fixture
+b9aa5a723d9b,H-CO-08,House,CO,8,Data for Progress,,,2026-05-13,2026-05-16,400,rv,online,52.0,41.8,10.200000000000003,False,fixture,fixture
+54fc2fb48763,H-CO-08,House,CO,8,YouGov/Economist,,,2026-07-14,2026-07-17,800,lv,online,52.7,40.6,12.100000000000001,False,fixture,fixture
+4dc15561ac49,H-CT-03,House,CT,3,YouGov/Economist,,,2026-08-28,2026-08-31,800,lv,online,53.4,41.3,12.100000000000001,False,fixture,fixture
+d672d53aa52d,H-CT-05,House,CT,5,Marist,,,2026-08-27,2026-08-30,600,lv,live phone,47.8,45.9,1.8999999999999986,False,fixture,fixture
+5ec11f832ecf,H-FL-07,House,FL,7,Data for Progress,,,2026-05-23,2026-05-26,800,lv,online,42.2,48.4,-6.199999999999996,False,fixture,fixture
+11a14f8511f2,H-FL-07,House,FL,7,YouGov/Economist,,,2026-05-11,2026-05-14,500,lv,online,45.3,48.5,-3.200000000000003,False,fixture,fixture
+569a4f0daebb,H-FL-08,House,FL,8,Siena/NYT,,,2026-05-23,2026-05-26,1000,lv,live phone,39.3,57.4,-18.1,False,fixture,fixture
+c49ab9669c7f,H-FL-09,House,FL,9,Data for Progress,,,2026-06-25,2026-06-28,600,lv,online,55.9,34.8,21.1,False,fixture,fixture
+a2ed056db866,H-FL-11,House,FL,11,Morning Consult,,,2026-05-22,2026-05-25,800,rv,online,43.1,52.4,-9.299999999999997,False,fixture,fixture
+dcefead73ed3,H-FL-14,House,FL,14,Quinnipiac University,,,2026-05-22,2026-05-25,600,lv,live phone,45.7,47.2,-1.5,False,fixture,fixture
+2bcca450554a,H-FL-15,House,FL,15,Quinnipiac University,,,2026-08-16,2026-08-19,400,lv,live phone,41.8,51.7,-9.900000000000006,False,fixture,fixture
+b416fb122e08,H-FL-15,House,FL,15,Cygnal,,,2026-07-14,2026-07-17,600,lv,mixed,39.1,58.7,-19.6,False,fixture,fixture
+a9b045d47ba9,H-FL-16,House,FL,16,Rasmussen Reports,,,2026-05-08,2026-05-11,400,lv,ivr/online,37.7,56.5,-18.799999999999997,False,fixture,fixture
+175273b045fb,H-FL-17,House,FL,17,Quinnipiac University,,,2026-08-30,2026-09-02,800,rv,live phone,42.0,54.1,-12.100000000000001,False,fixture,fixture
+55fe0418153b,H-FL-17,House,FL,17,Data for Progress,,,2026-07-12,2026-07-15,500,rv,online,37.6,56.6,-19.0,False,fixture,fixture
+05796a25299a,H-FL-21,House,FL,21,Data for Progress,,,2026-06-19,2026-06-22,600,lv,online,37.1,53.9,-16.799999999999997,False,fixture,fixture
+483b24bd19f1,H-FL-26,House,FL,26,Marist,,,2026-05-28,2026-05-31,500,rv,live phone,44.9,45.9,-1.0,False,fixture,fixture
+7edb23b578ac,H-FL-26,House,FL,26,Morning Consult,,,2026-08-19,2026-08-22,400,lv,online,41.6,52.4,-10.799999999999997,False,fixture,fixture
+ca3e99902cea,H-FL-27,House,FL,27,Quinnipiac University,,,2026-05-09,2026-05-12,400,lv,live phone,40.4,48.7,-8.300000000000004,False,fixture,fixture
+b70f02e9d02e,H-FL-27,House,FL,27,Fox News/Beacon-Shaw,,,2026-05-14,2026-05-17,600,lv,live phone,52.6,38.4,14.200000000000003,False,fixture,fixture
+1366fff05bac,H-FL-28,House,FL,28,Emerson College,,,2026-08-16,2026-08-19,1000,rv,ivr/online,50.4,44.0,6.399999999999999,False,fixture,fixture
+93db11bfa7d5,H-FL-28,House,FL,28,Trafalgar Group,,,2026-05-01,2026-05-04,600,rv,mixed,44.0,51.4,-7.399999999999999,False,fixture,fixture
+2b0f2ded6b9f,H-FL-28,House,FL,28,Rasmussen Reports,,,2026-08-16,2026-08-19,400,rv,ivr/online,46.2,47.9,-1.6999999999999957,False,fixture,fixture
+c8937c298142,H-FL-28,House,FL,28,Cygnal,,,2026-05-30,2026-06-02,1000,rv,mixed,49.2,49.9,-0.6999999999999957,False,fixture,fixture
+3d6a52e4a88b,H-FL-28,House,FL,28,Rasmussen Reports,,,2026-08-08,2026-08-11,400,lv,ivr/online,48.0,46.1,1.8999999999999986,False,fixture,fixture
+f090f96b2b0c,H-GA-02,House,GA,2,Data for Progress,,,2026-09-02,2026-09-05,400,rv,online,50.8,45.5,5.299999999999997,False,fixture,fixture
+0f6e646104a4,H-GA-02,House,GA,2,YouGov/Economist,,,2026-06-28,2026-07-01,600,lv,online,49.8,41.6,8.199999999999996,False,fixture,fixture
+60611a01d527,H-GA-02,House,GA,2,Emerson College,,,2026-08-26,2026-08-29,400,lv,ivr/online,49.7,42.8,6.900000000000006,False,fixture,fixture
+f30d593086fd,H-GA-02,House,GA,2,Public Policy Polling,,,2026-04-20,2026-04-23,1000,lv,ivr,54.7,40.7,14.0,False,fixture,fixture
+acc89dacb862,H-GA-02,House,GA,2,Trafalgar Group,,,2026-06-08,2026-06-11,1000,rv,mixed,49.2,44.4,4.800000000000004,False,fixture,fixture
+db74b8bbc28f,H-GA-02,House,GA,2,Rasmussen Reports,,,2026-09-02,2026-09-05,600,lv,ivr/online,47.6,46.5,1.1000000000000014,False,fixture,fixture
+0d2f7a55427d,H-GA-07,House,GA,7,Public Policy Polling,,,2026-05-22,2026-05-25,800,lv,ivr,59.4,37.5,21.9,False,fixture,fixture
+8058429c1ea9,H-GA-12,House,GA,12,YouGov/Economist,,,2026-07-20,2026-07-23,800,lv,online,44.0,49.7,-5.700000000000003,False,fixture,fixture
+41d5ca817400,H-IL-06,House,IL,6,Quinnipiac University,,,2026-07-07,2026-07-10,1000,lv,live phone,47.4,47.1,0.29999999999999716,False,fixture,fixture
+90147d265003,H-IL-06,House,IL,6,Marist,,,2026-04-10,2026-04-13,800,rv,live phone,47.5,41.5,6.0,False,fixture,fixture
+0049c718558d,H-IL-08,House,IL,8,Siena/NYT,,,2026-08-25,2026-08-28,400,lv,live phone,48.6,43.2,5.399999999999999,False,fixture,fixture
+7ccbd9dc8c1f,H-IL-08,House,IL,8,Fox News/Beacon-Shaw,,,2026-05-27,2026-05-30,800,lv,live phone,53.5,42.7,10.799999999999997,False,fixture,fixture
+2b172359ab8c,H-IL-13,House,IL,13,Quinnipiac University,,,2026-07-22,2026-07-25,1000,rv,live phone,53.5,41.2,12.299999999999997,False,fixture,fixture
+8ebd9a7df832,H-IL-14,House,IL,14,Data for Progress,,,2026-05-05,2026-05-08,800,rv,online,55.0,40.6,14.399999999999999,False,fixture,fixture
+1c5627020f38,H-IL-17,House,IL,17,Siena/NYT,,,2026-06-30,2026-07-03,500,lv,live phone,49.6,42.8,6.800000000000004,False,fixture,fixture
+f89654aa7a48,H-IL-17,House,IL,17,Data for Progress,,,2026-05-19,2026-05-22,1000,lv,online,51.5,40.0,11.5,False,fixture,fixture
+7532eb996a56,H-IL-17,House,IL,17,Emerson College,,,2026-05-01,2026-05-04,500,lv,ivr/online,44.3,49.2,-4.900000000000006,False,fixture,fixture
+a122d15cef60,H-IN-01,House,IN,1,Siena/NYT,,,2026-07-13,2026-07-16,400,lv,live phone,48.3,41.7,6.599999999999994,False,fixture,fixture
+6d273a423e6b,H-IN-05,House,IN,5,Emerson College,,,2026-07-08,2026-07-11,1000,rv,ivr/online,39.0,54.2,-15.200000000000003,False,fixture,fixture
+e9ae6b3bc214,H-IN-05,House,IN,5,Marist,,,2026-08-01,2026-08-04,400,lv,live phone,32.3,61.7,-29.400000000000006,False,fixture,fixture
+c87b0858c346,H-IA-01,House,IA,1,Siena/NYT,,,2026-06-15,2026-06-18,500,lv,live phone,39.8,54.2,-14.400000000000006,False,fixture,fixture
+83f94baa258e,H-IA-01,House,IA,1,Fox News/Beacon-Shaw,,,2026-06-05,2026-06-08,1000,lv,live phone,49.6,45.7,3.8999999999999986,False,fixture,fixture
+4c5bee66b0dc,H-IA-02,House,IA,2,Marist,,,2026-06-13,2026-06-16,800,lv,live phone,48.2,45.9,2.3000000000000043,False,fixture,fixture
+b72bb4695af4,H-IA-02,House,IA,2,Cygnal,,,2026-04-11,2026-04-14,600,rv,mixed,48.8,48.6,0.19999999999999574,False,fixture,fixture
+0970c84fdc4b,H-IA-02,House,IA,2,Cygnal,,,2026-07-13,2026-07-16,500,lv,mixed,51.2,44.5,6.700000000000003,False,fixture,fixture
+f649bb14cfd3,H-IA-03,House,IA,3,Fox News/Beacon-Shaw,,,2026-06-02,2026-06-05,600,lv,live phone,47.5,47.8,-0.29999999999999716,False,fixture,fixture
+6a5e04a561a2,H-IA-03,House,IA,3,Public Policy Polling,,,2026-08-20,2026-08-23,1000,rv,ivr,51.1,41.7,9.399999999999999,False,fixture,fixture
+b566010d0691,H-IA-03,House,IA,3,Public Policy Polling,,,2026-07-12,2026-07-15,800,lv,ivr,46.3,45.8,0.5,False,fixture,fixture
+b8e46c2f3036,H-IA-03,House,IA,3,Data for Progress,,,2026-04-24,2026-04-27,600,lv,online,49.7,42.2,7.5,False,fixture,fixture
+fc3599eac022,H-IA-03,House,IA,3,Trafalgar Group,,,2026-06-01,2026-06-04,400,lv,mixed,48.9,44.3,4.600000000000001,False,fixture,fixture
+0437e6ffe98e,H-KS-03,House,KS,3,Public Policy Polling,,,2026-04-13,2026-04-16,1000,lv,ivr,48.6,46.4,2.200000000000003,False,fixture,fixture
+31661bba2e3d,H-KS-03,House,KS,3,Quinnipiac University,,,2026-04-26,2026-04-29,1000,rv,live phone,40.3,49.8,-9.5,False,fixture,fixture
+fb7c0353b80a,H-KS-03,House,KS,3,Quinnipiac University,,,2026-06-23,2026-06-26,800,lv,live phone,47.6,43.1,4.5,False,fixture,fixture
+422302f17d85,H-KS-03,House,KS,3,Cygnal,,,2026-05-05,2026-05-08,800,rv,mixed,47.5,50.6,-3.1000000000000014,False,fixture,fixture
+2382c4f6feea,H-KY-03,House,KY,3,Fox News/Beacon-Shaw,,,2026-04-09,2026-04-12,1000,lv,live phone,57.8,34.9,22.9,False,fixture,fixture
+8f4581d90840,H-ME-02,House,ME,2,Quinnipiac University,,,2026-08-30,2026-09-02,800,lv,live phone,41.3,54.2,-12.900000000000006,False,fixture,fixture
+bdee8d14ab69,H-ME-02,House,ME,2,Quinnipiac University,,,2026-04-08,2026-04-11,500,rv,live phone,47.1,45.3,1.8000000000000043,False,fixture,fixture
+c315ad5e0ed8,H-MD-02,House,MD,2,Trafalgar Group,,,2026-07-10,2026-07-13,500,lv,mixed,51.8,39.4,12.399999999999999,False,fixture,fixture
+a81b0731519e,H-MD-03,House,MD,3,Public Policy Polling,,,2026-05-13,2026-05-16,1000,lv,ivr,54.0,40.6,13.399999999999999,False,fixture,fixture
+bb436e6f55ea,H-MD-06,House,MD,6,Siena/NYT,,,2026-04-24,2026-04-27,1000,lv,live phone,49.8,43.7,6.099999999999994,False,fixture,fixture
+32468cf00933,H-MD-06,House,MD,6,Morning Consult,,,2026-06-11,2026-06-14,400,lv,online,54.2,42.4,11.800000000000004,False,fixture,fixture
+62e7a2f26e33,H-MA-04,House,MA,4,Emerson College,,,2026-07-03,2026-07-06,500,lv,ivr/online,61.7,32.5,29.200000000000003,False,fixture,fixture
+ef29787f50a8,H-MA-09,House,MA,9,Morning Consult,,,2026-07-04,2026-07-07,600,lv,online,60.2,33.4,26.800000000000004,False,fixture,fixture
+ece77af7d055,H-MI-02,House,MI,2,Emerson College,,,2026-04-07,2026-04-10,800,lv,ivr/online,32.4,59.7,-27.300000000000004,False,fixture,fixture
+32d2b92904da,H-MI-03,House,MI,3,Rasmussen Reports,,,2026-05-23,2026-05-26,800,rv,ivr/online,46.0,48.0,-2.0,False,fixture,fixture
+56b4b1e4e68d,H-MI-03,House,MI,3,Trafalgar Group,,,2026-06-06,2026-06-09,800,lv,mixed,50.6,45.2,5.399999999999999,False,fixture,fixture
+28472fe8e693,H-MI-03,House,MI,3,Quinnipiac University,,,2026-04-18,2026-04-21,400,lv,live phone,51.0,43.6,7.399999999999999,False,fixture,fixture
+b092eb8d32be,H-MI-04,House,MI,4,Siena/NYT,,,2026-06-02,2026-06-05,400,lv,live phone,45.5,45.5,0.0,False,fixture,fixture
+e55e8460a357,H-MI-07,House,MI,7,Cygnal,,,2026-05-31,2026-06-03,1000,lv,mixed,44.3,49.2,-4.900000000000006,False,fixture,fixture
+24b8246408e3,H-MI-07,House,MI,7,Public Policy Polling,,,2026-09-02,2026-09-05,600,lv,ivr,49.1,51.2,-2.1000000000000014,False,fixture,fixture
+68c7f4f7c4cf,H-MI-07,House,MI,7,Rasmussen Reports,,,2026-06-21,2026-06-24,400,lv,ivr/online,42.1,48.2,-6.100000000000001,False,fixture,fixture
+46e915dcd5b3,H-MI-07,House,MI,7,YouGov/Economist,,,2026-04-10,2026-04-13,600,lv,online,52.0,40.9,11.100000000000001,False,fixture,fixture
+e9deda78744e,H-MI-08,House,MI,8,Trafalgar Group,,,2026-06-03,2026-06-06,400,lv,mixed,47.2,44.9,2.3000000000000043,False,fixture,fixture
+ccc06f339308,H-MI-08,House,MI,8,Data for Progress,,,2026-05-06,2026-05-09,1000,lv,online,47.1,48.2,-1.1000000000000014,False,fixture,fixture
+3421884bc0d8,H-MI-08,House,MI,8,Trafalgar Group,,,2026-08-23,2026-08-26,600,rv,mixed,53.7,43.0,10.700000000000003,False,fixture,fixture
+84fce9c82c4e,H-MI-08,House,MI,8,Rasmussen Reports,,,2026-04-14,2026-04-17,400,rv,ivr/online,45.5,46.9,-1.3999999999999986,False,fixture,fixture
+f406f9d2729a,H-MI-08,House,MI,8,Siena/NYT,,,2026-07-06,2026-07-09,1000,lv,live phone,50.8,38.7,12.099999999999994,False,fixture,fixture
+464c4bef1c5d,H-MI-11,House,MI,11,Morning Consult,,,2026-08-31,2026-09-03,500,lv,online,55.1,37.3,17.800000000000004,False,fixture,fixture
+11adce35136d,H-MN-01,House,MN,1,Siena/NYT,,,2026-07-19,2026-07-22,500,rv,live phone,44.2,51.7,-7.5,False,fixture,fixture
+04a48ead3249,H-MN-02,House,MN,2,Trafalgar Group,,,2026-05-01,2026-05-04,1000,lv,mixed,45.3,49.1,-3.8000000000000043,False,fixture,fixture
+6427a65e043c,H-MN-02,House,MN,2,Public Policy Polling,,,2026-04-16,2026-04-19,500,lv,ivr,52.0,41.2,10.799999999999997,False,fixture,fixture
+1dcf2099896e,H-MN-02,House,MN,2,Cygnal,,,2026-08-23,2026-08-26,400,lv,mixed,52.5,39.8,12.700000000000003,False,fixture,fixture
+6c849b43b54f,H-MN-03,House,MN,3,Quinnipiac University,,,2026-07-10,2026-07-13,1000,lv,live phone,53.5,40.7,12.799999999999997,False,fixture,fixture
+958d9dff11f0,H-MN-03,House,MN,3,Quinnipiac University,,,2026-04-29,2026-05-02,600,lv,live phone,55.4,41.4,14.0,False,fixture,fixture
+b9615d2c5578,H-MN-06,House,MN,6,Public Policy Polling,,,2026-09-02,2026-09-05,600,lv,ivr,32.5,62.5,-30.0,False,fixture,fixture
+036f61343ef0,H-MN-08,House,MN,8,Data for Progress,,,2026-04-18,2026-04-21,500,rv,online,41.0,50.8,-9.799999999999997,False,fixture,fixture
+896bf003cb57,H-MN-08,House,MN,8,Fox News/Beacon-Shaw,,,2026-05-12,2026-05-15,400,lv,live phone,38.2,55.8,-17.599999999999994,False,fixture,fixture
+aeb058872fa3,H-MS-03,House,MS,3,Morning Consult,,,2026-04-14,2026-04-17,400,lv,online,30.6,66.9,-36.300000000000004,False,fixture,fixture
+9b33090fcbbe,H-MT-01,House,MT,1,Emerson College,,,2026-05-01,2026-05-04,800,rv,ivr/online,42.3,53.9,-11.600000000000001,False,fixture,fixture
+4527befaf019,H-NE-02,House,NE,2,Rasmussen Reports,,,2026-04-15,2026-04-18,500,rv,ivr/online,51.3,44.8,6.5,False,fixture,fixture
+078c6839ea2d,H-NE-02,House,NE,2,Emerson College,,,2026-05-15,2026-05-18,800,rv,ivr/online,48.1,44.3,3.8000000000000043,False,fixture,fixture
+fdbd0384cac8,H-NE-02,House,NE,2,YouGov/Economist,,,2026-08-31,2026-09-03,1000,rv,online,48.9,48.0,0.8999999999999986,False,fixture,fixture
+dc0c9fc2a5fa,H-NE-02,House,NE,2,Quinnipiac University,,,2026-08-08,2026-08-11,1000,lv,live phone,47.6,44.7,2.8999999999999986,False,fixture,fixture
+e101e22ae7db,H-NE-02,House,NE,2,Emerson College,,,2026-05-14,2026-05-17,600,lv,ivr/online,56.7,36.0,20.700000000000003,False,fixture,fixture
+e84e855cff10,H-NE-02,House,NE,2,Cygnal,,,2026-07-13,2026-07-16,800,lv,mixed,49.0,43.8,5.200000000000003,False,fixture,fixture
+dcf51f98abfd,H-NE-02,House,NE,2,Cygnal,,,2026-05-29,2026-06-01,600,lv,mixed,53.9,41.9,12.0,False,fixture,fixture
+dd0c79f73e3a,H-NE-02,House,NE,2,Emerson College,,,2026-04-15,2026-04-18,800,lv,ivr/online,47.2,46.5,0.7000000000000028,False,fixture,fixture
+0fb226aaedbd,H-NV-01,House,NV,1,Data for Progress,,,2026-08-20,2026-08-23,800,lv,online,48.5,44.5,4.0,False,fixture,fixture
+4f0cbbb669ad,H-NV-01,House,NV,1,Data for Progress,,,2026-08-08,2026-08-11,400,lv,online,51.8,45.1,6.699999999999996,False,fixture,fixture
+98608d932aa3,H-NV-01,House,NV,1,Siena/NYT,,,2026-08-13,2026-08-16,1000,lv,live phone,49.9,43.0,6.899999999999999,False,fixture,fixture
+6074c602ce64,H-NV-01,House,NV,1,Public Policy Polling,,,2026-06-24,2026-06-27,500,lv,ivr,50.2,42.8,7.400000000000006,False,fixture,fixture
+d4f46d912acf,H-NV-01,House,NV,1,Emerson College,,,2026-08-11,2026-08-14,500,lv,ivr/online,47.4,48.3,-0.8999999999999986,False,fixture,fixture
+bd5ff1bd712f,H-NV-01,House,NV,1,Siena/NYT,,,2026-05-17,2026-05-20,800,lv,live phone,52.5,42.2,10.299999999999997,False,fixture,fixture
+ee6fcb292407,H-NV-02,House,NV,2,Data for Progress,,,2026-05-31,2026-06-03,600,lv,online,43.1,49.9,-6.799999999999997,False,fixture,fixture
+edc7ad921790,H-NV-02,House,NV,2,Public Policy Polling,,,2026-08-23,2026-08-26,500,lv,ivr,43.4,49.5,-6.100000000000001,False,fixture,fixture
+6af0f012b9ed,H-NV-02,House,NV,2,Morning Consult,,,2026-06-10,2026-06-13,800,lv,online,35.0,56.8,-21.799999999999997,False,fixture,fixture
+5a18b88c76b6,H-NV-03,House,NV,3,Quinnipiac University,,,2026-05-14,2026-05-17,600,lv,live phone,52.9,40.1,12.799999999999997,False,fixture,fixture
+22238d72257c,H-NV-03,House,NV,3,Quinnipiac University,,,2026-08-15,2026-08-18,500,lv,live phone,44.0,51.7,-7.700000000000003,False,fixture,fixture
+3970b1f99468,H-NV-03,House,NV,3,Siena/NYT,,,2026-07-05,2026-07-08,400,rv,live phone,51.8,46.5,5.299999999999997,False,fixture,fixture
+6bc6660a7ca8,H-NV-03,House,NV,3,Data for Progress,,,2026-07-25,2026-07-28,400,lv,online,55.6,38.2,17.4,False,fixture,fixture
+c28359ef5586,H-NV-03,House,NV,3,Rasmussen Reports,,,2026-04-20,2026-04-23,1000,rv,ivr/online,49.8,42.9,6.899999999999999,False,fixture,fixture
+165b4a25d13e,H-NV-04,House,NV,4,Morning Consult,,,2026-08-02,2026-08-05,400,rv,online,55.8,37.3,18.5,False,fixture,fixture
+d7aaf0de0a73,H-NH-01,House,NH,1,Trafalgar Group,,,2026-05-15,2026-05-18,600,lv,mixed,44.7,47.6,-2.8999999999999986,False,fixture,fixture
+91ffb71cb71e,H-NH-01,House,NH,1,Marist,,,2026-06-06,2026-06-09,500,lv,live phone,45.7,51.1,-5.399999999999999,False,fixture,fixture
+9b5c84123688,H-NH-01,House,NH,1,Siena/NYT,,,2026-07-30,2026-08-02,400,lv,live phone,51.0,42.7,8.299999999999997,False,fixture,fixture
+b64b2cf4d05d,H-NH-01,House,NH,1,Public Policy Polling,,,2026-04-11,2026-04-14,500,rv,ivr,50.7,43.7,7.0,False,fixture,fixture
+6cac2c0b1004,H-NH-01,House,NH,1,Fox News/Beacon-Shaw,,,2026-05-31,2026-06-03,400,rv,live phone,49.5,46.5,3.0,False,fixture,fixture
+5a3ff78461f6,H-NH-02,House,NH,2,Quinnipiac University,,,2026-06-26,2026-06-29,1000,rv,live phone,50.7,45.1,5.600000000000001,False,fixture,fixture
+fa58ffdebd72,H-NH-02,House,NH,2,YouGov/Economist,,,2026-06-03,2026-06-06,600,lv,online,48.7,41.0,7.700000000000003,False,fixture,fixture
+adfe9e8a7670,H-NJ-02,House,NJ,2,Marist,,,2026-05-13,2026-05-16,1000,lv,live phone,47.1,48.2,-1.1000000000000014,False,fixture,fixture
+c7db98796a20,H-NJ-03,House,NJ,3,Public Policy Polling,,,2026-05-11,2026-05-14,1000,rv,ivr,49.2,43.7,5.5,False,fixture,fixture
+9443cd2bea5c,H-NJ-05,House,NJ,5,Quinnipiac University,,,2026-08-05,2026-08-08,400,rv,live phone,51.5,44.0,7.5,False,fixture,fixture
+e13c43b6615e,H-NJ-05,House,NJ,5,Public Policy Polling,,,2026-08-02,2026-08-05,800,rv,ivr,55.9,37.2,18.699999999999996,False,fixture,fixture
+bc2e4b9d8d20,H-NJ-07,House,NJ,7,Trafalgar Group,,,2026-08-28,2026-08-31,600,rv,mixed,40.5,53.2,-12.700000000000003,False,fixture,fixture
+481e3b790e4c,H-NJ-07,House,NJ,7,Data for Progress,,,2026-07-26,2026-07-29,800,rv,online,49.0,48.9,0.10000000000000142,False,fixture,fixture
+83678271e5c5,H-NJ-09,House,NJ,9,YouGov/Economist,,,2026-04-25,2026-04-28,500,lv,online,56.3,40.2,16.099999999999994,False,fixture,fixture
+0ac6d949fc92,H-NJ-11,House,NJ,11,Quinnipiac University,,,2026-08-24,2026-08-27,500,lv,live phone,48.5,43.0,5.5,False,fixture,fixture
+ded590c20c5c,H-NM-01,House,NM,1,Fox News/Beacon-Shaw,,,2026-08-26,2026-08-29,600,lv,live phone,54.3,39.4,14.899999999999999,False,fixture,fixture
+337d1b446f87,H-NM-03,House,NM,3,Data for Progress,,,2026-08-22,2026-08-25,400,lv,online,57.2,37.3,19.900000000000006,False,fixture,fixture
+7b483905379c,H-NY-01,House,NY,1,Trafalgar Group,,,2026-06-26,2026-06-29,500,lv,mixed,47.1,47.1,0.0,False,fixture,fixture
+75880848a7fd,H-NY-01,House,NY,1,Cygnal,,,2026-08-29,2026-09-01,1000,rv,mixed,44.1,50.6,-6.5,False,fixture,fixture
+7fc25475cb7c,H-NY-02,House,NY,2,Quinnipiac University,,,2026-09-03,2026-09-06,500,lv,live phone,49.0,45.2,3.799999999999997,False,fixture,fixture
+94e4643e25ae,H-NY-02,House,NY,2,Marist,,,2026-08-19,2026-08-22,800,rv,live phone,44.8,50.3,-5.5,False,fixture,fixture
+ebbdfeeb4b36,H-NY-02,House,NY,2,Cygnal,,,2026-05-18,2026-05-21,500,rv,mixed,44.8,49.6,-4.800000000000004,False,fixture,fixture
+2d7ebeb7e6a2,H-NY-02,House,NY,2,YouGov/Economist,,,2026-04-10,2026-04-13,400,lv,online,47.9,48.5,-0.6000000000000014,False,fixture,fixture
+3900d393b2a4,H-NY-03,House,NY,3,YouGov/Economist,,,2026-08-11,2026-08-14,400,lv,online,53.3,41.6,11.699999999999996,False,fixture,fixture
+7412cbca1cd0,H-NY-03,House,NY,3,Trafalgar Group,,,2026-05-17,2026-05-20,500,lv,mixed,53.6,40.4,13.200000000000003,False,fixture,fixture
+8d3f26231d98,H-NY-03,House,NY,3,YouGov/Economist,,,2026-06-20,2026-06-23,600,lv,online,54.5,38.4,16.1,False,fixture,fixture
+06c90435dc60,H-NY-11,House,NY,11,Emerson College,,,2026-06-14,2026-06-17,400,lv,ivr/online,44.5,48.5,-4.0,False,fixture,fixture
+468da8d928ea,H-NY-11,House,NY,11,Siena/NYT,,,2026-09-02,2026-09-05,800,lv,live phone,46.7,47.7,-1.0,False,fixture,fixture
+b918641ca8f5,H-NY-11,House,NY,11,Fox News/Beacon-Shaw,,,2026-07-21,2026-07-24,1000,rv,live phone,47.4,47.4,0.0,False,fixture,fixture
+0d488b86e0fe,H-NY-17,House,NY,17,Emerson College,,,2026-05-08,2026-05-11,600,rv,ivr/online,51.3,45.2,6.099999999999994,False,fixture,fixture
+f182f4438545,H-NY-18,House,NY,18,Quinnipiac University,,,2026-07-30,2026-08-02,600,lv,live phone,56.2,41.5,14.700000000000003,False,fixture,fixture
+dc8be54e87f5,H-NY-18,House,NY,18,Trafalgar Group,,,2026-04-29,2026-05-02,800,lv,mixed,50.0,43.7,6.299999999999997,False,fixture,fixture
+7dcf9ef8c6c5,H-NY-19,House,NY,19,Marist,,,2026-08-02,2026-08-05,600,lv,live phone,51.4,45.7,5.699999999999996,False,fixture,fixture
+b7188030d9b4,H-NY-19,House,NY,19,Public Policy Polling,,,2026-05-07,2026-05-10,500,rv,ivr,53.0,42.3,10.700000000000003,False,fixture,fixture
+f304b8b902b6,H-NY-22,House,NY,22,Emerson College,,,2026-06-09,2026-06-12,1000,lv,ivr/online,46.6,46.5,0.10000000000000142,False,fixture,fixture
+02d39e8b5e6c,H-NY-22,House,NY,22,Emerson College,,,2026-05-12,2026-05-15,400,lv,ivr/online,52.1,46.4,5.700000000000003,False,fixture,fixture
+b4d7cf1a5a31,H-NY-22,House,NY,22,Data for Progress,,,2026-04-25,2026-04-28,400,lv,online,44.4,47.2,-2.8000000000000043,False,fixture,fixture
+1b776722fbcf,H-NY-22,House,NY,22,Emerson College,,,2026-08-19,2026-08-22,400,rv,ivr/online,44.3,52.4,-8.100000000000001,False,fixture,fixture
+cdc2b7ccf846,H-NY-22,House,NY,22,Morning Consult,,,2026-08-20,2026-08-23,500,lv,online,53.5,38.8,14.700000000000003,False,fixture,fixture
+7cf9877f1ce9,H-NY-22,House,NY,22,Morning Consult,,,2026-08-11,2026-08-14,800,lv,online,54.4,40.3,14.100000000000001,False,fixture,fixture
+791be885f0dc,H-NY-25,House,NY,25,Emerson College,,,2026-05-23,2026-05-26,1000,lv,ivr/online,56.4,37.8,18.6,False,fixture,fixture
+529f0801adac,H-NY-25,House,NY,25,Fox News/Beacon-Shaw,,,2026-08-19,2026-08-22,500,rv,live phone,54.4,37.7,16.699999999999996,False,fixture,fixture
+777d89b26d99,H-NY-26,House,NY,26,Public Policy Polling,,,2026-07-20,2026-07-23,400,lv,ivr,44.3,48.2,-3.9000000000000057,False,fixture,fixture
+bdb0c398683b,H-NC-01,House,NC,1,Marist,,,2026-04-28,2026-05-01,800,lv,live phone,53.0,40.4,12.600000000000001,False,fixture,fixture
+191653c86bf5,H-NC-06,House,NC,6,Cygnal,,,2026-06-14,2026-06-17,500,lv,mixed,53.3,39.7,13.599999999999994,False,fixture,fixture
+47cd50fbc389,H-NC-06,House,NC,6,Siena/NYT,,,2026-08-20,2026-08-23,500,rv,live phone,55.4,39.4,16.0,False,fixture,fixture
+aa7ef0ab93c8,H-NC-07,House,NC,7,Data for Progress,,,2026-08-23,2026-08-26,1000,lv,online,41.9,52.8,-10.899999999999999,False,fixture,fixture
+1625dda440ac,H-NC-13,House,NC,13,Fox News/Beacon-Shaw,,,2026-04-16,2026-04-19,400,lv,live phone,51.3,43.4,7.899999999999999,False,fixture,fixture
+9676ff770830,H-NC-13,House,NC,13,Data for Progress,,,2026-06-27,2026-06-30,400,lv,online,47.4,43.7,3.6999999999999957,False,fixture,fixture
+ecfaeb6c0f75,H-NC-13,House,NC,13,Marist,,,2026-07-05,2026-07-08,600,lv,live phone,43.5,53.4,-9.899999999999999,False,fixture,fixture
+5c898af8b4e7,H-OH-07,House,OH,7,Emerson College,,,2026-06-08,2026-06-11,500,lv,ivr/online,44.6,49.8,-5.199999999999996,False,fixture,fixture
+c08e5a1f11a9,H-OH-09,House,OH,9,Trafalgar Group,,,2026-09-01,2026-09-04,500,lv,mixed,51.3,44.3,7.0,False,fixture,fixture
+052abc5b3e99,H-OH-09,House,OH,9,Marist,,,2026-06-28,2026-07-01,600,rv,live phone,49.2,45.5,3.700000000000003,False,fixture,fixture
+7204a14bfc57,H-OH-09,House,OH,9,Marist,,,2026-05-17,2026-05-20,600,rv,live phone,48.1,46.6,1.5,False,fixture,fixture
+9ffb11303b1b,H-OH-10,House,OH,10,Public Policy Polling,,,2026-04-21,2026-04-24,500,lv,ivr,45.3,46.7,-1.4000000000000057,False,fixture,fixture
+03b91731cc36,H-OH-10,House,OH,10,Morning Consult,,,2026-09-02,2026-09-05,600,lv,online,37.4,58.5,-21.1,False,fixture,fixture
+66de6cc28238,H-OH-10,House,OH,10,Rasmussen Reports,,,2026-06-08,2026-06-11,400,lv,ivr/online,41.2,54.2,-13.0,False,fixture,fixture
+e4573977b530,H-OH-13,House,OH,13,Fox News/Beacon-Shaw,,,2026-04-08,2026-04-11,1000,lv,live phone,47.1,48.4,-1.2999999999999972,False,fixture,fixture
+38fcda8475ca,H-OH-13,House,OH,13,Cygnal,,,2026-05-07,2026-05-10,1000,lv,mixed,42.2,45.9,-3.6999999999999957,False,fixture,fixture
+09d80d6087c9,H-OH-13,House,OH,13,Rasmussen Reports,,,2026-05-13,2026-05-16,600,lv,ivr/online,43.3,50.0,-6.700000000000003,False,fixture,fixture
+4abce5824409,H-OH-15,House,OH,15,Siena/NYT,,,2026-06-29,2026-07-02,400,lv,live phone,38.4,52.7,-14.300000000000004,False,fixture,fixture
+c445ef7099a4,H-OH-15,House,OH,15,Fox News/Beacon-Shaw,,,2026-05-13,2026-05-16,800,lv,live phone,43.8,50.3,-6.5,False,fixture,fixture
+0fcf7918c6d3,H-OH-15,House,OH,15,Marist,,,2026-05-13,2026-05-16,800,lv,live phone,43.5,48.9,-5.399999999999999,False,fixture,fixture
+4a189f271189,H-OR-02,House,OR,2,Marist,,,2026-07-03,2026-07-06,800,lv,live phone,38.4,53.9,-15.5,False,fixture,fixture
+13f653446fe3,H-OR-04,House,OR,4,Trafalgar Group,,,2026-06-20,2026-06-23,500,rv,mixed,59.2,38.3,20.900000000000006,False,fixture,fixture
+16459d163dc8,H-OR-05,House,OR,5,Trafalgar Group,,,2026-06-06,2026-06-09,1000,lv,mixed,49.6,45.9,3.700000000000003,False,fixture,fixture
+18b464c7ae25,H-OR-05,House,OR,5,Trafalgar Group,,,2026-05-15,2026-05-18,500,lv,mixed,46.1,46.6,-0.5,False,fixture,fixture
+ef805f749620,H-PA-01,House,PA,1,Marist,,,2026-04-20,2026-04-23,800,lv,live phone,49.0,46.2,2.799999999999997,False,fixture,fixture
+2f82014d64ce,H-PA-01,House,PA,1,Marist,,,2026-04-12,2026-04-15,600,lv,live phone,43.8,49.8,-6.0,False,fixture,fixture
+83a570307fd6,H-PA-01,House,PA,1,Siena/NYT,,,2026-06-25,2026-06-28,600,lv,live phone,48.0,47.5,0.5,False,fixture,fixture
+336e7a7bdaca,H-PA-04,House,PA,4,Quinnipiac University,,,2026-07-11,2026-07-14,600,rv,live phone,57.6,36.6,21.0,False,fixture,fixture
+248de6242b8f,H-PA-07,House,PA,7,YouGov/Economist,,,2026-05-21,2026-05-24,400,rv,online,43.6,52.0,-8.399999999999999,False,fixture,fixture
+ee6f57b7399f,H-PA-07,House,PA,7,Fox News/Beacon-Shaw,,,2026-07-06,2026-07-09,1000,rv,live phone,50.8,45.7,5.099999999999994,False,fixture,fixture
+d82826d0122a,H-PA-07,House,PA,7,Quinnipiac University,,,2026-08-14,2026-08-17,500,lv,live phone,49.5,45.8,3.700000000000003,False,fixture,fixture
+4df1244c9f53,H-PA-08,House,PA,8,Trafalgar Group,,,2026-05-11,2026-05-14,1000,lv,mixed,43.1,49.3,-6.199999999999996,False,fixture,fixture
+68d905ce52ea,H-PA-08,House,PA,8,Quinnipiac University,,,2026-08-13,2026-08-16,800,lv,live phone,44.9,47.1,-2.200000000000003,False,fixture,fixture
+98a2eeb2bb9e,H-PA-08,House,PA,8,Marist,,,2026-05-11,2026-05-14,500,rv,live phone,49.9,42.6,7.299999999999997,False,fixture,fixture
+20375a9d86c8,H-PA-08,House,PA,8,Cygnal,,,2026-04-09,2026-04-12,1000,lv,mixed,44.5,49.0,-4.5,False,fixture,fixture
+3e8dcedf165e,H-PA-08,House,PA,8,Trafalgar Group,,,2026-06-04,2026-06-07,800,lv,mixed,43.2,53.5,-10.299999999999997,False,fixture,fixture
+4639c43fcd63,H-PA-08,House,PA,8,Emerson College,,,2026-08-12,2026-08-15,600,lv,ivr/online,49.2,47.2,2.0,False,fixture,fixture
+64d1b8cfcc2f,H-PA-08,House,PA,8,Morning Consult,,,2026-08-16,2026-08-19,800,lv,online,44.8,47.8,-3.0,False,fixture,fixture
+cbcbcb81c061,H-PA-12,House,PA,12,Cygnal,,,2026-06-03,2026-06-06,800,rv,mixed,58.0,38.0,20.0,False,fixture,fixture
+6621b73dca48,H-PA-12,House,PA,12,Siena/NYT,,,2026-07-08,2026-07-11,500,lv,live phone,57.2,34.3,22.900000000000006,False,fixture,fixture
+18ddbf5856ef,H-PA-17,House,PA,17,Marist,,,2026-08-15,2026-08-18,1000,lv,live phone,47.5,44.6,2.8999999999999986,False,fixture,fixture
+ee2b7515ad8a,H-PA-17,House,PA,17,Emerson College,,,2026-04-22,2026-04-25,500,rv,ivr/online,49.2,45.6,3.6000000000000014,False,fixture,fixture
+5795f3862495,H-PA-17,House,PA,17,Cygnal,,,2026-08-01,2026-08-04,800,rv,mixed,46.6,48.1,-1.5,False,fixture,fixture
+74b04d3818d7,H-PA-17,House,PA,17,Morning Consult,,,2026-06-26,2026-06-29,600,lv,online,52.7,44.0,8.700000000000003,False,fixture,fixture
+38dae8452f50,H-PA-17,House,PA,17,Siena/NYT,,,2026-07-28,2026-07-31,800,rv,live phone,45.9,48.4,-2.5,False,fixture,fixture
+6960d7a07318,H-PA-17,House,PA,17,Fox News/Beacon-Shaw,,,2026-07-03,2026-07-06,1000,lv,live phone,42.6,53.3,-10.699999999999996,False,fixture,fixture
+e47403ca940d,H-PA-17,House,PA,17,Quinnipiac University,,,2026-07-22,2026-07-25,600,lv,live phone,41.4,54.6,-13.200000000000003,False,fixture,fixture
+229ef1ec5a75,H-PA-17,House,PA,17,Trafalgar Group,,,2026-05-17,2026-05-20,800,lv,mixed,44.9,49.5,-4.600000000000001,False,fixture,fixture
+215353301e81,H-PA-17,House,PA,17,Trafalgar Group,,,2026-06-30,2026-07-03,400,lv,mixed,44.4,49.6,-5.200000000000003,False,fixture,fixture
+fb19ace58a61,H-PA-17,House,PA,17,Marist,,,2026-08-01,2026-08-04,600,lv,live phone,53.7,38.6,15.100000000000001,False,fixture,fixture
+7aae30854d5b,H-SC-01,House,SC,1,Cygnal,,,2026-08-11,2026-08-14,500,lv,mixed,41.8,52.3,-10.5,False,fixture,fixture
+38b1e7f4a6f8,H-TN-05,House,TN,5,Morning Consult,,,2026-04-20,2026-04-23,600,rv,online,45.3,48.8,-3.5,False,fixture,fixture
+61faa7219e34,H-TX-15,House,TX,15,Fox News/Beacon-Shaw,,,2026-07-18,2026-07-21,800,lv,live phone,45.7,49.5,-3.799999999999997,False,fixture,fixture
+97c520004be8,H-TX-15,House,TX,15,Rasmussen Reports,,,2026-06-14,2026-06-17,800,lv,ivr/online,41.7,51.6,-9.899999999999999,False,fixture,fixture
+b55bd01d4ced,H-TX-15,House,TX,15,Quinnipiac University,,,2026-06-09,2026-06-12,600,lv,live phone,47.1,47.1,0.0,False,fixture,fixture
+448c3bcbd8dd,H-TX-15,House,TX,15,Data for Progress,,,2026-08-01,2026-08-04,600,lv,online,49.4,44.9,4.5,False,fixture,fixture
+99659e70e001,H-TX-15,House,TX,15,Fox News/Beacon-Shaw,,,2026-04-16,2026-04-19,800,rv,live phone,48.6,45.3,3.3000000000000043,False,fixture,fixture
+d3336f6a6fff,H-TX-21,House,TX,21,Emerson College,,,2026-07-16,2026-07-19,800,rv,ivr/online,39.0,55.5,-16.5,False,fixture,fixture
+a8b7f47ee72e,H-TX-23,House,TX,23,Morning Consult,,,2026-04-24,2026-04-27,800,lv,online,42.7,53.4,-10.699999999999996,False,fixture,fixture
+1a79cbf7e037,H-TX-26,House,TX,26,Trafalgar Group,,,2026-05-09,2026-05-12,600,lv,mixed,31.2,61.5,-30.3,False,fixture,fixture
+aff173573bc6,H-TX-27,House,TX,27,Public Policy Polling,,,2026-07-12,2026-07-15,1000,lv,ivr,34.0,58.1,-24.1,False,fixture,fixture
+a598d5e265b2,H-TX-28,House,TX,28,Public Policy Polling,,,2026-08-07,2026-08-10,600,rv,ivr,55.5,39.0,16.5,False,fixture,fixture
+90f8c194d143,H-UT-03,House,UT,3,Marist,,,2026-04-11,2026-04-14,1000,lv,live phone,34.9,59.6,-24.700000000000003,False,fixture,fixture
+c9dab2978fa3,H-VA-02,House,VA,2,Cygnal,,,2026-07-02,2026-07-05,1000,lv,mixed,43.9,46.5,-2.6000000000000014,False,fixture,fixture
+4b8a03e4c4ab,H-VA-02,House,VA,2,Morning Consult,,,2026-04-10,2026-04-13,800,lv,online,49.4,45.2,4.199999999999996,False,fixture,fixture
+93732f766397,H-VA-02,House,VA,2,Rasmussen Reports,,,2026-05-26,2026-05-29,500,lv,ivr/online,39.0,56.2,-17.200000000000003,False,fixture,fixture
+72edcce71c66,H-VA-02,House,VA,2,Fox News/Beacon-Shaw,,,2026-08-27,2026-08-30,1000,rv,live phone,46.7,45.9,0.8000000000000043,False,fixture,fixture
+4a97c43f3dde,H-VA-02,House,VA,2,Fox News/Beacon-Shaw,,,2026-05-15,2026-05-18,600,lv,live phone,45.7,46.9,-1.1999999999999957,False,fixture,fixture
+0e67f7a18b3b,H-VA-02,House,VA,2,Marist,,,2026-08-03,2026-08-06,400,rv,live phone,52.0,43.0,9.0,False,fixture,fixture
+f15d924bc314,H-VA-02,House,VA,2,Emerson College,,,2026-04-16,2026-04-19,500,rv,ivr/online,41.0,49.8,-8.799999999999997,False,fixture,fixture
+9016d322321d,H-VA-02,House,VA,2,Rasmussen Reports,,,2026-08-31,2026-09-03,600,lv,ivr/online,48.6,46.8,1.8000000000000043,False,fixture,fixture
+f442bc2d85d9,H-VA-05,House,VA,5,Fox News/Beacon-Shaw,,,2026-08-07,2026-08-10,600,lv,live phone,48.3,49.0,-0.7000000000000028,False,fixture,fixture
+0782504eabc6,H-VA-05,House,VA,5,YouGov/Economist,,,2026-06-10,2026-06-13,500,rv,online,45.9,45.6,0.29999999999999716,False,fixture,fixture
+74573a1ebf46,H-VA-07,House,VA,7,Public Policy Polling,,,2026-06-11,2026-06-14,1000,rv,ivr,52.0,45.7,6.299999999999997,False,fixture,fixture
+51f34cb978cc,H-VA-10,House,VA,10,YouGov/Economist,,,2026-08-17,2026-08-20,500,lv,online,48.4,43.3,5.100000000000001,False,fixture,fixture
+a927a690065c,H-VA-10,House,VA,10,Fox News/Beacon-Shaw,,,2026-08-17,2026-08-20,800,lv,live phone,55.8,42.0,13.799999999999997,False,fixture,fixture
+46fd6714ef95,H-WA-02,House,WA,2,Data for Progress,,,2026-08-25,2026-08-28,500,lv,online,54.7,40.9,13.800000000000004,False,fixture,fixture
+7c99213eb99d,H-WA-03,House,WA,3,Rasmussen Reports,,,2026-06-19,2026-06-22,1000,rv,ivr/online,37.5,59.0,-21.5,False,fixture,fixture
+709a5e7aa999,H-WA-08,House,WA,8,Public Policy Polling,,,2026-08-11,2026-08-14,500,lv,ivr,59.0,37.6,21.4,False,fixture,fixture
+40cf3e98142e,H-WA-08,House,WA,8,YouGov/Economist,,,2026-05-13,2026-05-16,800,lv,online,48.8,43.9,4.899999999999999,False,fixture,fixture
+218c4254c667,H-WI-01,House,WI,1,Trafalgar Group,,,2026-07-24,2026-07-27,500,lv,mixed,45.6,47.7,-2.1000000000000014,False,fixture,fixture
+5f15c88bb73d,H-WI-01,House,WI,1,Siena/NYT,,,2026-05-17,2026-05-20,800,rv,live phone,50.3,48.2,2.0999999999999943,False,fixture,fixture
+0c6cd196952d,H-WI-08,House,WI,8,Rasmussen Reports,,,2026-07-27,2026-07-30,400,rv,ivr/online,41.4,49.2,-7.800000000000004,False,fixture,fixture
+4ad54ad80c99,S-AK,Senate,AK,0,Public Policy Polling,,,2026-04-08,2026-04-11,600,lv,ivr,39.2,52.9,-13.699999999999996,False,fixture,fixture
+4816c814877f,S-AK,Senate,AK,0,Morning Consult,,,2026-04-23,2026-04-26,1000,lv,online,40.5,51.0,-10.5,False,fixture,fixture
+a1fb041e686d,S-CO,Senate,CO,0,Rasmussen Reports,,,2026-05-02,2026-05-05,500,lv,ivr/online,48.6,45.9,2.700000000000003,False,fixture,fixture
+906cfb8d235d,S-GA,Senate,GA,0,Morning Consult,,,2026-04-23,2026-04-26,500,lv,online,47.8,45.6,2.1999999999999957,False,fixture,fixture
+ca8117fc6e70,S-GA,Senate,GA,0,Trafalgar Group,,,2026-05-15,2026-05-18,600,lv,mixed,47.3,46.4,0.8999999999999986,False,fixture,fixture
+7f2b7858651d,S-GA,Senate,GA,0,Emerson College,,,2026-06-16,2026-06-19,400,lv,ivr/online,49.1,45.9,3.200000000000003,False,fixture,fixture
+46495b3b921e,S-GA,Senate,GA,0,Public Policy Polling,,,2026-05-26,2026-05-29,500,lv,ivr,51.2,44.0,7.200000000000003,False,fixture,fixture
+cb499d69d2dc,S-GA,Senate,GA,0,Cygnal,,,2026-04-07,2026-04-10,500,lv,mixed,47.8,45.8,2.0,False,fixture,fixture
+c65005bf869b,S-GA,Senate,GA,0,Emerson College,,,2026-08-08,2026-08-11,500,rv,ivr/online,45.4,50.5,-5.100000000000001,False,fixture,fixture
+78b6da49e45f,S-GA,Senate,GA,0,Cygnal,,,2026-05-09,2026-05-12,800,lv,mixed,46.8,44.8,2.0,False,fixture,fixture
+2e56e8b8197a,S-GA,Senate,GA,0,Siena/NYT,,,2026-04-23,2026-04-26,500,rv,live phone,57.0,37.9,19.1,False,fixture,fixture
+2de44a033ef6,S-GA,Senate,GA,0,Quinnipiac University,,,2026-07-21,2026-07-24,1000,lv,live phone,45.8,46.0,-0.20000000000000284,False,fixture,fixture
+180dbaea727b,S-IL,Senate,IL,0,Data for Progress,,,2026-04-08,2026-04-11,1000,rv,online,56.5,36.4,20.1,False,fixture,fixture
+90ff7acdcb8c,S-IA,Senate,IA,0,Morning Consult,,,2026-06-10,2026-06-13,800,rv,online,43.3,51.1,-7.800000000000004,False,fixture,fixture
+57f79ef8e4f7,S-IA,Senate,IA,0,Cygnal,,,2026-09-02,2026-09-05,600,lv,mixed,43.8,47.8,-4.0,False,fixture,fixture
+5932dea2e78d,S-IA,Senate,IA,0,Trafalgar Group,,,2026-04-29,2026-05-02,600,lv,mixed,44.9,50.2,-5.300000000000004,False,fixture,fixture
+1723ec7d849d,S-IA,Senate,IA,0,Public Policy Polling,,,2026-07-23,2026-07-26,600,lv,ivr,46.0,49.6,-3.6000000000000014,False,fixture,fixture
+7965a4a19e14,S-IA,Senate,IA,0,Public Policy Polling,,,2026-08-31,2026-09-03,1000,rv,ivr,41.6,51.1,-9.5,False,fixture,fixture
+92a6f908a11f,S-KS,Senate,KS,0,Fox News/Beacon-Shaw,,,2026-07-22,2026-07-25,800,lv,live phone,46.9,48.3,-1.3999999999999986,False,fixture,fixture
+c8d66af73c98,S-KS,Senate,KS,0,Quinnipiac University,,,2026-05-03,2026-05-06,1000,lv,live phone,41.0,55.5,-14.5,False,fixture,fixture
+3f355435bf78,S-KY,Senate,KY,0,Quinnipiac University,,,2026-08-13,2026-08-16,400,lv,live phone,39.2,55.5,-16.299999999999997,False,fixture,fixture
+a14df7be4190,S-ME,Senate,ME,0,Emerson College,,,2026-05-19,2026-05-22,600,lv,ivr/online,40.8,49.6,-8.800000000000004,False,fixture,fixture
+6b1c42de5b01,S-ME,Senate,ME,0,Morning Consult,,,2026-06-11,2026-06-14,500,lv,online,45.2,48.8,-3.5999999999999943,False,fixture,fixture
+ec36315c0aa3,S-ME,Senate,ME,0,Siena/NYT,,,2026-04-28,2026-05-01,600,lv,live phone,44.1,46.4,-2.299999999999997,False,fixture,fixture
+3763ed7c2906,S-ME,Senate,ME,0,Fox News/Beacon-Shaw,,,2026-04-24,2026-04-27,500,rv,live phone,54.9,35.1,19.799999999999997,False,fixture,fixture
+0979054a0439,S-ME,Senate,ME,0,Data for Progress,,,2026-07-27,2026-07-30,1000,rv,online,53.7,40.6,13.100000000000001,False,fixture,fixture
+f7dd5d565ebe,S-ME,Senate,ME,0,Marist,,,2026-05-23,2026-05-26,500,lv,live phone,52.1,45.0,7.100000000000001,False,fixture,fixture
+43d399ec65d8,S-ME,Senate,ME,0,Trafalgar Group,,,2026-05-18,2026-05-21,1000,lv,mixed,47.4,44.8,2.6000000000000014,False,fixture,fixture
+013b0d413ac3,S-ME,Senate,ME,0,Morning Consult,,,2026-08-12,2026-08-15,600,rv,online,48.9,45.5,3.3999999999999986,False,fixture,fixture
+29a509338bd9,S-ME,Senate,ME,0,Emerson College,,,2026-05-20,2026-05-23,500,lv,ivr/online,48.9,44.7,4.199999999999996,False,fixture,fixture
+f4ea82ce0a87,S-ME,Senate,ME,0,Public Policy Polling,,,2026-08-03,2026-08-06,800,lv,ivr,49.8,40.7,9.099999999999994,False,fixture,fixture
+4cd68914fb05,S-MA,Senate,MA,0,Cygnal,,,2026-06-05,2026-06-08,600,lv,mixed,62.0,32.4,29.6,False,fixture,fixture
+7ee0e77b7e70,S-MI,Senate,MI,0,Emerson College,,,2026-07-05,2026-07-08,800,lv,ivr/online,46.6,41.4,5.200000000000003,False,fixture,fixture
+9e54343ad2a0,S-MI,Senate,MI,0,Public Policy Polling,,,2026-06-29,2026-07-02,1000,rv,ivr,46.2,44.8,1.4000000000000057,False,fixture,fixture
+b28696741851,S-MI,Senate,MI,0,Siena/NYT,,,2026-06-25,2026-06-28,400,lv,live phone,47.0,49.2,-2.200000000000003,False,fixture,fixture
+bf23b929f8b4,S-MI,Senate,MI,0,Cygnal,,,2026-07-17,2026-07-20,500,lv,mixed,47.1,45.7,1.3999999999999986,False,fixture,fixture
+3902c34c7aec,S-MI,Senate,MI,0,Trafalgar Group,,,2026-04-25,2026-04-28,500,lv,mixed,43.7,52.1,-8.399999999999999,False,fixture,fixture
+7abc43a0e313,S-MI,Senate,MI,0,Quinnipiac University,,,2026-04-21,2026-04-24,600,rv,live phone,42.6,49.1,-6.5,False,fixture,fixture
+e3f385b1db5c,S-MI,Senate,MI,0,Rasmussen Reports,,,2026-06-04,2026-06-07,400,lv,ivr/online,43.7,49.9,-6.199999999999996,False,fixture,fixture
+0b1e1a06e144,S-MI,Senate,MI,0,Trafalgar Group,,,2026-05-11,2026-05-14,600,rv,mixed,45.9,47.0,-1.1000000000000014,False,fixture,fixture
+90a4d3ac7f8b,S-MI,Senate,MI,0,Data for Progress,,,2026-04-21,2026-04-24,600,rv,online,55.9,37.7,18.199999999999996,False,fixture,fixture
+00abf95a3ef0,S-MI,Senate,MI,0,Cygnal,,,2026-08-13,2026-08-16,800,lv,mixed,46.0,47.7,-1.7000000000000028,False,fixture,fixture
+9c3b60b1c841,S-MI,Senate,MI,0,Public Policy Polling,,,2026-06-17,2026-06-20,800,rv,ivr,48.9,44.6,4.299999999999997,False,fixture,fixture
+8f75177132ba,S-MN,Senate,MN,0,Trafalgar Group,,,2026-08-20,2026-08-23,500,lv,mixed,48.2,45.9,2.3000000000000043,False,fixture,fixture
+0d069ff5fc23,S-MN,Senate,MN,0,Emerson College,,,2026-07-10,2026-07-13,1000,rv,ivr/online,52.8,43.6,9.199999999999996,False,fixture,fixture
+fa843d693f77,S-MN,Senate,MN,0,Fox News/Beacon-Shaw,,,2026-06-14,2026-06-17,800,lv,live phone,47.4,43.9,3.5,False,fixture,fixture
+0f9cce58868c,S-MN,Senate,MN,0,Morning Consult,,,2026-05-01,2026-05-04,400,lv,online,51.5,41.6,9.899999999999999,False,fixture,fixture
+f9cb19c817f8,S-MN,Senate,MN,0,Emerson College,,,2026-08-05,2026-08-08,400,rv,ivr/online,45.7,48.7,-3.0,False,fixture,fixture
+68c41eb4f8e5,S-MS,Senate,MS,0,Public Policy Polling,,,2026-08-05,2026-08-08,400,lv,ivr,43.6,52.2,-8.600000000000001,False,fixture,fixture
+f1c273c12442,S-NH,Senate,NH,0,Siena/NYT,,,2026-06-19,2026-06-22,1000,lv,live phone,46.8,46.5,0.29999999999999716,False,fixture,fixture
+7f885f4b1e64,S-NH,Senate,NH,0,Rasmussen Reports,,,2026-05-24,2026-05-27,800,lv,ivr/online,49.3,42.3,7.0,False,fixture,fixture
+20aeea6c2552,S-NH,Senate,NH,0,Data for Progress,,,2026-07-07,2026-07-10,600,lv,online,53.6,41.3,12.300000000000004,False,fixture,fixture
+2189327c1f93,S-NH,Senate,NH,0,Marist,,,2026-07-05,2026-07-08,800,lv,live phone,50.1,45.5,4.600000000000001,False,fixture,fixture
+02ace1385bed,S-NJ,Senate,NJ,0,Emerson College,,,2026-08-06,2026-08-09,1000,lv,ivr/online,54.5,38.8,15.700000000000003,False,fixture,fixture
+caad02842c21,S-NM,Senate,NM,0,Public Policy Polling,,,2026-07-24,2026-07-27,400,rv,ivr,47.1,47.4,-0.29999999999999716,False,fixture,fixture
+c2700c4c3fef,S-NM,Senate,NM,0,Trafalgar Group,,,2026-07-16,2026-07-19,500,lv,mixed,45.7,50.1,-4.399999999999999,False,fixture,fixture
+74b16d6b115c,S-NC,Senate,NC,0,Siena/NYT,,,2026-07-20,2026-07-23,1000,lv,live phone,45.6,46.3,-0.6999999999999957,False,fixture,fixture
+e51504e57854,S-NC,Senate,NC,0,Rasmussen Reports,,,2026-05-31,2026-06-03,600,lv,ivr/online,40.2,53.0,-12.799999999999997,False,fixture,fixture
+7748a7584beb,S-NC,Senate,NC,0,Cygnal,,,2026-05-18,2026-05-21,600,lv,mixed,45.2,47.8,-2.5999999999999943,False,fixture,fixture
+995dfaaa88c3,S-NC,Senate,NC,0,Marist,,,2026-07-14,2026-07-17,500,lv,live phone,50.2,45.6,4.600000000000001,False,fixture,fixture
+2614cad93a2a,S-NC,Senate,NC,0,Fox News/Beacon-Shaw,,,2026-05-23,2026-05-26,400,rv,live phone,43.6,47.6,-4.0,False,fixture,fixture
+d68f66d69f9e,S-NC,Senate,NC,0,Quinnipiac University,,,2026-08-31,2026-09-03,1000,lv,live phone,43.2,50.0,-6.799999999999997,False,fixture,fixture
+954a0f1c5111,S-NC,Senate,NC,0,Trafalgar Group,,,2026-06-13,2026-06-16,500,lv,mixed,40.9,55.4,-14.5,False,fixture,fixture
+91935a8504f9,S-NC,Senate,NC,0,YouGov/Economist,,,2026-05-31,2026-06-03,1000,rv,online,45.0,46.7,-1.7000000000000028,False,fixture,fixture
+933c5abf1cbe,S-NC,Senate,NC,0,Fox News/Beacon-Shaw,,,2026-07-07,2026-07-10,600,lv,live phone,44.4,48.3,-3.8999999999999986,False,fixture,fixture
+091788d2adea,S-TN,Senate,TN,0,YouGov/Economist,,,2026-07-04,2026-07-07,400,lv,online,34.7,59.3,-24.599999999999994,False,fixture,fixture
+caee40b43835,S-TX,Senate,TX,0,Data for Progress,,,2026-09-02,2026-09-05,500,lv,online,38.4,59.3,-20.9,False,fixture,fixture
+3549303c8301,S-VA,Senate,VA,0,Emerson College,,,2026-08-14,2026-08-17,1000,rv,ivr/online,51.2,43.8,7.400000000000006,False,fixture,fixture
+10baee3f3db2,S-VA,Senate,VA,0,Siena/NYT,,,2026-06-12,2026-06-15,1000,rv,live phone,48.0,50.3,-2.299999999999997,False,fixture,fixture
+bae587adb218,S-VA,Senate,VA,0,Emerson College,,,2026-07-04,2026-07-07,800,lv,ivr/online,51.5,44.7,6.799999999999997,False,fixture,fixture
+e3c4a67172da,S-VA,Senate,VA,0,Emerson College,,,2026-05-10,2026-05-13,1000,lv,ivr/online,49.3,43.4,5.899999999999999,False,fixture,fixture
+3296c4ec090f,S-VA,Senate,VA,0,Morning Consult,,,2026-06-25,2026-06-28,800,lv,online,52.0,43.8,8.200000000000003,False,fixture,fixture
+d9dcd7c6d622,S-VA,Senate,VA,0,Data for Progress,,,2026-04-14,2026-04-17,400,lv,online,48.6,42.7,5.899999999999999,False,fixture,fixture
+cc32891f56b8,S-FL-special,Senate,FL,0,Public Policy Polling,,,2026-05-04,2026-05-07,500,lv,ivr,45.1,46.6,-1.5,False,fixture,fixture
+0521485f3b95,S-FL-special,Senate,FL,0,Emerson College,,,2026-09-02,2026-09-05,800,lv,ivr/online,46.7,46.1,0.6000000000000014,False,fixture,fixture
+3e64143a839a,S-FL-special,Senate,FL,0,Cygnal,,,2026-05-09,2026-05-12,1000,lv,mixed,44.5,48.5,-4.0,False,fixture,fixture
+eea381132203,S-FL-special,Senate,FL,0,Trafalgar Group,,,2026-06-09,2026-06-12,800,rv,mixed,48.9,43.0,5.899999999999999,False,fixture,fixture
+0abc751b75de,S-FL-special,Senate,FL,0,YouGov/Economist,,,2026-07-17,2026-07-20,500,lv,online,49.8,38.3,11.5,False,fixture,fixture
+9d5b3221452a,S-FL-special,Senate,FL,0,Rasmussen Reports,,,2026-05-15,2026-05-18,1000,lv,ivr/online,42.8,50.5,-7.700000000000003,False,fixture,fixture
+d2bd8205c34d,S-FL-special,Senate,FL,0,Morning Consult,,,2026-04-16,2026-04-19,500,lv,online,42.5,51.7,-9.200000000000003,False,fixture,fixture
+70a47367c10d,S-FL-special,Senate,FL,0,Cygnal,,,2026-06-24,2026-06-27,600,lv,mixed,47.0,50.3,-3.299999999999997,False,fixture,fixture
+dc27b930c924,G-AK,Governor,AK,0,Siena/NYT,,,2026-08-28,2026-08-31,800,lv,live phone,39.7,54.6,-14.899999999999999,False,fixture,fixture
+e50bf9c524f7,G-AK,Governor,AK,0,Siena/NYT,,,2026-06-24,2026-06-27,500,lv,live phone,44.6,50.1,-5.5,False,fixture,fixture
+43272c34aaa9,G-AK,Governor,AK,0,Siena/NYT,,,2026-08-24,2026-08-27,500,lv,live phone,40.8,52.4,-11.600000000000001,False,fixture,fixture
+8b7bece4252b,G-AK,Governor,AK,0,Emerson College,,,2026-09-01,2026-09-04,800,rv,ivr/online,45.1,46.4,-1.2999999999999972,False,fixture,fixture
+41ca3dab6098,G-AK,Governor,AK,0,Rasmussen Reports,,,2026-08-14,2026-08-17,600,rv,ivr/online,45.1,49.2,-4.100000000000001,False,fixture,fixture
+9bafa3e2f3a9,G-AK,Governor,AK,0,Data for Progress,,,2026-08-27,2026-08-30,500,lv,online,49.0,47.9,1.1000000000000014,False,fixture,fixture
+02241c9d029c,G-AZ,Governor,AZ,0,Marist,,,2026-04-14,2026-04-17,600,rv,live phone,40.4,48.5,-8.100000000000001,False,fixture,fixture
+5323a1f434aa,G-AZ,Governor,AZ,0,Cygnal,,,2026-07-26,2026-07-29,500,lv,mixed,44.3,47.4,-3.1000000000000014,False,fixture,fixture
+814121c8215f,G-AZ,Governor,AZ,0,YouGov/Economist,,,2026-06-26,2026-06-29,600,lv,online,43.7,50.2,-6.5,False,fixture,fixture
+0eae6cd8084c,G-CO,Governor,CO,0,Fox News/Beacon-Shaw,,,2026-07-03,2026-07-06,800,lv,live phone,44.4,49.9,-5.5,False,fixture,fixture
+f2266333a9da,G-CO,Governor,CO,0,Morning Consult,,,2026-04-17,2026-04-20,600,lv,online,47.1,49.4,-2.299999999999997,False,fixture,fixture
+c02c4ff46c8a,G-CO,Governor,CO,0,Fox News/Beacon-Shaw,,,2026-05-02,2026-05-05,1000,rv,live phone,48.8,46.8,2.0,False,fixture,fixture
+b32ef497b0ae,G-CO,Governor,CO,0,Public Policy Polling,,,2026-04-30,2026-05-03,800,lv,ivr,50.6,43.1,7.5,False,fixture,fixture
+987cdb8322e2,G-FL,Governor,FL,0,Siena/NYT,,,2026-04-23,2026-04-26,1000,rv,live phone,42.1,52.0,-9.899999999999999,False,fixture,fixture
+662078c3e2db,G-FL,Governor,FL,0,Fox News/Beacon-Shaw,,,2026-07-03,2026-07-06,1000,lv,live phone,45.1,49.9,-4.799999999999997,False,fixture,fixture
+179445afa836,G-FL,Governor,FL,0,Morning Consult,,,2026-06-29,2026-07-02,1000,lv,online,43.9,46.6,-2.700000000000003,False,fixture,fixture
+92f1a33490c9,G-FL,Governor,FL,0,Morning Consult,,,2026-05-01,2026-05-04,800,lv,online,42.2,49.7,-7.5,False,fixture,fixture
+5cdbed2168ec,G-FL,Governor,FL,0,Morning Consult,,,2026-05-13,2026-05-16,500,lv,online,45.4,51.5,-6.100000000000001,False,fixture,fixture
+4e6915aa7fa7,G-GA,Governor,GA,0,Trafalgar Group,,,2026-06-07,2026-06-10,600,rv,mixed,45.0,49.7,-4.700000000000003,False,fixture,fixture
+260fd366fe43,G-GA,Governor,GA,0,Emerson College,,,2026-07-05,2026-07-08,500,rv,ivr/online,44.2,48.5,-4.299999999999997,False,fixture,fixture
+8cd50aa33945,G-IL,Governor,IL,0,Public Policy Polling,,,2026-08-19,2026-08-22,500,lv,ivr,56.7,39.0,17.700000000000003,False,fixture,fixture
+77941bae1601,G-IL,Governor,IL,0,Morning Consult,,,2026-07-27,2026-07-30,500,rv,online,60.2,35.4,24.800000000000004,False,fixture,fixture
+cd66df844058,G-IA,Governor,IA,0,Rasmussen Reports,,,2026-06-08,2026-06-11,1000,lv,ivr/online,40.1,54.3,-14.199999999999996,False,fixture,fixture
+e3e5a39b9b16,G-IA,Governor,IA,0,Cygnal,,,2026-07-07,2026-07-10,1000,lv,mixed,40.0,52.5,-12.5,False,fixture,fixture
+429119bc95bc,G-IA,Governor,IA,0,Morning Consult,,,2026-08-08,2026-08-11,600,rv,online,41.9,50.1,-8.200000000000003,False,fixture,fixture
+3956202cd274,G-IA,Governor,IA,0,Rasmussen Reports,,,2026-05-19,2026-05-22,1000,lv,ivr/online,43.9,47.0,-3.1000000000000014,False,fixture,fixture
+29d807db0e81,G-KS,Governor,KS,0,Trafalgar Group,,,2026-07-08,2026-07-11,800,lv,mixed,39.0,55.9,-16.9,False,fixture,fixture
+9cf6b11c016e,G-ME,Governor,ME,0,Rasmussen Reports,,,2026-07-19,2026-07-22,1000,lv,ivr/online,52.1,44.7,7.399999999999999,False,fixture,fixture
+f6f7aae95012,G-MI,Governor,MI,0,YouGov/Economist,,,2026-07-23,2026-07-26,500,lv,online,50.9,42.8,8.100000000000001,False,fixture,fixture
+e5b8321d6d70,G-MI,Governor,MI,0,Cygnal,,,2026-04-17,2026-04-20,500,lv,mixed,44.6,44.3,0.30000000000000426,False,fixture,fixture
+274004786916,G-MI,Governor,MI,0,Marist,,,2026-04-26,2026-04-29,400,rv,live phone,47.5,46.6,0.8999999999999986,False,fixture,fixture
+ce35c071a348,G-MI,Governor,MI,0,Marist,,,2026-05-05,2026-05-08,500,lv,live phone,49.0,44.6,4.399999999999999,False,fixture,fixture
+5bdc8b4cee5c,G-NV,Governor,NV,0,Morning Consult,,,2026-05-31,2026-06-03,1000,lv,online,47.5,48.2,-0.7000000000000028,False,fixture,fixture
+d6a878d7359a,G-NV,Governor,NV,0,Fox News/Beacon-Shaw,,,2026-04-08,2026-04-11,400,lv,live phone,43.0,49.1,-6.100000000000001,False,fixture,fixture
+4f82c34706dc,G-NV,Governor,NV,0,Quinnipiac University,,,2026-07-27,2026-07-30,600,lv,live phone,45.3,47.5,-2.200000000000003,False,fixture,fixture
+6054bf4ef3ef,G-NV,Governor,NV,0,Public Policy Polling,,,2026-08-10,2026-08-13,500,lv,ivr,42.2,48.7,-6.5,False,fixture,fixture
+76ae9d07a685,G-NV,Governor,NV,0,Morning Consult,,,2026-08-05,2026-08-08,500,rv,online,45.1,46.0,-0.8999999999999986,False,fixture,fixture
+210f23231501,G-NH,Governor,NH,0,Rasmussen Reports,,,2026-08-21,2026-08-24,1000,lv,ivr/online,44.3,51.2,-6.900000000000006,False,fixture,fixture
+61f886d5cd68,G-NH,Governor,NH,0,Marist,,,2026-08-13,2026-08-16,500,lv,live phone,44.2,51.1,-6.899999999999999,False,fixture,fixture
+83d97469ca34,G-NH,Governor,NH,0,Siena/NYT,,,2026-04-12,2026-04-15,800,lv,live phone,49.6,47.0,2.6000000000000014,False,fixture,fixture
+8cc1f8f63cda,G-NH,Governor,NH,0,Cygnal,,,2026-08-01,2026-08-04,1000,lv,mixed,47.5,47.1,0.3999999999999986,False,fixture,fixture
+01d431050eb3,G-NH,Governor,NH,0,Quinnipiac University,,,2026-07-15,2026-07-18,500,lv,live phone,46.8,47.4,-0.6000000000000014,False,fixture,fixture
+3e6d92a051fa,G-PA,Governor,PA,0,Marist,,,2026-04-15,2026-04-18,400,lv,live phone,45.4,51.2,-5.800000000000004,False,fixture,fixture
+d4a497e8798c,G-SC,Governor,SC,0,YouGov/Economist,,,2026-07-30,2026-08-02,500,lv,online,36.2,55.1,-18.9,False,fixture,fixture
+5cea1c7dd2ab,G-SC,Governor,SC,0,Emerson College,,,2026-07-20,2026-07-23,800,lv,ivr/online,40.3,53.1,-12.800000000000004,False,fixture,fixture
+3b22c77fae43,G-TX,Governor,TX,0,Morning Consult,,,2026-05-14,2026-05-17,800,lv,online,42.8,53.2,-10.400000000000006,False,fixture,fixture
+c8c49ee8b4dc,G-TX,Governor,TX,0,Rasmussen Reports,,,2026-04-13,2026-04-16,1000,rv,ivr/online,44.1,50.0,-5.899999999999999,False,fixture,fixture
+89c6538ff345,G-WI,Governor,WI,0,Quinnipiac University,,,2026-04-19,2026-04-22,800,rv,live phone,43.0,50.4,-7.399999999999999,False,fixture,fixture
+dd301c92854c,G-WI,Governor,WI,0,Marist,,,2026-07-06,2026-07-09,600,lv,live phone,43.3,53.0,-9.700000000000003,False,fixture,fixture
+e26ab5cc343b,G-WI,Governor,WI,0,Morning Consult,,,2026-07-15,2026-07-18,1000,lv,online,47.8,43.4,4.399999999999999,False,fixture,fixture
+307b4e632fd3,GENERIC,Governor,,0,Siena/NYT,,,2026-04-24,2026-04-28,2000,lv,live phone,49.8,40.2,9.599999999999994,False,fixture,fixture
+82a84261a838,GENERIC,Governor,,0,Cygnal,,,2026-03-09,2026-03-13,1200,rv,mixed,50.5,39.5,11.0,False,fixture,fixture
+9511b78a8f30,GENERIC,Governor,,0,Cygnal,,,2026-08-05,2026-08-09,1200,lv,mixed,43.6,46.4,-2.799999999999997,False,fixture,fixture
+3c3aa183395a,GENERIC,Governor,,0,Emerson College,,,2026-06-10,2026-06-14,1500,rv,ivr/online,49.9,40.1,9.799999999999997,False,fixture,fixture
+6ae1f4712a0d,GENERIC,Governor,,0,Public Policy Polling,,,2026-08-15,2026-08-19,1200,rv,ivr,45.4,44.6,0.7999999999999972,False,fixture,fixture
+c2e74bf3ef69,GENERIC,Governor,,0,Trafalgar Group,,,2026-03-28,2026-04-01,1500,a,mixed,43.2,46.8,-3.5999999999999943,False,fixture,fixture
+8d55811c46c9,GENERIC,Governor,,0,Data for Progress,,,2026-06-29,2026-07-03,1000,lv,online,53.0,37.0,16.0,False,fixture,fixture
+b6688c2a8c89,GENERIC,Governor,,0,Cygnal,,,2026-09-01,2026-09-05,1000,rv,mixed,47.2,42.8,4.400000000000006,False,fixture,fixture
+c223c3a82e3b,GENERIC,Governor,,0,Trafalgar Group,,,2026-08-06,2026-08-10,2000,rv,mixed,48.4,41.6,6.799999999999997,False,fixture,fixture
+31bc49163da0,GENERIC,Governor,,0,Emerson College,,,2026-08-02,2026-08-06,1000,lv,ivr/online,42.7,47.3,-4.599999999999994,False,fixture,fixture
+e78d87ef11f8,GENERIC,Governor,,0,Data for Progress,,,2026-07-09,2026-07-13,1200,lv,online,44.2,45.8,-1.5999999999999943,False,fixture,fixture
+fadfa956b031,GENERIC,Governor,,0,Siena/NYT,,,2026-06-13,2026-06-17,2000,rv,live phone,49.4,40.6,8.799999999999997,False,fixture,fixture
+e2de8a740ac3,GENERIC,Governor,,0,Morning Consult,,,2026-08-19,2026-08-23,1000,rv,online,48.3,41.7,6.599999999999994,False,fixture,fixture
+94e7f8fca07e,GENERIC,Governor,,0,Rasmussen Reports,,,2026-06-19,2026-06-23,1200,lv,ivr/online,45.1,44.9,0.20000000000000284,False,fixture,fixture
+96ef0a730c20,GENERIC,Governor,,0,Cygnal,,,2026-04-12,2026-04-16,1000,lv,mixed,48.9,41.1,7.799999999999997,False,fixture,fixture
+dc4542fd80f1,GENERIC,Governor,,0,Marist,,,2026-06-03,2026-06-07,1200,rv,live phone,41.2,48.8,-7.599999999999994,False,fixture,fixture
+b530c3735f77,GENERIC,Governor,,0,Siena/NYT,,,2026-06-14,2026-06-18,2000,lv,live phone,47.7,42.3,5.400000000000006,False,fixture,fixture
+e79f2efd41e6,GENERIC,Governor,,0,Morning Consult,,,2026-04-12,2026-04-16,2000,lv,online,47.8,42.2,5.599999999999994,False,fixture,fixture
+3dc694a7f8fa,GENERIC,Governor,,0,Data for Progress,,,2026-06-22,2026-06-26,2000,lv,online,48.8,41.2,7.599999999999994,False,fixture,fixture
+738ef923c697,GENERIC,Governor,,0,Cygnal,,,2026-08-09,2026-08-13,1500,rv,mixed,43.4,46.6,-3.200000000000003,False,fixture,fixture
+62206dcfd560,GENERIC,Governor,,0,Morning Consult,,,2026-08-06,2026-08-10,1200,lv,online,46.3,43.7,2.5999999999999943,False,fixture,fixture
+d814a4b8cfc8,GENERIC,Governor,,0,Quinnipiac University,,,2026-04-07,2026-04-11,1000,lv,live phone,45.5,44.5,1.0,False,fixture,fixture
+c6ffbb1d6edb,GENERIC,Governor,,0,Data for Progress,,,2026-04-22,2026-04-26,1500,lv,online,46.7,43.3,3.4000000000000057,False,fixture,fixture
+09429ca35217,GENERIC,Governor,,0,Emerson College,,,2026-05-21,2026-05-25,1000,rv,ivr/online,45.5,44.5,1.0,False,fixture,fixture
+b09bfc15ea9c,GENERIC,Governor,,0,Public Policy Polling,,,2026-05-04,2026-05-08,2000,rv,ivr,46.4,43.6,2.799999999999997,False,fixture,fixture
+8e927645e9be,GENERIC,Governor,,0,Trafalgar Group,,,2026-07-01,2026-07-05,2000,rv,mixed,47.2,42.8,4.400000000000006,False,fixture,fixture
+39b14fc1c3d5,GENERIC,Governor,,0,Quinnipiac University,,,2026-04-28,2026-05-02,1000,rv,live phone,46.9,43.1,3.799999999999997,False,fixture,fixture
+2e99989d28ed,GENERIC,Governor,,0,Quinnipiac University,,,2026-08-22,2026-08-26,1000,rv,live phone,47.6,42.4,5.200000000000003,False,fixture,fixture
+6fbda363d46c,GENERIC,Governor,,0,Marist,,,2026-06-06,2026-06-10,1200,lv,live phone,47.6,42.4,5.200000000000003,False,fixture,fixture
+a6cd1e1a4f8e,GENERIC,Governor,,0,Trafalgar Group,,,2026-08-05,2026-08-09,1000,rv,mixed,47.1,42.9,4.200000000000003,False,fixture,fixture
+9bd957f01f8d,GENERIC,Governor,,0,Marist,,,2026-04-10,2026-04-14,1500,rv,live phone,42.6,47.4,-4.799999999999997,False,fixture,fixture
+cfe30b2f422b,GENERIC,Governor,,0,Trafalgar Group,,,2026-05-04,2026-05-08,2000,rv,mixed,45.4,44.6,0.7999999999999972,False,fixture,fixture
+d55d6ec88db0,GENERIC,Governor,,0,Data for Progress,,,2026-06-26,2026-06-30,2000,lv,online,46.5,43.5,3.0,False,fixture,fixture
+1cde0fa5a97a,GENERIC,Governor,,0,Emerson College,,,2026-05-23,2026-05-27,1000,lv,ivr/online,48.8,41.2,7.599999999999994,False,fixture,fixture
+ec2ad3bafaf3,GENERIC,Governor,,0,Emerson College,,,2026-08-09,2026-08-13,2000,lv,ivr/online,46.8,43.2,3.5999999999999943,False,fixture,fixture
+7b4b0cd1051d,GENERIC,Governor,,0,Marist,,,2026-03-10,2026-03-14,1000,lv,live phone,48.4,41.6,6.799999999999997,False,fixture,fixture
+f1c78baa96ec,GENERIC,Governor,,0,Rasmussen Reports,,,2026-04-23,2026-04-27,1500,a,ivr/online,42.4,47.6,-5.200000000000003,False,fixture,fixture
+3254905ba62c,GENERIC,Governor,,0,YouGov/Economist,,,2026-03-13,2026-03-17,1000,lv,online,43.8,46.2,-2.4000000000000057,False,fixture,fixture
+093c1dd32dea,GENERIC,Governor,,0,Data for Progress,,,2026-08-23,2026-08-27,1500,rv,online,47.2,42.8,4.400000000000006,False,fixture,fixture
+3a3bf5779cf9,GENERIC,Governor,,0,Data for Progress,,,2026-06-24,2026-06-28,1500,lv,online,47.3,42.7,4.599999999999994,False,fixture,fixture
+0b7a5e484930,GENERIC,Governor,,0,Trafalgar Group,,,2026-07-24,2026-07-28,1200,rv,mixed,46.1,43.9,2.200000000000003,False,fixture,fixture
+db8a5b5db899,GENERIC,Governor,,0,Siena/NYT,,,2026-06-06,2026-06-10,1000,lv,live phone,43.4,46.6,-3.200000000000003,False,fixture,fixture
+9184cc54e1eb,GENERIC,Governor,,0,Morning Consult,,,2026-04-28,2026-05-02,1500,rv,online,47.9,42.1,5.799999999999997,False,fixture,fixture
+2b9a0bf8bf29,GENERIC,Governor,,0,Cygnal,,,2026-06-07,2026-06-11,1500,lv,mixed,48.4,41.6,6.799999999999997,False,fixture,fixture
+756b1ca3f9ab,GENERIC,Governor,,0,Quinnipiac University,,,2026-06-13,2026-06-17,1500,a,live phone,47.3,42.7,4.599999999999994,False,fixture,fixture
+ab01fa8fec51,GENERIC,Governor,,0,Trafalgar Group,,,2026-04-10,2026-04-14,1000,lv,mixed,44.8,45.2,-0.4000000000000057,False,fixture,fixture
+1688b752cb8c,GENERIC,Governor,,0,Marist,,,2026-05-17,2026-05-21,1000,lv,live phone,46.2,43.8,2.4000000000000057,False,fixture,fixture
+e8827c286b5d,GENERIC,Governor,,0,Cygnal,,,2026-07-02,2026-07-06,1000,rv,mixed,47.4,42.6,4.799999999999997,False,fixture,fixture
+fd551a9fa4cc,GENERIC,Governor,,0,Quinnipiac University,,,2026-08-17,2026-08-21,1200,rv,live phone,46.7,43.3,3.4000000000000057,False,fixture,fixture
+047a9d099fd5,GENERIC,Governor,,0,Marist,,,2026-07-24,2026-07-28,1500,lv,live phone,48.1,41.9,6.200000000000003,False,fixture,fixture
+72aa892a3751,GENERIC,Governor,,0,Emerson College,,,2026-03-24,2026-03-28,1000,a,ivr/online,48.4,41.6,6.799999999999997,False,fixture,fixture
+d6d4505c0cf0,GENERIC,Governor,,0,Cygnal,,,2026-05-30,2026-06-03,2000,a,mixed,47.4,42.6,4.799999999999997,False,fixture,fixture
+faaa79716a00,GENERIC,Governor,,0,Data for Progress,,,2026-07-18,2026-07-22,2000,a,online,48.4,41.6,6.799999999999997,False,fixture,fixture
+0da4fa2b22ff,GENERIC,Governor,,0,Emerson College,,,2026-05-21,2026-05-25,1000,lv,ivr/online,45.7,44.3,1.4000000000000057,False,fixture,fixture
+bff6b71126d9,GENERIC,Governor,,0,Marist,,,2026-06-27,2026-07-01,2000,lv,live phone,45.0,45.0,0.0,False,fixture,fixture
+6d92a39b20ed,GENERIC,Governor,,0,YouGov/Economist,,,2026-08-06,2026-08-10,1000,lv,online,47.1,42.9,4.200000000000003,False,fixture,fixture
+0065eae65c54,GENERIC,Governor,,0,Morning Consult,,,2026-04-16,2026-04-20,1000,lv,online,47.2,42.8,4.400000000000006,False,fixture,fixture
+9457b990ac1e,GENERIC,Governor,,0,Quinnipiac University,,,2026-05-26,2026-05-30,1200,a,live phone,46.2,43.8,2.4000000000000057,False,fixture,fixture
+6dfb8a88b560,GENERIC,Governor,,0,Marist,,,2026-06-20,2026-06-24,1000,rv,live phone,43.3,46.7,-3.4000000000000057,False,fixture,fixture
+aea4b4c7039b,GENERIC,Governor,,0,Cygnal,,,2026-05-03,2026-05-07,2000,lv,mixed,44.7,45.3,-0.5999999999999943,False,fixture,fixture
+8e3c74695d41,GENERIC,Governor,,0,Cygnal,,,2026-08-28,2026-09-01,1200,rv,mixed,51.0,39.0,12.0,False,fixture,fixture
+e9e6d17fce03,GENERIC,Governor,,0,Cygnal,,,2026-09-01,2026-09-05,1500,lv,mixed,45.2,44.8,0.4000000000000057,False,fixture,fixture
+68b7daec7ac9,GENERIC,Governor,,0,Siena/NYT,,,2026-07-30,2026-08-03,1200,rv,live phone,50.6,39.4,11.200000000000003,False,fixture,fixture
+bf372438d3c7,GENERIC,Governor,,0,Trafalgar Group,,,2026-04-19,2026-04-23,1500,lv,mixed,42.8,47.2,-4.400000000000006,False,fixture,fixture
+cd19f895dcf6,GENERIC,Governor,,0,Trafalgar Group,,,2026-03-15,2026-03-19,1500,lv,mixed,45.9,44.1,1.7999999999999972,False,fixture,fixture
+735392de0cff,GENERIC,Governor,,0,Data for Progress,,,2026-08-08,2026-08-12,1500,rv,online,46.4,43.6,2.799999999999997,False,fixture,fixture
+62d7e184c42b,GENERIC,Governor,,0,Quinnipiac University,,,2026-07-25,2026-07-29,2000,lv,live phone,46.5,43.5,3.0,False,fixture,fixture
+e9ad181a0b85,GENERIC,Governor,,0,Public Policy Polling,,,2026-06-09,2026-06-13,1500,lv,ivr,47.6,42.4,5.200000000000003,False,fixture,fixture
+336705a5a46a,GENERIC,Governor,,0,Quinnipiac University,,,2026-06-26,2026-06-30,2000,rv,live phone,46.9,43.1,3.799999999999997,False,fixture,fixture
+c1d0d6df43d8,GENERIC,Governor,,0,YouGov/Economist,,,2026-05-27,2026-05-31,2000,rv,online,47.9,42.1,5.799999999999997,False,fixture,fixture
+3ebc80163611,GENERIC,Governor,,0,Rasmussen Reports,,,2026-08-08,2026-08-12,1200,lv,ivr/online,43.8,46.2,-2.4000000000000057,False,fixture,fixture
+1fadf605e6ae,GENERIC,Governor,,0,Morning Consult,,,2026-07-01,2026-07-05,1000,lv,online,46.5,43.5,3.0,False,fixture,fixture
+7f97215ecca8,GENERIC,Governor,,0,Rasmussen Reports,,,2026-03-20,2026-03-24,2000,rv,ivr/online,45.9,44.1,1.7999999999999972,False,fixture,fixture
+9ebe7b9a631b,GENERIC,Governor,,0,Quinnipiac University,,,2026-04-03,2026-04-07,2000,lv,live phone,48.6,41.4,7.200000000000003,False,fixture,fixture
+a91c2e7ead31,GENERIC,Governor,,0,Trafalgar Group,,,2026-04-13,2026-04-17,2000,lv,mixed,48.5,41.5,7.0,False,fixture,fixture
+176f61f4c726,GENERIC,Governor,,0,Data for Progress,,,2026-04-07,2026-04-11,1000,lv,online,47.1,42.9,4.200000000000003,False,fixture,fixture
+8cea164f7ea2,GENERIC,Governor,,0,Marist,,,2026-07-19,2026-07-23,2000,lv,live phone,48.0,42.0,6.0,False,fixture,fixture
+2a1ee431b6f4,GENERIC,Governor,,0,Siena/NYT,,,2026-04-16,2026-04-20,2000,lv,live phone,46.2,43.8,2.4000000000000057,False,fixture,fixture
+864874f00f61,GENERIC,Governor,,0,Quinnipiac University,,,2026-07-04,2026-07-08,1000,lv,live phone,47.3,42.7,4.599999999999994,False,fixture,fixture
+21d721f19b2e,GENERIC,Governor,,0,Morning Consult,,,2026-04-24,2026-04-28,1000,rv,online,49.9,40.1,9.799999999999997,False,fixture,fixture
+65fac96ab981,GENERIC,Governor,,0,Rasmussen Reports,,,2026-04-28,2026-05-02,1000,rv,ivr/online,45.3,44.7,0.5999999999999943,False,fixture,fixture
+aa010ed2e3fb,GENERIC,Governor,,0,Cygnal,,,2026-07-29,2026-08-02,1000,rv,mixed,47.1,42.9,4.200000000000003,False,fixture,fixture
+37927dc07c0c,GENERIC,Governor,,0,Siena/NYT,,,2026-06-16,2026-06-20,1500,lv,live phone,42.9,47.1,-4.200000000000003,False,fixture,fixture
+d15ab21a793a,GENERIC,Governor,,0,Data for Progress,,,2026-05-28,2026-06-01,1200,rv,online,48.5,41.5,7.0,False,fixture,fixture
+bed4c5841873,GENERIC,Governor,,0,Siena/NYT,,,2026-07-24,2026-07-28,2000,rv,live phone,47.9,42.1,5.799999999999997,False,fixture,fixture
+26aa951b0a5c,GENERIC,Governor,,0,Siena/NYT,,,2026-08-27,2026-08-31,1200,lv,live phone,46.3,43.7,2.5999999999999943,False,fixture,fixture
+4489bf3d06d7,GENERIC,Governor,,0,Cygnal,,,2026-07-11,2026-07-15,1500,lv,mixed,46.0,44.0,2.0,False,fixture,fixture
+a0afc4f0c8bb,GENERIC,Governor,,0,Trafalgar Group,,,2026-04-11,2026-04-15,1200,lv,mixed,46.5,43.5,3.0,False,fixture,fixture
+cbfe6f306b09,GENERIC,Governor,,0,Siena/NYT,,,2026-04-17,2026-04-21,1500,a,live phone,48.3,41.7,6.599999999999994,False,fixture,fixture
+187d0067b6fa,GENERIC,Governor,,0,Marist,,,2026-05-01,2026-05-05,2000,a,live phone,47.5,42.5,5.0,False,fixture,fixture

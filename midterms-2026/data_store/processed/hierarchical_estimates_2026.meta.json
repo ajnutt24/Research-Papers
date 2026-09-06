@@ -1,0 +1,15 @@
+{
+  "stage": "hierarchical_estimates_2026",
+  "provenance": "fixture",
+  "rows": 506,
+  "written": "2026-09-06T17:37:13",
+  "nat_dev": {
+    "mean": -1.47,
+    "sd": 2.53
+  },
+  "poll_bias": {
+    "mean": -2.78,
+    "sd": 2.26
+  },
+  "max_rhat": 1.0150787318226677
+}

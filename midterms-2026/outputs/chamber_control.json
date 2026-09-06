@@ -1,0 +1,34 @@
+{
+  "n_sims": 69420,
+  "n_sims_reason": "projected 2.0s for 69420 is within the 120s limit",
+  "benchmark_seconds": 0.028,
+  "elapsed_seconds": 2.57,
+  "asof": "2026-09-06",
+  "days_to_election": 58,
+  "provenance": "fixture",
+  "House": {
+    "p_dem_control": 0.836819360414866,
+    "dem_seats_median": 228.0,
+    "dem_seats_mean": 228.85151253241142,
+    "dem_seats_p10": 214.0,
+    "dem_seats_p90": 244.0,
+    "majority_threshold": 218
+  },
+  "Senate": {
+    "p_dem_control": 0.12915586286372804,
+    "dem_seats_median": 49.0,
+    "dem_seats_mean": 48.46707000864304,
+    "dem_seats_p10": 46.0,
+    "dem_seats_p90": 51.0,
+    "majority_threshold": 51,
+    "p_dem_50_seats_tie": 0.15913281475079227
+  },
+  "Governor": {
+    "p_dem_control": 0.19121290694324403,
+    "dem_seats_median": 23.0,
+    "dem_seats_mean": 22.99628349178911,
+    "dem_seats_p10": 19.0,
+    "dem_seats_p90": 27.0,
+    "majority_threshold": 26
+  }
+}

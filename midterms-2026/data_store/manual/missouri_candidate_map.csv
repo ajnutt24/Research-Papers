@@ -1,0 +1,4 @@
+# Missouri: the August 2026 primary ran on the 2025 map, blocked by the state Supreme Court for the general.
+# Map each nominee from primary_district (2025 map) to general_district (2020-census map, MO-01..MO-08).
+# Ruling under appeal to the U.S. Supreme Court; re-verify before each run.
+candidate,party,primary_district,general_district,notes
