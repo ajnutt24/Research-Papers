@@ -238,7 +238,8 @@ def fetch_rcp() -> pd.DataFrame | None:
 def load_manual() -> pd.DataFrame | None:
     if not MANUAL_POLLS.exists():
         return None
-    df = pd.read_csv(MANUAL_POLLS)
+    df = pd.read_csv(MANUAL_POLLS, comment="#")
+    df = df.dropna(subset=["race_id"])
     out = standardise(df, "manual")
     log.info("manual polls: %d rows", len(out))
     return out
@@ -310,7 +311,7 @@ def filter_hypothetical(df: pd.DataFrame, raw_names: pd.DataFrame | None = None)
     df = df[~df["hypothetical"]]
     df = df.dropna(subset=["dem_pct", "rep_pct", "end_date"])
     if MANUAL_CANDIDATES.exists() and raw_names is not None and {"dem_candidate", "rep_candidate"} <= set(raw_names.columns):
-        cands = pd.read_csv(MANUAL_CANDIDATES)
+        cands = pd.read_csv(MANUAL_CANDIDATES, comment="#")
         noms = {(r.race_id, r.party): str(r.candidate).split()[-1].lower() for r in cands.itertuples()}
         keep = []
         for pid, rid, dn, rn in zip(raw_names.poll_id, raw_names.race_id, raw_names.dem_candidate, raw_names.rep_candidate):

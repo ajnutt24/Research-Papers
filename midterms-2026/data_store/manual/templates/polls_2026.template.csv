@@ -1,0 +1,9 @@
+# One row per poll question (general-election, D vs R). Margins are computed as dem_pct - rep_pct.
+# race_id: H-TX-23 (House), S-GA (Senate), S-OH-special / S-FL-special, G-AZ (Governor), GENERIC (generic ballot)
+# population: lv | rv | a      partisan: blank, D, or R (sponsor's party)      hypothetical: true/false
+# Independent candidates who would caucus with one party (e.g. Osborn in Nebraska): put them in the column
+# of the party they align with and note it in dem_candidate / rep_candidate.
+# To activate: copy to data_store/manual/polls_2026.csv and delete the example rows.
+race_id,pollster,sponsor,partisan,start_date,end_date,sample_size,population,methodology,dem_pct,rep_pct,hypothetical,dem_candidate,rep_candidate
+GENERIC,Example Pollster,,,2026-09-08,2026-09-11,1500,rv,online,49,42,false,,
+S-GA,Example University,,,2026-09-01,2026-09-04,800,lv,live phone,50,45,false,Ossoff,ExampleR

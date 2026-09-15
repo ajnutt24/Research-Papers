@@ -1,0 +1,5 @@
+# War-salience covariate for 2026. attention_index on a 0-1 scale comparable to approval_history.csv
+# (Korea 1950 = 0.9, Iraq 2006 = 0.8, Ukraine 2022 = 0.3). weeks_since_escalation is optional.
+# To activate: copy to data_store/manual/war_salience_2026.csv
+date,weeks_since_escalation,attention_index
+2026-09-10,,0.5

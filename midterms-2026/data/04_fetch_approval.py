@@ -101,7 +101,7 @@ def fetch_live() -> tuple[pd.DataFrame | None, str]:
 def main():
     df, prov = fetch_live()
     if df is None and MANUAL.exists():
-        df = pd.read_csv(MANUAL)
+        df = pd.read_csv(MANUAL, comment="#")
         df["date"] = pd.to_datetime(df["date"]).dt.date
         prov = "manual"
         log.info("approval from manual file: %d rows", len(df))
@@ -126,7 +126,7 @@ def main():
     hist = pd.read_csv(HIST)
     # current cycle
     if WAR_2026.exists():
-        w = pd.read_csv(WAR_2026).iloc[-1]
+        w = pd.read_csv(WAR_2026, comment="#").iloc[-1]
         war_2026, weeks_2026, wprov = float(w["attention_index"]), float(w["weeks_since_escalation"]), "manual"
     else:
         war_2026, weeks_2026, wprov = 0.5, np.nan, "fixture"

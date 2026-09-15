@@ -1,0 +1,4 @@
+# Presidential approval topline (a tracker average or individual polls; the last row is used as current).
+# To activate: copy to data_store/manual/approval_manual.csv
+date,approve,disapprove,source
+2026-09-10,41.0,55.0,example-tracker

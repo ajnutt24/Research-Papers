@@ -70,7 +70,7 @@ def partisan_lean(uni: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     uni.loc[newmap, "lean"] = st_lean[newmap]
     uni.loc[newmap, "lean_source"] = "state_fallback_new_map"
     if MANUAL_PVI.exists():
-        m = pd.read_csv(MANUAL_PVI).set_index("race_id")["pvi"]
+        m = pd.read_csv(MANUAL_PVI, comment="#").dropna(subset=["pvi"]).set_index("race_id")["pvi"]
         hit = uni.race_id.isin(m.index)
         uni.loc[hit, "lean"] = uni.loc[hit, "race_id"].map(m)
         uni.loc[hit, "lean_source"] = "dailykos_manual"
@@ -136,7 +136,7 @@ def incumbency(uni: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     # treat as incumbent only if an override says so
     uni.loc[is_house & uni.new_map.astype(bool) & ~uni.race_id.isin(house_inc.keys()), "inc_status"] = "open"
     if MANUAL_INC.exists():
-        ov = pd.read_csv(MANUAL_INC)
+        ov = pd.read_csv(MANUAL_INC, comment="#").dropna(subset=["status"])
         ov = ov[ov.race_id.isin(uni.race_id)]
         for r in ov.itertuples():
             m = uni.race_id == r.race_id

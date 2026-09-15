@@ -168,7 +168,7 @@ def consensus(df: pd.DataFrame) -> pd.DataFrame:
 
 def historical() -> tuple[pd.DataFrame, str]:
     if MANUAL_HIST.exists():
-        h = pd.read_csv(MANUAL_HIST)
+        h = pd.read_csv(MANUAL_HIST, comment="#")
         h["rating"] = h["rating"].map(normalise_rating)
         prov = "manual"
     else:
@@ -197,8 +197,9 @@ def main():
     df = scrape_all()
     prov = "live"
     if (df is None or len(df) < 50) and MANUAL.exists():
-        df = pd.read_csv(MANUAL)
+        df = pd.read_csv(MANUAL, comment="#")
         df["rating"] = df["rating"].map(normalise_rating)
+        df = df.dropna(subset=["rating"])          # blank template rows are ignored
         prov = "manual"
         log.info("ratings from manual file: %d rows", len(df))
     if df is None or len(df) < 50:
