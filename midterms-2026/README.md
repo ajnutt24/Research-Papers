@@ -22,6 +22,10 @@ next command. Then run, in a new cell:
 Do not paste the numbered scripts into cells. They import each other, so they
 have to exist as files, which the download handles.
 
+To see the forecast:
+
+    %run show_results.py
+
 To see where each input actually came from on your machine:
 
     %run check_data.py
