@@ -10,6 +10,9 @@ Paste the contents of this file into ONE Jupyter cell and run it. It will:
 
 You do not need to paste any other script into a cell. Everything else runs
 from the files this downloads. Works on Windows, macOS and Linux.
+
+If the project is already present this does NOT re-download. To force an
+update to the newest code, run `update.py`, or pass --update to this script.
 """
 import io
 import os
@@ -38,7 +41,8 @@ def find_project():
     return None
 
 
-project = find_project()
+FORCE = "--update" in sys.argv
+project = None if FORCE else find_project()
 
 if project is None:
     print(f"Downloading the project (about 3 MB) from {OWNER_REPO} ...")
@@ -54,6 +58,10 @@ if project is None:
         raise SystemExit(1)
 
     dest = Path.cwd().resolve()
+    if FORCE:
+        existing = find_project()
+        if existing is not None:
+            dest = existing.parent
     with zipfile.ZipFile(io.BytesIO(blob)) as z:
         members = [n for n in z.namelist() if f"/{FOLDER}/" in n and not n.endswith("/")]
         if not members:
