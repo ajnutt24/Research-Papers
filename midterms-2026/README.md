@@ -11,6 +11,17 @@ distributions and chamber-control probabilities.
 Every margin in the project is **Democratic minus Republican, in percentage
 points**.
 
+## Quick start
+
+Paste the contents of `START_HERE.py` into one Jupyter cell and run it. It
+downloads the project, moves into it, checks your packages, and prints the
+next command. Then run, in a new cell:
+
+    %run run_pipeline.py --full
+
+Do not paste the numbered scripts into cells. They import each other, so they
+have to exist as files, which the download handles.
+
 ## Data provenance: read this first
 
 Every stage output carries a `provenance` column and a `.meta.json` sidecar:
