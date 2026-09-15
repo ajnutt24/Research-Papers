@@ -84,6 +84,10 @@ for s in data/01 data/02 data/03 data/04 data/05 data/07 data/06 \
 done
 ```
 
+Shortcut runner: `python3 run_pipeline.py --update` re-runs only what new
+polls can change (03 -> 08 -> 11 -> 12 -> 13, about a minute);
+`--full` runs everything; a list of stage numbers runs just those.
+
 Useful environment variables: `FORECAST_ASOF=YYYY-MM-DD` freezes the as-of
 date; `MCMC_DRAWS`, `MCMC_TUNE`, `MCMC_CHAINS` control PyMC; `NYT_POLLS_URL`
 and `APPROVAL_URL` point the poll and approval fetchers at a CSV endpoint.
