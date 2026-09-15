@@ -29,7 +29,10 @@ from urllib import robotparser
 import pandas as pd
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+except NameError:
+    sys.path.insert(0, str(Path.cwd()))
 import config  # noqa: E402
 
 PROVENANCE_RANK = {"live": 0, "cache": 1, "manual": 1, "mirror": 1, "fixture": 3}

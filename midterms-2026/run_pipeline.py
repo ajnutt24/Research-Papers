@@ -21,7 +21,10 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+try:
+    ROOT = Path(__file__).resolve().parent
+except NameError:
+    ROOT = Path.cwd()
 STAGES = {
     "01": "data/01_fetch_economic_data.py", "02": "data/02_fetch_gas_prices.py",
     "03": "data/03_fetch_polls.py", "04": "data/04_fetch_approval.py",

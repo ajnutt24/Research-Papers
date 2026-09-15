@@ -39,7 +39,10 @@ from pathlib import Path
 # --------------------------------------------------------------------------
 # Paths
 # --------------------------------------------------------------------------
-PROJECT_ROOT = Path(__file__).resolve().parent
+try:
+    PROJECT_ROOT = Path(__file__).resolve().parent
+except NameError:  # imported from a notebook cell
+    PROJECT_ROOT = Path.cwd()
 DATA_RAW = PROJECT_ROOT / "data_store" / "raw"          # cached downloads
 DATA_MANUAL = PROJECT_ROOT / "data_store" / "manual"    # hand-maintained inputs
 DATA_PROCESSED = PROJECT_ROOT / "data_store" / "processed"  # stage outputs

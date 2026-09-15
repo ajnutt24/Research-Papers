@@ -45,8 +45,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "model"))
+try:  # normal script execution
+    _ROOT = Path(__file__).resolve().parents[1]
+except NameError:  # pasted into a Jupyter cell: assume the notebook runs from midterms-2026/
+    _ROOT = Path.cwd()
+sys.path.insert(0, str(_ROOT))
+sys.path.insert(0, str(_ROOT / "model"))
 import config  # noqa: E402
 from utils import get_logger, load_stage  # noqa: E402
 from modellib import BacktestContext, blend_rows, marginal_win_prob, stacking_weights, win_prob  # noqa: E402
