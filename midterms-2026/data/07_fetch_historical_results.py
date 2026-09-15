@@ -41,10 +41,33 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-try:  # normal script execution
-    _ROOT = Path(__file__).resolve().parents[1]
-except NameError:  # pasted into a Jupyter cell: assume the notebook runs from midterms-2026/
-    _ROOT = Path.cwd()
+
+def _find_project_root() -> Path:
+    """Locate the midterms-2026 folder (the one holding config.py and utils.py).
+
+    Works when run as a script, and when the code is pasted into a Jupyter cell
+    (where __file__ does not exist): then it searches the working directory, its
+    parents, and any 'midterms-2026' subfolder.
+    """
+    try:
+        return Path(__file__).resolve().parents[1]
+    except NameError:
+        pass
+    here = Path.cwd().resolve()
+    for cand in [here, *here.parents]:
+        for d in (cand, cand / "midterms-2026"):
+            if (d / "config.py").is_file() and (d / "utils.py").is_file():
+                return d
+    raise RuntimeError(
+        "Cannot find the project folder. config.py and utils.py must exist as FILES "
+        "(pasting their contents into a notebook cell does not create them).\n"
+        f"Current working directory: {here}\n"
+        "Fix: download the midterms-2026 folder from the repository, then in a cell run\n"
+        "    %cd /path/to/midterms-2026"
+    )
+
+
+_ROOT = _find_project_root()
 sys.path.insert(0, str(_ROOT))
 import config  # noqa: E402
 from utils import get_logger, load_races_mirror, load_results_mirror, save_stage  # noqa: E402

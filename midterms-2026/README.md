@@ -85,10 +85,26 @@ for s in data/01 data/02 data/03 data/04 data/05 data/07 data/06 \
 done
 ```
 
-Jupyter: open `forecast.ipynb` from the `midterms-2026/` folder; each cell
-`%run`s one stage. Pasting a script's contents into a cell also works (the
-scripts fall back to the current directory when `__file__` is undefined), as
-long as the notebook's working directory is `midterms-2026/`.
+### Running in Jupyter
+
+The scripts are modules that import each other, so they must exist as **files
+on disk**. Pasting the contents of `01_fetch_economic_data.py` into a cell
+fails with `ModuleNotFoundError: No module named 'config'`, because the paste
+never created `config.py` as a file.
+
+The supported way:
+
+1. Download or clone the whole `midterms-2026` folder.
+2. Open `forecast.ipynb`, which lives inside it. Each cell `%run`s one stage.
+3. Run the first cell, `%run setup_check.py`. It verifies the working
+   directory, every package, that PyMC can compile and sample, and prints
+   which 2026 inputs are real versus placeholder. Fix anything it flags
+   before going further.
+
+Pasting a *whole* stage script into a cell does work, but only once
+`config.py` and `utils.py` exist as files and the notebook can see them: each
+script searches the working directory, its parents, and any `midterms-2026`
+subfolder for them, and raises a message naming the fix if it cannot.
 
 Shortcut runner: `python3 run_pipeline.py --update` re-runs only what new
 polls can change (03 -> 08 -> 11 -> 12 -> 13, about a minute);
