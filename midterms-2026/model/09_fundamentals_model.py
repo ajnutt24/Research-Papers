@@ -83,6 +83,16 @@ log = get_logger("09_fund")
 TRAIN_CYCLES = [2018, 2020, 2022]
 
 
+
+def _save_idata(idata, filename: str) -> None:
+    """Write posterior draws for later inspection. This is a convenience dump:
+    no later stage reads it, so a missing netCDF backend must not fail the run."""
+    try:
+        az.to_netcdf(idata, config.DATA_PROCESSED / filename)
+    except Exception as e:  # noqa: BLE001
+        log.warning("could not write %s (%s: %s); continuing", filename, type(e).__name__, e)
+
+
 def main():
     # ---------------- national model ----------------
     nat_tab = national_training_table()
@@ -97,7 +107,7 @@ def main():
     m, sd_mean, sd_pred = predict_national(idata_n, cur.s, cur.approval_c, cur.cpi_yoy_oct, cur.war_salience)
     log.info("2026 national fundamentals: D%+.1f (sd of mean %.1f, predictive sd %.1f) with approval=%.0f, CPI=%.1f, war=%.2f",
              m, sd_mean, sd_pred, cur.approval, cur.cpi_yoy_oct, cur.war_salience)
-    az.to_netcdf(idata_n, config.DATA_PROCESSED / "national_model_idata.nc")
+    _save_idata(idata_n, "national_model_idata.nc")
 
     # ---------------- seat model ----------------
     hist = load_stage("historical_results")
@@ -107,7 +117,7 @@ def main():
     idata_s, _ = fit_seat_model(feats)
     ssum = az.summary(idata_s, var_names=["c", "b_nat", "b_lean", "b_inc", "b_fund", "sigma"])
     log.info("seat coefficients:\n%s", ssum[["mean", "sd", "r_hat"]].to_string())
-    az.to_netcdf(idata_s, config.DATA_PROCESSED / "seat_model_idata.nc")
+    _save_idata(idata_s, "seat_model_idata.nc")
 
     fund = load_stage("fundamentals_2026")
     pred = predict_seats(idata_s, fund, nat_mean=m, nat_sd=sd_pred)

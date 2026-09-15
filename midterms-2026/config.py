@@ -318,7 +318,7 @@ RANDOM_SEED = 20261103
 # --------------------------------------------------------------------------
 MCMC_DRAWS = int(os.environ.get("MCMC_DRAWS", 1000))
 MCMC_TUNE = int(os.environ.get("MCMC_TUNE", 1000))
-MCMC_CHAINS = int(os.environ.get("MCMC_CHAINS", 4))
+MCMC_CHAINS = int(os.environ.get("MCMC_CHAINS", 2))
 MCMC_TARGET_ACCEPT = 0.9
 
 

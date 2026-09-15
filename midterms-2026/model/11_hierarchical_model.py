@@ -121,6 +121,16 @@ def fit(df: pd.DataFrame, shared: dict):
     return idata
 
 
+
+def _save_idata(idata, filename: str) -> None:
+    """Write posterior draws for later inspection. This is a convenience dump:
+    no later stage reads it, so a missing netCDF backend must not fail the run."""
+    try:
+        az.to_netcdf(idata, config.DATA_PROCESSED / filename)
+    except Exception as e:  # noqa: BLE001
+        log.warning("could not write %s (%s: %s); continuing", filename, type(e).__name__, e)
+
+
 def main():
     df, shared = build_frame()
     log.info("%d races, %d polled; shared priors: %s", len(df), int(df.polled.sum()),
@@ -152,7 +162,7 @@ def main():
     np.savez_compressed(config.DATA_PROCESSED / "hier_draws.npz", theta=theta.astype(np.float32),
                         nat_dev=nat_dev, poll_bias=poll_bias, alpha_state=alpha.astype(np.float32),
                         race_id=out["race_id"].values.astype(str))
-    az.to_netcdf(idata, config.DATA_PROCESSED / "hierarchical_idata.nc")
+    _save_idata(idata, "hierarchical_idata.nc")
     print(out.sort_values("hier_sd").head(3).to_string(index=False))
     print(out[out.polled].sort_values("hier_margin").iloc[::20].to_string(index=False))
 
