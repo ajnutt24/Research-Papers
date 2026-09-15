@@ -21,7 +21,7 @@ except NameError:
     here = Path.cwd().resolve()
     PROJECT = None
     for base in [here, *here.parents]:
-        for cand in [base, base / FOLDER, *base.glob(f"*/{FOLDER}")]:
+        for cand in (base, base / FOLDER, base / "research-papers" / FOLDER):
             if (cand / "config.py").is_file() and (cand / "run_pipeline.py").is_file():
                 PROJECT = cand
                 break
