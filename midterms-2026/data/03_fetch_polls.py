@@ -333,6 +333,8 @@ def discover_race_articles() -> dict[str, str]:
     """
     sys.path.insert(0, str(_ROOT))
     import wikipolls
+    from utils import require
+    require(wikipolls, "parse_html_sections", "discover_links", "district_from_heading")
 
     found: dict[str, str] = {}
     for hub in HUB_PAGES:
@@ -361,6 +363,8 @@ def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
     """
     sys.path.insert(0, str(_ROOT))
     import wikipolls
+    from utils import require
+    require(wikipolls, "parse_html_sections", "discover_links", "district_from_heading")
 
     targets: dict[str, str] = dict(wiki_titles())          # guessed
     discovered = discover_race_articles()                  # crawled

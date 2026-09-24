@@ -84,6 +84,23 @@ if not (project / "config.py").is_file():
 os.chdir(project)
 if str(project) not in sys.path:
     sys.path.insert(0, str(project))
+
+# Python caches imported modules, so refreshing the files on disk is not
+# enough: a notebook that already imported wikipolls/config/utils would keep
+# running the old code and fail with confusing AttributeErrors about functions
+# that plainly exist in the file. Drop this project's modules so the next
+# import reads the refreshed files.
+_stale = []
+for _name, _mod in list(sys.modules.items()):
+    _file = getattr(_mod, "__file__", None)
+    if _file and str(project) in str(_file):
+        _stale.append(_name)
+for _name in _stale:
+    del sys.modules[_name]
+if _stale:
+    print(f"Reloaded {len(_stale)} project module(s): {', '.join(sorted(_stale)[:6])}"
+          + (" ..." if len(_stale) > 6 else ""))
+
 print(f"Working folder: {project}\n")
 
 missing = []

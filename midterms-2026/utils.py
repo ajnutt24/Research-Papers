@@ -327,3 +327,20 @@ def tier_from_lean(lean: float, thresholds=(3.0, 8.0, 15.0)) -> str:
     if a < thresholds[2]:
         return f"Likely {side}"
     return f"Safe {side}"
+
+def require(module, *names) -> None:
+    """Fail with an actionable message when a stale copy of a module is loaded.
+
+    Refreshing the files on disk does not replace a module Python has already
+    imported, so an out-of-date notebook kernel raises AttributeError for
+    functions that plainly exist in the file. This turns that into an
+    instruction.
+    """
+    missing = [n for n in names if not hasattr(module, n)]
+    if missing:
+        raise RuntimeError(
+            f"{module.__name__} is out of date: missing {', '.join(missing)}.\n"
+            f"Loaded from: {getattr(module, '__file__', '?')}\n"
+            "Re-run the setup cell (START_HERE.py) to refresh the code, which also\n"
+            "reloads stale modules. If it still fails, restart the kernel and re-run it."
+        )

@@ -54,6 +54,10 @@ for _p in (DATA_RAW, DATA_MANUAL, DATA_PROCESSED, OUTPUTS, FIGURES):
 # --------------------------------------------------------------------------
 # Calendar
 # --------------------------------------------------------------------------
+# Bumped whenever a change adds a function other modules call, so a stale
+# copy reports a version mismatch instead of an AttributeError.
+CODE_VERSION = "2026.09.24.1"
+
 ELECTION_DATE = date(2026, 11, 3)
 CYCLE = 2026
 # "As of" date for the forecast. Override with FORECAST_ASOF=YYYY-MM-DD to

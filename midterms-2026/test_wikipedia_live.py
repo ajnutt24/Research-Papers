@@ -21,7 +21,10 @@ sys.path.insert(0, str(_ROOT))
 import pandas as pd  # noqa: E402
 import config  # noqa: E402
 import wikipolls  # noqa: E402
-from utils import fetch_text  # noqa: E402
+from utils import fetch_text, require  # noqa: E402
+
+require(wikipolls, "parse_html_sections", "district_from_heading")
+print(f"code version: {config.CODE_VERSION}\n")
 
 WIKI_API = "https://en.wikipedia.org/api/rest_v1/page/html/"
 SAMPLE = [
