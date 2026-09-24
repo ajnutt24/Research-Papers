@@ -59,8 +59,13 @@ with pm.Model():
 bench = time.perf_counter() - t0
 ratio = bench / REFERENCE_BENCH
 
-print(f"\n  benchmark model: {bench:.0f}s  (reference machine: {REFERENCE_BENCH:.0f}s)")
-print(f"  this machine is about {ratio:.0f}x {'slower' if ratio >= 1 else 'faster'}\n")
+print(f"\n  benchmark model: {bench:.1f}s  (reference machine: {REFERENCE_BENCH:.0f}s)")
+if ratio >= 1.2:
+    print(f"  this machine is about {ratio:.0f}x slower than the reference\n")
+elif ratio <= 0.8:
+    print(f"  this machine is about {1 / ratio:.0f}x faster than the reference\n")
+else:
+    print("  this machine is about as fast as the reference\n")
 
 heavy = {"09", "11", "12", "14"}
 def est(stage):
