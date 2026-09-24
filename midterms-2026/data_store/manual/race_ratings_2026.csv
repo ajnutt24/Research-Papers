@@ -1,69 +1,71 @@
 race_id,source,rating
-H-AK-01,user_provided,Likely R
-H-AL-02,user_provided,Likely R
-H-AZ-01,user_provided,Toss-up
-H-AZ-02,user_provided,Likely R
-H-AZ-06,user_provided,Toss-up
-H-CA-13,user_provided,Lean D
-H-CA-21,user_provided,Likely D
-H-CA-22,user_provided,Toss-up
-H-CA-45,user_provided,Likely D
-H-CA-48,user_provided,Lean D
-H-CO-03,user_provided,Likely R
-H-CO-05,user_provided,Likely R
-H-CO-08,user_provided,Toss-up
-H-FL-07,user_provided,Likely R
-H-FL-09,user_provided,Likely R
-H-FL-13,user_provided,Likely R
-H-FL-14,user_provided,Toss-up
-H-FL-22,user_provided,Lean R
-H-FL-25,user_provided,Toss-up
-H-FL-27,user_provided,Likely R
-H-IA-01,user_provided,Toss-up
-H-IA-02,user_provided,Lean R
-H-IA-03,user_provided,Toss-up
-H-IN-01,user_provided,Likely D
-H-ME-02,user_provided,Likely R
-H-MI-04,user_provided,Lean R
-H-MI-07,user_provided,Toss-up
-H-MI-08,user_provided,Likely D
-H-MI-10,user_provided,Toss-up
-H-MN-01,user_provided,Likely R
-H-MN-02,user_provided,Likely D
-H-MT-01,user_provided,Likely R
-H-NC-01,user_provided,Lean R
-H-NC-11,user_provided,Lean R
-H-NE-02,user_provided,Lean D
-H-NH-01,user_provided,Likely D
-H-NJ-07,user_provided,Toss-up
-H-NJ-09,user_provided,Likely D
-H-NM-02,user_provided,Lean D
-H-NV-01,user_provided,Likely D
-H-NV-03,user_provided,Lean D
-H-NV-04,user_provided,Likely D
-H-NY-03,user_provided,Lean D
-H-NY-04,user_provided,Lean D
-H-NY-17,user_provided,Toss-up
-H-NY-19,user_provided,Likely D
-H-OH-01,user_provided,Lean D
-H-OH-07,user_provided,Toss-up
-H-OH-09,user_provided,Toss-up
-H-OH-10,user_provided,Likely R
-H-OH-13,user_provided,Likely D
-H-OH-15,user_provided,Likely R
-H-PA-01,user_provided,Likely R
-H-PA-07,user_provided,Toss-up
-H-PA-08,user_provided,Toss-up
-H-PA-10,user_provided,Toss-up
-H-SC-01,user_provided,Likely R
-H-TX-15,user_provided,Lean R
-H-TX-23,user_provided,Likely R
-H-TX-28,user_provided,Lean D
-H-TX-34,user_provided,Toss-up
-H-TX-35,user_provided,Likely R
-H-VA-01,user_provided,Lean R
-H-VA-02,user_provided,Toss-up
-H-VA-07,user_provided,Likely D
-H-WA-03,user_provided,Toss-up
-H-WI-01,user_provided,Likely R
-H-WI-03,user_provided,Toss-up
+H-AK-01,cook,Likely R
+H-AL-02,cook,Likely R
+H-AZ-01,cook,Toss-up
+H-AZ-02,cook,Likely R
+H-AZ-06,cook,Toss-up
+H-CA-13,cook,Lean D
+H-CA-21,cook,Likely D
+H-CA-22,cook,Toss-up
+H-CA-45,cook,Likely D
+H-CA-48,cook,Lean D
+H-CO-03,cook,Likely R
+H-CO-05,cook,Likely R
+H-CO-08,cook,Toss-up
+H-FL-07,cook,Likely R
+H-FL-09,cook,Likely R
+H-FL-13,cook,Likely R
+H-FL-14,cook,Toss-up
+H-FL-22,cook,Lean R
+H-FL-25,cook,Toss-up
+H-FL-27,cook,Likely R
+H-IA-01,cook,Toss-up
+H-IA-02,cook,Lean R
+H-IA-03,cook,Toss-up
+H-IN-01,cook,Likely D
+H-ME-02,cook,Likely R
+H-MI-04,cook,Lean R
+H-MI-07,cook,Toss-up
+H-MI-08,cook,Likely D
+H-MI-10,cook,Toss-up
+H-MN-01,cook,Likely R
+H-MN-02,cook,Likely D
+H-MT-01,cook,Likely R
+H-NC-01,cook,Lean R
+H-NC-11,cook,Lean R
+H-NE-01,cook,Likely R
+H-NE-02,cook,Lean D
+H-NH-01,cook,Likely D
+H-NJ-07,cook,Toss-up
+H-NJ-09,cook,Likely D
+H-NM-02,cook,Lean D
+H-NV-01,cook,Likely D
+H-NV-03,cook,Lean D
+H-NV-04,cook,Likely D
+H-NY-03,cook,Lean D
+H-NY-04,cook,Lean D
+H-NY-17,cook,Toss-up
+H-NY-19,cook,Likely D
+H-OH-01,cook,Lean D
+H-OH-07,cook,Toss-up
+H-OH-09,cook,Toss-up
+H-OH-10,cook,Likely R
+H-OH-13,cook,Likely D
+H-OH-15,cook,Likely R
+H-PA-01,cook,Likely R
+H-PA-07,cook,Toss-up
+H-PA-08,cook,Toss-up
+H-PA-10,cook,Toss-up
+H-SC-01,cook,Likely R
+H-TN-09,cook,Likely R
+H-TX-15,cook,Lean R
+H-TX-23,cook,Likely R
+H-TX-28,cook,Lean D
+H-TX-34,cook,Toss-up
+H-TX-35,cook,Likely R
+H-VA-01,cook,Lean R
+H-VA-02,cook,Toss-up
+H-VA-07,cook,Likely D
+H-WA-03,cook,Toss-up
+H-WI-01,cook,Likely R
+H-WI-03,cook,Toss-up
