@@ -37,9 +37,25 @@ blas = pytensor.config.blas__ldflags
 print(f"  C compiler : {cxx if cxx else '(none found)'}")
 print(f"  BLAS flags : {blas if blas else '(none - using a slower fallback)'}")
 
+backend = "default (C)"
 if not cxx:
-    print("\n  !! PyTensor has no C compiler, so every model runs in a slow")
-    print("     fallback mode. This is the main cause of very long stages.")
+    try:
+        import numba  # noqa: F401
+        import pytensor as _pt
+        _pt.config.mode = "NUMBA"
+        backend = "NUMBA"
+        print("  backend    : NUMBA (no C compiler, using numba instead)")
+        print("\n  This is fine: numba recovers most of the speed a C compiler")
+        print("  would give (measured: 5.6s with a compiler, 10.9s on numba,")
+        print("  67.5s with neither, on the same model).")
+    except ImportError:
+        backend = "interpreted"
+        print("\n  !! No C compiler AND no numba, so every model runs in a slow")
+        print("     interpreted mode (about 11x slower). Fix with:")
+        print("         !pip install numba")
+        print("     then restart the kernel.")
+else:
+    print("  backend    : default C backend")
 
 print("\nTiming a small model (about a minute) ...")
 import pymc as pm  # noqa: E402
@@ -88,9 +104,14 @@ for s in sorted(heavy, key=lambda s: -est(s)):
 if ratio > 5:
     print("\n" + "=" * 64)
     print("This machine is much slower than expected for this kind of model.")
-    print("The usual cause on Windows is a missing C compiler. Fix with:")
-    print("\n    !conda install -c conda-forge m2w64-toolchain -y")
-    print("\nthen restart the kernel. That typically gives a 10-50x speedup.")
+    if backend == "interpreted":
+        print("Cause: no C compiler and no numba. Easiest fix, no admin needed:")
+        print("\n    !pip install numba")
+        print("\nthen restart the kernel. Measured speedup on this project: ~6x.")
+    else:
+        print("A C toolchain would help further:")
+        print("\n    conda install -c conda-forge m2w64-toolchain -y")
+        print("\n(run it in a terminal, then restart the kernel).")
     print("\nIf you would rather not install anything, run with lighter")
     print("sampling (less precise, much faster):")
     print("\n    import os; os.environ['MCMC_DRAWS']='400'; os.environ['MCMC_TUNE']='400'")

@@ -22,11 +22,26 @@ next command. Then run, in a new cell:
 Do not paste the numbered scripts into cells. They import each other, so they
 have to exist as files, which the download handles.
 
-Expected runtime: about 5 minutes on a fast machine. Stages 09, 11 and 14
-run MCMC sampling and dominate the total; on a machine without an
-optimised BLAS or a C compiler they can be 5-10x slower, so 30-45
-minutes for `--full` is normal there. `--fast` skips the backtest
-(stage 14) and still produces the forecast.
+Expected runtime: about 5 minutes. Stages 09, 11, 12 and 14 run MCMC
+sampling and dominate the total. `--fast` skips the backtest (stage 14) and
+still produces the forecast.
+
+**Compute backend.** PyMC compiles each model before sampling. `perf.py`
+picks the fastest backend available and is imported before pymc everywhere
+that samples: the default C backend when PyTensor finds a C compiler,
+otherwise numba. Measured on this project's national model fit:
+
+| backend | time |
+|---|---|
+| default C backend, compiler present | 5.6s |
+| numba, no C compiler | 10.9s |
+| interpreted fallback, neither | 67.5s |
+
+numba is therefore a listed dependency: `pip install numba` needs no admin
+rights and no toolchain, and it keeps a compiler-less machine usable.
+`%run speed_check.py` reports which backend you are on and estimates
+runtimes. A C toolchain is still slightly faster if you want it
+(`conda install -c conda-forge m2w64-toolchain`).
 
 To see the forecast:
 

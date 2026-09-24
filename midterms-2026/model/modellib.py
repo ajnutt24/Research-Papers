@@ -22,6 +22,15 @@ import sys
 from datetime import date, timedelta
 from pathlib import Path
 
+# Select the fastest available PyTensor backend before pymc is imported anywhere.
+import sys as _sys
+from pathlib import Path as _Path
+try:
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+except NameError:
+    _sys.path.insert(0, str(_Path.cwd()))
+import perf as _perf  # noqa: E402,F401
+
 import numpy as np
 import pandas as pd
 from scipy import stats

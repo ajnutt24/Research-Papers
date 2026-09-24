@@ -41,6 +41,15 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+# Select the fastest available PyTensor backend BEFORE pymc is imported.
+import sys as _sys
+from pathlib import Path as _Path
+try:
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
+except NameError:
+    _sys.path.insert(0, str(_Path.cwd()))
+import perf as _perf  # noqa: E402,F401
+
 import arviz as az
 import numpy as np
 import pandas as pd
