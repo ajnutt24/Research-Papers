@@ -133,15 +133,18 @@ def fetch_text(url: str, cache_name: str, *, max_age_hours=config.CACHE_MAX_AGE_
     """Return (text, provenance). provenance in {"live", "cache"}; raises if neither."""
     p = cache_path(cache_name)
     if not force and cache_is_fresh(p, max_age_hours):
-        return p.read_text(), "cache"
+        return p.read_text(encoding="utf-8-sig"), "cache"
     try:
         r = SESSION.get(url, check_robots=check_robots)
-        p.write_text(r.text)
-        return r.text, "live"
+        text = r.text
+        if text.startswith("\ufeff"):      # drop a byte-order mark before caching
+            text = text.lstrip("\ufeff")
+        p.write_text(text, encoding="utf-8")
+        return text, "live"
     except Exception as e:
         if p.exists():
             log.warning("live fetch failed (%s); using stale cache %s", e, p.name)
-            return p.read_text(), "cache"
+            return p.read_text(encoding="utf-8-sig"), "cache"
         raise
 
 
@@ -213,6 +216,66 @@ RESULTS_MIRROR_URLS = {
 STATE_ABBR = {v: k for k, v in config.STATE_NAMES.items()}
 
 
+def _clean_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Strip byte-order marks and whitespace from column names.
+
+    Several FiveThirtyEight CSVs (the 2018 and 2020 partisan-lean files) are
+    saved with a UTF-8 BOM. Some pandas versions strip it on read and some
+    keep it, so the first column can arrive as either 'district' or
+    '\ufeffdistrict'. Normalising here makes column lookups behave the same
+    on every machine.
+    """
+    df = df.copy()
+    df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
+    return df
+
+
+def _lean_to_number(v) -> float:
+    """Parse a partisan-lean cell.
+
+    Handles 'R+15.21' and 'D+3.4' (2018/2020 vintages) as well as plain
+    signed floats (2022 vintage). Republican leans are negative, matching the
+    project-wide convention that margins are Democratic minus Republican.
+    """
+    if v is None or (isinstance(v, float) and v != v):
+        return float("nan")
+    if not isinstance(v, str):
+        return float(v)
+    v = v.strip()
+    if not v:
+        return float("nan")
+    side = v[0].upper() if v[0].isalpha() else ""
+    body = v[1:] if side else v
+    body = body.replace("+", "").strip()
+    try:
+        num = float(body)
+    except ValueError:
+        return float("nan")
+    return -num if side == "R" else num
+
+
+def _pick_lean_column(df: pd.DataFrame, key_col: str, source: str) -> str:
+    """Return the name of the lean column, and verify it actually holds leans.
+
+    Picking 'the column that is not the key' silently returns the key itself
+    when the key's name does not match (for instance because of a BOM), which
+    produced a confusing float-conversion error far downstream. This checks
+    the choice instead of trusting it.
+    """
+    candidates = [c for c in df.columns if c != key_col]
+    if not candidates:
+        raise ValueError(f"{source}: no lean column found; columns are {list(df.columns)}")
+    col = candidates[0]
+    parsed = df[col].map(_lean_to_number)
+    if parsed.notna().mean() < 0.8:
+        raise ValueError(
+            f"{source}: column {col!r} does not look like partisan lean "
+            f"(only {parsed.notna().mean():.0%} of values parsed). "
+            f"Columns are {list(df.columns)}."
+        )
+    return col
+
+
 def load_partisan_lean(vintage: str = "2022") -> tuple[pd.DataFrame, str]:
     """Return (DataFrame[race_key, lean], provenance). race_key is 'TX-23' for
     districts and 'TX' for states; at-large districts are 'AK-01'."""
@@ -220,29 +283,21 @@ def load_partisan_lean(vintage: str = "2022") -> tuple[pd.DataFrame, str]:
     d_url, s_url = PARTISAN_LEAN_URLS[vintage]
     d_txt, p1 = fetch_text(d_url, f"plean_districts_{vintage}.csv", max_age_hours=24 * 7)
     s_txt, p2 = fetch_text(s_url, f"plean_states_{vintage}.csv", max_age_hours=24 * 7)
-    d = pd.read_csv(io.StringIO(d_txt))
-    s = pd.read_csv(io.StringIO(s_txt))
-    lean_col_d = [c for c in d.columns if c != "district"][0]
-    lean_col_s = [c for c in s.columns if c != "state"][0]
+    d = _clean_columns(pd.read_csv(io.StringIO(d_txt)))
+    s = _clean_columns(pd.read_csv(io.StringIO(s_txt)))
 
-    def to_num(v):
-        """Older vintages store 'R+15.21' / 'D+3.4' strings; newer ones store signed floats."""
-        if isinstance(v, str):
-            v = v.strip()
-            m = v[0].upper() if v and v[0].isalpha() else ""
-            num = float(v.lstrip("DR+ ").replace("+", "")) if v else float("nan")
-            return -num if m == "R" else num
-        return float(v)
-    d[lean_col_d] = d[lean_col_d].map(to_num)
-    s[lean_col_s] = s[lean_col_s].map(to_num)
+    lean_col_d = _pick_lean_column(d, "district", f"partisan lean {vintage} districts")
+    lean_col_s = _pick_lean_column(s, "state", f"partisan lean {vintage} states")
 
     def norm_district(x: str) -> str:
-        st, num = x.split("-")
-        return f"{st}-{int(num):02d}"
+        st, num = str(x).split("-")
+        return f"{st.strip()}-{int(num):02d}"
 
-    d = pd.DataFrame({"race_key": d["district"].map(norm_district), "lean": d[lean_col_d].astype(float)})
-    s = pd.DataFrame({"race_key": s["state"].map(STATE_ABBR), "lean": s[lean_col_s].astype(float)})
-    out = pd.concat([d, s], ignore_index=True)
+    d = pd.DataFrame({"race_key": d["district"].map(norm_district),
+                      "lean": d[lean_col_d].map(_lean_to_number).astype(float)})
+    s = pd.DataFrame({"race_key": s["state"].map(lambda x: STATE_ABBR.get(str(x).strip())),
+                      "lean": s[lean_col_s].map(_lean_to_number).astype(float)})
+    out = pd.concat([d, s], ignore_index=True).dropna(subset=["race_key"])
     out["vintage"] = vintage
     return out, worst_provenance(p1, p2) if p1 == "live" or p2 == "live" else "mirror"
 
