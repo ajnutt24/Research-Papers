@@ -66,7 +66,8 @@ def run_stage(stage: str, extra: list[str], log) -> tuple[int, list[str]]:
 def main(argv: list[str]):
     if "--from" in argv:
         start = argv[argv.index("--from") + 1].zfill(2)
-        order = FULL[FULL.index(start):] if start in FULL else FULL
+        base = FAST if "--fast" in argv else FULL
+        order = base[base.index(start):] if start in base else base
     elif "--fast" in argv:
         order = FAST
     elif "--full" in argv:
