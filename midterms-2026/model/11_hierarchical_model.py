@@ -126,7 +126,8 @@ def fit(df: pd.DataFrame, shared: dict):
             pm.Normal("generic_obs", shared["nat_fund_mean"] + nat_dev + poll_bias, shared["generic_sd"],
                       observed=shared["generic_mean"])
         idata = pm.sample(draws=config.MCMC_DRAWS, tune=config.MCMC_TUNE, chains=config.MCMC_CHAINS,
-                          random_seed=config.RANDOM_SEED, target_accept=config.MCMC_TARGET_ACCEPT, progressbar=False)
+                          cores=config.MCMC_CORES, random_seed=config.RANDOM_SEED,
+                          target_accept=config.MCMC_TARGET_ACCEPT, progressbar=False)
     return idata
 
 
@@ -144,7 +145,10 @@ def main():
     df, shared = build_frame()
     log.info("%d races, %d polled; shared priors: %s", len(df), int(df.polled.sum()),
              {k: round(v, 2) for k, v in shared.items()})
+    log.info("sampling the hierarchical model (%d races, %d chains, cores=%d) ...",
+             len(df), config.MCMC_CHAINS, config.MCMC_CORES)
     idata = fit(df, shared)
+    log.info("hierarchical sampling done")
     summ = az.summary(idata, var_names=["nat_dev", "poll_bias", "tau_state"])
     log.info("shared terms:\n%s", summ[["mean", "sd", "r_hat", "ess_bulk"]].to_string())
     post = idata.posterior

@@ -26,6 +26,14 @@ Expected runtime: about 5 minutes. Stages 09, 11, 12 and 14 run MCMC
 sampling and dominate the total. `--fast` skips the backtest (stage 14) and
 still produces the forecast.
 
+**Sampling runs sequentially by design.** Each stage already runs inside a
+subprocess whose stdout is a pipe; letting PyMC spawn its own worker
+processes for parallel chains on top of that deadlocks on Windows, where
+multiprocessing uses spawn and the workers inherit that pipe. The symptom is
+a stage that produces no output and never finishes. `config.MCMC_CORES`
+defaults to 1 to avoid it; set `MCMC_CORES=2` to opt back in on Linux/macOS.
+Sequential sampling costs roughly 2x wall time for 2 chains.
+
 **Compute backend.** PyMC compiles each model before sampling. `perf.py`
 picks the fastest backend available and is imported before pymc everywhere
 that samples: the default C backend when PyTensor finds a C compiler,

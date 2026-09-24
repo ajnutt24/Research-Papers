@@ -377,8 +377,9 @@ def fit_national_model(df: pd.DataFrame, draws=None, tune=None, chains=None, see
         post94 = pm.Data("post94", train["post94"].values)
         mu = a + b_post94 * post94 + s * (b_mid + b_app * app + b_cpi * cpi + b_war * war)
         pm.Normal("y", mu, sigma, observed=train["house_margin_national"].values)
-        idata = pm.sample(draws=draws, tune=tune, chains=chains, random_seed=seed,
-                          target_accept=config.MCMC_TARGET_ACCEPT, progressbar=False, idata_kwargs={"log_likelihood": True})
+        idata = pm.sample(draws=draws, tune=tune, chains=chains, cores=config.MCMC_CORES,
+                          random_seed=seed, target_accept=config.MCMC_TARGET_ACCEPT,
+                          progressbar=False, idata_kwargs={"log_likelihood": True})
     return idata, model
 
 
@@ -456,8 +457,8 @@ def fit_seat_model(train: pd.DataFrame, draws=None, tune=None, chains=None, seed
         mu = (c[o] + b_nat[o] * t["nat_margin"].values + b_lean[o] * t["lean"].values
               + b_inc[o] * t["incumbency"].values + b_fund * t["fund"].values)
         pm.Normal("y", mu, sigma[o], observed=t["margin"].values)
-        idata = pm.sample(draws=draws, tune=tune, chains=chains, random_seed=seed,
-                          target_accept=config.MCMC_TARGET_ACCEPT, progressbar=False)
+        idata = pm.sample(draws=draws, tune=tune, chains=chains, cores=config.MCMC_CORES,
+                          random_seed=seed, target_accept=config.MCMC_TARGET_ACCEPT, progressbar=False)
     return idata, model
 
 
@@ -604,8 +605,9 @@ def stacking_weights(df: pd.DataFrame, components: dict[str, tuple[str, str]], y
             extra = pm.HalfNormal("extra", 8.0)
             sd = pm.math.sqrt(d[scol].values ** 2 + extra ** 2)
             pm.Normal("y", d[mcol].values + b, sd, observed=d[y_col].values)
-            idatas[name] = pm.sample(draws=800, tune=800, chains=2, random_seed=seed, progressbar=False,
-                                     target_accept=0.95, idata_kwargs={"log_likelihood": True})
+            idatas[name] = pm.sample(draws=800, tune=800, chains=2, cores=config.MCMC_CORES,
+                                     random_seed=seed, progressbar=False, target_accept=0.95,
+                                     idata_kwargs={"log_likelihood": True})
     comp = az.compare(idatas, ic="loo", method="stacking", scale="log")
     w = comp["weight"].to_dict()
     return w, comp

@@ -107,7 +107,9 @@ def main():
     nat_tab = national_training_table()
     train = nat_tab[nat_tab.cycle < config.CYCLE]
     log.info("national training table: %d midterms", len(train))
+    log.info("fitting the national model (%d midterms) ...", len(train))
     idata_n, _ = fit_national_model(train)
+    log.info("national model done")
     summ = az.summary(idata_n, var_names=["a", "b_post94", "b_mid", "b_app", "b_cpi", "b_war", "sigma"])
     log.info("national coefficients:\n%s", summ[["mean", "sd", "hdi_3%", "hdi_97%", "r_hat"]].to_string())
     cur = nat_tab[nat_tab.cycle == config.CYCLE].iloc[0]
@@ -123,7 +125,9 @@ def main():
     natres = load_stage("historical_national")
     feats = pd.concat([seat_features(c, hist, natres) for c in TRAIN_CYCLES], ignore_index=True)
     log.info("seat training rows: %s", feats.groupby("office").size().to_dict())
+    log.info("fitting the seat model (%d races) ...", len(feats))
     idata_s, _ = fit_seat_model(feats)
+    log.info("seat model done")
     ssum = az.summary(idata_s, var_names=["c", "b_nat", "b_lean", "b_inc", "b_fund", "sigma"])
     log.info("seat coefficients:\n%s", ssum[["mean", "sd", "r_hat"]].to_string())
     _save_idata(idata_s, "seat_model_idata.nc")

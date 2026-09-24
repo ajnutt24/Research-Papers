@@ -58,6 +58,7 @@ def run_stage(stage: str, extra: list[str], log) -> tuple[int, list[str]]:
         line = line.rstrip("\n")
         print(line, flush=True)
         log.write(line + "\n")
+        log.flush()          # keep the log current so a stall is diagnosable
         lines.append(line)
     proc.wait()
     return proc.returncode, lines
@@ -87,14 +88,16 @@ def main(argv: list[str]):
     with open(LOG, "w", encoding="utf-8") as log:
         log.write(f"pipeline start {time.strftime('%Y-%m-%d %H:%M:%S')}  stages={order}\n")
         for st in order:
-            banner = f"\n===== stage {st}: {STAGES[st]} ====="
+            banner = f"\n===== stage {st}: {STAGES[st]} =====  started {time.strftime('%H:%M:%S')}"
             print(banner, flush=True)
             log.write(banner + "\n")
+            log.flush()
             t0 = time.perf_counter()
             rc, lines = run_stage(st, extra, log)
             done = f"===== stage {st} finished in {time.perf_counter() - t0:.0f}s (exit {rc}) ====="
             print(done, flush=True)
             log.write(done + "\n")
+            log.flush()
             if rc != 0:
                 failed = (st, lines)
                 break

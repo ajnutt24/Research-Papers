@@ -319,6 +319,13 @@ RANDOM_SEED = 20261103
 MCMC_DRAWS = int(os.environ.get("MCMC_DRAWS", 1000))
 MCMC_TUNE = int(os.environ.get("MCMC_TUNE", 1000))
 MCMC_CHAINS = int(os.environ.get("MCMC_CHAINS", 2))
+# Number of worker PROCESSES PyMC may use for parallel chains.
+# Default 1 (sequential) on purpose. Each stage already runs inside a
+# subprocess whose stdout is a pipe; letting PyMC spawn its own workers on top
+# of that deadlocks on Windows, where multiprocessing uses spawn and the
+# workers inherit the pipe. Sequential sampling costs roughly 2x wall time for
+# 2 chains and removes that failure mode entirely. Set MCMC_CORES=2 to opt in.
+MCMC_CORES = int(os.environ.get("MCMC_CORES", 1))
 MCMC_TARGET_ACCEPT = 0.9
 
 
