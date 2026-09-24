@@ -83,13 +83,36 @@ runtimes. A C toolchain is still slightly faster if you want it
 
 ### Getting real polls in
 
-The 2026 poll fetchers try, in order: a CSV endpoint named by `NYT_POLLS_URL`,
-a RealClearPolitics scrape, then `data_store/manual/polls_2026.csv`. If all
-three come up empty the model builds clearly-labelled placeholder polls so the
-pipeline still runs, and every output says `provenance=fixture`.
+The 2026 poll fetchers try, in order:
 
-The commercial poll sites are JavaScript-heavy and change often, so the manual
-CSV is the dependable route. `add_polls.py` writes it for you:
+1. a CSV endpoint named by `NYT_POLLS_URL` (unset by default),
+2. **Wikipedia polling tables** (the default working source),
+3. a RealClearPolitics scrape,
+4. `data_store/manual/polls_2026.csv`.
+
+If all four come up empty the model builds clearly-labelled placeholder polls
+so the pipeline still runs, and every output says `provenance=fixture`.
+
+**Why Wikipedia.** FiveThirtyEight's poll database was discontinued in 2025.
+The commercial aggregators (RealClearPolitics, Silver Bulletin, FiftyPlusOne)
+render their tables in JavaScript and restrict reuse, so a plain HTTP fetch
+returns no rows from them. Wikipedia's per-race "Polling" sections are plain
+wikitables that `pandas.read_html` reads directly, each row cites its original
+pollster, and the licence permits reuse. `wikipolls.py` does the parsing and
+`test_wikipolls.py` covers it with fixtures (dates spanning months, comma
+sample sizes, partisan asterisks, non-poll tables that must be skipped).
+
+Check it works from your machine before a full run:
+
+```
+%run test_wikipedia_live.py          # a few representative races
+%run test_wikipedia_live.py --all    # all 72 race articles
+```
+
+It prints polls found per race and the most recent ones. If Wikipedia is
+blocked it says so and stops quickly rather than retrying 72 articles.
+
+**Manual entry** remains available for polls Wikipedia lacks, or to override:
 
 ```
 python3 add_polls.py --example     # show the format
@@ -97,17 +120,9 @@ python3 add_polls.py --file my_polls.txt
 python3 add_polls.py --check       # what is loaded now
 ```
 
-Each line is `race_id, pollster, end_date, sample, population, dem_pct, rep_pct`:
-
-```
-GENERIC, Quinnipiac, 2026-09-18, 1500, rv, 49, 43
-S-GA, Emerson College, 2026-09-15, 800, lv, 51, 45
-H-NE-02, Split Ticket, 2026-09-10, 500, lv, 52, 44
-```
-
-Entries are validated (unknown race ids, impossible dates and percentages are
-rejected) and de-duplicated, so re-adding the same poll is harmless. Once the
-file exists the placeholder generator switches off. Then `%run run_pipeline.py --update`.
+Each line is `race_id, pollster, end_date, sample, population, dem_pct, rep_pct`.
+Entries are validated and de-duplicated. Manual polls are merged with scraped
+ones, so both can be used together.
 
 Note that polls alone do not clear the `fixture` label: presidential approval
 (stage 04) and race ratings (stage 05) have their own placeholders. `%run

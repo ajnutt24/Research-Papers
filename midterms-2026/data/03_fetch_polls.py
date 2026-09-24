@@ -10,6 +10,10 @@ Sources, in priority order
    FiveThirtyEight's discontinued feed). The NYT does not publish a stable,
    documented CSV URL, so the URL is read from the NYT_POLLS_URL environment
    variable. Column names are matched heuristically (see COLUMN_ALIASES).
+1b. Wikipedia polling tables, one article per race (see wikipolls.py). This is
+   the default working source: free, structured, comprehensive and legally
+   reusable, and each row cites its original pollster. Commercial aggregators
+   render their tables in JavaScript, so a plain fetch gets nothing.
 2. RealClearPolitics/RealClearPolling HTML tables. A list of race pages is
    read from data_store/manual/rcp_urls.csv (race_id,url); the generic-ballot
    page is always attempted. RCP tables carry pollster, dates, sample and
@@ -260,6 +264,68 @@ def fetch_rcp() -> pd.DataFrame | None:
 
 
 # --------------------------------------------------------------------------
+# Source 2b: Wikipedia polling tables
+# --------------------------------------------------------------------------
+# Wikipedia is the only comprehensive, free, structured and legally reusable
+# source of 2026 general-election polls now that FiveThirtyEight's database is
+# gone. Each race's article carries a "Polling" wikitable that pandas can read
+# directly, and every row cites its original pollster. See wikipolls.py.
+WIKI_API = "https://en.wikipedia.org/api/rest_v1/page/html/"
+
+
+def wiki_titles() -> list[tuple[str, str]]:
+    """(race_id, article title) for every race Wikipedia is likely to cover."""
+    out = [("GENERIC", "2026_United_States_House_of_Representatives_elections")]
+    for st, cls, special, inc, open_seat, note in config.SENATE_2026:
+        name = config.STATE_NAMES[st].replace(" ", "_")
+        if special:
+            out.append((f"S-{st}-special", f"2026_United_States_Senate_special_election_in_{name}"))
+        else:
+            out.append((f"S-{st}", f"2026_United_States_Senate_election_in_{name}"))
+    for st, inc, open_seat, note in config.GOVERNOR_2026:
+        name = config.STATE_NAMES[st].replace(" ", "_")
+        out.append((f"G-{st}", f"2026_{name}_gubernatorial_election"))
+    return out
+
+
+def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
+    """Fetch and parse the polling tables for every 2026 race article."""
+    sys.path.insert(0, str(_ROOT))
+    import wikipolls
+
+    targets = wiki_titles()
+    if limit:
+        targets = targets[:limit]
+    frames, found, missing = [], 0, 0
+    consecutive_failures = 0
+    for rid, title in targets:
+        try:
+            html, prov = fetch_text(WIKI_API + title, f"wiki_{rid}.html", max_age_hours=12)
+            consecutive_failures = 0
+        except Exception as e:  # article may not exist yet; that is normal
+            missing += 1
+            consecutive_failures += 1
+            log.debug("wikipedia %s (%s): %s", rid, title, e)
+            # A handful of missing articles is expected; a long unbroken run of
+            # failures means the network is blocking Wikipedia, so stop rather
+            # than spend minutes retrying all 72.
+            if consecutive_failures >= 5:
+                log.warning("Wikipedia unreachable (%d consecutive failures); giving up on this source",
+                            consecutive_failures)
+                break
+            continue
+        df = wikipolls.parse_html(html, rid, default_year=config.CYCLE)
+        if len(df):
+            found += 1
+            frames.append(standardise(df, f"wikipedia:{prov}"))
+    log.info("Wikipedia: %d articles with polls, %d unreachable, %d poll rows",
+             found, missing, sum(len(f) for f in frames))
+    if not frames:
+        return None
+    return pd.concat(frames, ignore_index=True)
+
+
+# --------------------------------------------------------------------------
 # Source 3: manual CSV
 # --------------------------------------------------------------------------
 def load_manual() -> pd.DataFrame | None:
@@ -357,6 +423,7 @@ def main(force_fixture: bool = False):
     report = []
     if not force_fixture:
         for name, fn, prov in [("NYT feed (NYT_POLLS_URL)", fetch_nyt_csv, "live"),
+                               ("Wikipedia polling tables", fetch_wikipedia, "live"),
                                ("RealClearPolitics scrape", fetch_rcp, "live"),
                                ("manual CSV (data_store/manual/polls_2026.csv)", load_manual, "manual")]:
             try:
