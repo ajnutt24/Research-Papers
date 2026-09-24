@@ -1,0 +1,36 @@
+race_id,main_party,main_name,main_experience,main_is_incumbent,rep_name,rep_experience,rep_is_incumbent,three_way,verify,note
+S-AL,D,,unknown,False,,unknown,False,False,True,Tuberville running for governor
+S-AK,D,,unknown,False,,unknown,True,False,True,Sullivan
+S-AR,D,,unknown,False,,unknown,True,False,True,Cotton
+S-CO,D,,unknown,True,,unknown,False,False,True,Hickenlooper
+S-DE,D,,unknown,True,,unknown,False,False,True,Coons
+S-GA,D,Jon Ossoff,none,True,,unknown,False,False,True,Ossoff
+S-ID,I,,unknown,False,,unknown,True,False,True,Independent vs Risch (R); no Democrat. Verify.
+S-IL,D,,unknown,False,,unknown,False,False,True,Durbin retiring
+S-IA,D,,unknown,False,,unknown,False,False,True,Ernst retiring (verify)
+S-KS,D,,unknown,False,,unknown,True,False,True,Marshall
+S-KY,D,,unknown,False,,unknown,False,False,True,McConnell retiring
+S-LA,D,,unknown,False,,unknown,True,False,True,Cassidy (verify primary outcome)
+S-ME,D,,unknown,False,Susan Collins,none,True,False,True,Collins
+S-MA,D,,unknown,True,,unknown,False,False,True,Markey (verify primary outcome)
+S-MI,D,,unknown,False,,unknown,False,False,True,Peters retiring
+S-MN,D,,unknown,False,,unknown,False,False,True,Smith retiring
+S-MS,D,,unknown,False,,unknown,True,False,True,Hyde-Smith
+S-MT,D,,unknown,False,,unknown,True,True,True,Three-way: Daines (R) vs a Democrat vs an independent.
+S-NE,I,,unknown,False,,unknown,True,False,True,Independent vs Ricketts (R). Verify nominee names.
+S-NH,D,,unknown,False,,unknown,False,False,True,Shaheen retiring
+S-NJ,D,,unknown,True,,unknown,False,False,True,Booker
+S-NM,D,,unknown,True,,unknown,False,False,True,Lujan
+S-NC,D,Roy Cooper,governor,False,Michael Whatley,none,False,False,True,Tillis retiring
+S-OK,D,,unknown,False,,unknown,True,False,True,Mullin
+S-OR,D,,unknown,True,,unknown,False,False,True,Merkley
+S-RI,D,,unknown,True,,unknown,False,False,True,Reed
+S-SC,D,,unknown,False,,unknown,True,False,True,Graham
+S-SD,I,,unknown,False,,unknown,True,False,True,Independent vs Rounds (R); no Democrat. Verify.
+S-TN,D,,unknown,False,,unknown,True,False,True,Hagerty
+S-TX,D,,unknown,False,John Cornyn,statewide,True,False,True,Cornyn (verify primary/runoff outcome)
+S-VA,D,,unknown,True,,unknown,False,False,True,Warner
+S-WV,D,,unknown,False,,unknown,True,False,True,Capito
+S-WY,D,,unknown,False,,unknown,True,False,True,Lummis
+S-OH-special,D,,unknown,False,Jon Husted,lt_governor,True,False,True,special: Husted (appointed)
+S-FL-special,D,,unknown,False,Ashley Moody,statewide,True,False,True,special: Moody (appointed)

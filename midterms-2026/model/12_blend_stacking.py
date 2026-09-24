@@ -210,7 +210,12 @@ def main(refit: bool = False):
     keep = ["race_id", "office", "state", "polled", "n_polls", "weak_lean", "hier_margin", "hier_sd", "hier_sd_idio",
             "poll_weight_in_hier", "fund_margin", "fund_sd_idio", "fund_nat_loading", "nat_fund_sd", "rating",
             "rating_margin", "rating_sd", "rating_pwin", "w_hier", "w_fund", "w_rating", "blend_margin",
-            "blend_sd_idio", "p_dem_marginal"]
+            "blend_sd_idio", "p_dem_marginal", "exp_edge_pts", "main_party", "three_way",
+            "caucus_prob_dem"]
+    for c in ["exp_edge_pts", "main_party", "three_way", "caucus_prob_dem"]:
+        if c not in df:
+            df[c] = {"exp_edge_pts": 0.0, "main_party": "D",
+                     "three_way": False, "caucus_prob_dem": 1.0}[c]
     save_stage(df[keep], "blend_2026", prov, {"horizon_days": h})
 
     import matplotlib

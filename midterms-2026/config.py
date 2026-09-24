@@ -214,6 +214,86 @@ GOVERNOR_2026 = [
 assert len(GOVERNOR_2026) == 36
 
 # --------------------------------------------------------------------------
+# Races with a significant independent / third-party candidate
+# --------------------------------------------------------------------------
+# The model is two-party: every race is scored as a margin between the leading
+# non-Republican and the Republican. That breaks in three ways this cycle, and
+# Hummel & Rothschild (2014) drop races where a third candidate clears 10% for
+# exactly this reason, so these need to be handled explicitly rather than
+# forced into a D-vs-R frame.
+#
+#   has_democrat=False : no Democrat on the ballot, so the "Democratic" column
+#                        holds the independent. Treating the seat as Safe R
+#                        because the Democratic share is zero would be wrong.
+#   three_way=True     : Democrat AND independent both running; the anti-R vote
+#                        may split, which a two-party margin cannot express.
+#   caucus_prob_dem    : if the independent wins, the probability they caucus
+#                        with the Democrats. This decides chamber control and is
+#                        a JUDGEMENT, not an estimate. 0.5 is a deliberate
+#                        "genuinely unknown". Set it per race from what the
+#                        candidate has actually said.
+INDEPENDENT_RACES_2026 = {
+    "S-NE": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.5,
+             "independent": "", "note": "Independent vs Ricketts (R). Verify nominee names."},
+    "S-ID": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.5,
+             "independent": "", "note": "Independent vs Risch (R); no Democrat. Verify."},
+    "S-SD": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.5,
+             "independent": "", "note": "Independent vs Rounds (R); no Democrat. Verify."},
+    "S-MT": {"has_democrat": True, "three_way": True, "caucus_prob_dem": 0.5,
+             "independent": "", "note": "Three-way: Daines (R) vs a Democrat vs an independent."},
+}
+# How much a three-way race widens that seat's uncertainty (pct points, added
+# in quadrature). A split anti-incumbent vote is genuinely less predictable.
+THREE_WAY_EXTRA_SD = 6.0
+
+# How far an independent runs ahead of where a generic Democrat would, in
+# points. The partisan-lean fundamentals describe a generic Democrat, so
+# without this an independent in a deep-red state is modelled as a Democrat
+# losing badly, which is the wrong candidate.
+#
+# Nebraska is measurable rather than assumed. In 2024 the state ran two Senate
+# races on the same day: the independent lost by 6.7 while the Democrat in the
+# concurrent special lost by 25.2, an 18.5-point gap in a same-state,
+# same-electorate comparison. That is a clean natural experiment but a single
+# observation, and it flatters the independent (a well-funded challenger
+# against a complacent incumbent). The default shrinks it by half toward zero.
+# Idaho and South Dakota get 0: their independents have no comparable record,
+# and inventing a bonus for them would be fabrication.
+INDEPENDENT_BONUS_PTS = {
+    "S-NE": 9.0,     # half of the measured 18.5; raise toward 18.5 if warranted
+    "S-ID": 0.0,
+    "S-SD": 0.0,
+}
+
+# --------------------------------------------------------------------------
+# Candidate experience (Hummel & Rothschild 2014, Table 2)
+# --------------------------------------------------------------------------
+# Points a candidate's prior office is worth, relative to a candidate with no
+# political experience. These are the paper's published estimates, applied as a
+# prior-driven offset rather than fitted here: the 2018-2022 training set has
+# no experience coding, so there is nothing in it to estimate them from. The
+# model uses the DIFFERENCE between the two candidates, and incumbency stays a
+# separate fitted term so the two do not double-count.
+EXPERIENCE_POINTS_SENATE = {
+    "governor": 10.8,       # most valuable experience for a Senate candidate
+    "senator": 10.8,        # former senator seeking to return
+    "us_house": 5.5,        # paper: statewide office is worth about the same
+    "statewide": 5.5,       # AG, secretary of state, treasurer
+    "lt_governor": 5.0,
+    "local": 5.0,           # "nearly as beneficial as having served in the House"
+    "state_legislator": 4.0,  # least valuable elected experience
+    "none": 0.0,            # no elected office (party chair, first-time candidate)
+    "unknown": None,        # candidate not identified yet: contributes NO edge.
+                            # Distinct from "none": an unfilled row must not
+                            # quietly penalise a candidate we simply have not
+                            # looked up.
+}
+EXPERIENCE_POINTS_GOVERNOR = dict(EXPERIENCE_POINTS_SENATE, senator=9.4, governor=9.4)
+# Scale applied to the experience difference. 1.0 takes the paper at face
+# value; lower it to shrink toward the fitted incumbency term.
+EXPERIENCE_WEIGHT = 1.0
+
+# --------------------------------------------------------------------------
 # Redistricting status tracker
 # --------------------------------------------------------------------------
 # status values:

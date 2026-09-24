@@ -81,6 +81,7 @@ LEGISLATORS_URL = f"{GH}/unitedstates/congress-legislators/main/legislators-curr
 MANUAL_PVI = config.DATA_MANUAL / "pvi_manual.csv"
 MANUAL_INC = config.DATA_MANUAL / "incumbency_overrides_2026.csv"
 MANUAL_FEC = config.DATA_MANUAL / "fec_totals_manual.csv"
+MANUAL_CANDIDATES = config.DATA_MANUAL / "candidates_2026.csv"
 FEC_BASE = "https://api.open.fec.gov/v1/candidates/totals/"
 
 
@@ -238,18 +239,89 @@ def fec_totals(uni: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     return uni, prov
 
 
+
+def candidate_experience(uni: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    """Attach the candidates' experience edge and independent-race flags.
+
+    `exp_edge_pts` is (main non-Republican's experience) minus (Republican's),
+    in percentage points, using Hummel & Rothschild's published values. It is
+    deliberately an offset rather than a fitted coefficient: the 2018-2022
+    training set carries no experience coding, so there is nothing here to
+    estimate it from. Incumbency stays a separate fitted term, and the
+    experience scale excludes the seat being contested, so they do not
+    double-count.
+    """
+    uni = uni.copy()
+    uni["exp_edge_pts"] = 0.0
+    uni["independent_bonus"] = 0.0
+    uni["main_party"] = "D"
+    uni["three_way"] = False
+    uni["has_democrat"] = True
+    uni["caucus_prob_dem"] = 1.0
+
+    for rid, cfg in config.INDEPENDENT_RACES_2026.items():
+        m = uni.race_id == rid
+        if not m.any():
+            continue
+        uni.loc[m, "three_way"] = bool(cfg.get("three_way", False))
+        uni.loc[m, "has_democrat"] = bool(cfg.get("has_democrat", True))
+        if not cfg.get("has_democrat", True):
+            uni.loc[m, "main_party"] = "I"
+        # if an independent wins, how likely are they to caucus with the Democrats
+        uni.loc[m, "caucus_prob_dem"] = float(cfg.get("caucus_prob_dem", 0.5))
+        uni.loc[m, "independent_bonus"] = float(config.INDEPENDENT_BONUS_PTS.get(rid, 0.0))
+
+    if not MANUAL_CANDIDATES.exists():
+        log.warning("candidates_2026.csv missing: no candidate-experience adjustment applied")
+        return uni, "missing"
+
+    cand = pd.read_csv(MANUAL_CANDIDATES, comment="#")
+    applied = 0
+    for r in cand.itertuples():
+        m = uni.race_id == r.race_id
+        if not m.any():
+            continue
+        office = uni.loc[m, "office"].iloc[0]
+        scale = config.EXPERIENCE_POINTS_GOVERNOR if office == "Governor" else config.EXPERIENCE_POINTS_SENATE
+        main = scale.get(str(getattr(r, "main_experience", "unknown")))
+        rep = scale.get(str(getattr(r, "rep_experience", "unknown")))
+        # Only score an edge when BOTH candidates are known. If either side is
+        # unidentified, an edge would be an artefact of missing data rather
+        # than a real advantage.
+        edge = 0.0 if (main is None or rep is None) else config.EXPERIENCE_WEIGHT * (main - rep)
+        uni.loc[m, "exp_edge_pts"] = edge
+        if bool(getattr(r, "three_way", False)):
+            uni.loc[m, "three_way"] = True
+        if edge:
+            applied += 1
+    log.info("candidate experience: %d race(s) with a non-zero edge (max %+.1f pts)",
+             applied, uni.exp_edge_pts.abs().max() if applied else 0.0)
+    n_ind = int((uni.main_party == "I").sum())
+    if n_ind:
+        log.info("independent-led races (no Democrat on the ballot): %s",
+                 ", ".join(sorted(uni.loc[uni.main_party == "I", "race_id"])))
+    if uni.three_way.any():
+        log.info("three-way races (anti-R vote may split): %s",
+                 ", ".join(sorted(uni.loc[uni.three_way, "race_id"])))
+    return uni, "manual"
+
+
 def main():
     uni = config.race_universe()
     uni, p_lean = partisan_lean(uni)
     uni = lagged_results(uni)
     uni, p_inc = incumbency(uni)
     uni, p_fec = fec_totals(uni)
+    uni, p_exp = candidate_experience(uni)
     tot = uni.fund_dem.fillna(0) + uni.fund_rep.fillna(0)
     uni["fund_share_dem"] = np.where(tot > 0, uni.fund_dem.fillna(0) / tot.replace(0, np.nan), np.nan)
     uni["fund_logratio"] = np.log((uni.fund_dem.fillna(0) + 1e4) / (uni.fund_rep.fillna(0) + 1e4)).where(tot > 0)
     prov = worst_provenance(p_lean, p_inc) if p_fec != "missing" else worst_provenance(p_lean, p_inc)
     save_stage(uni, "fundamentals_2026", prov,
-               {"lean": p_lean, "incumbency": p_inc, "fec": p_fec,
+               {"lean": p_lean, "incumbency": p_inc, "fec": p_fec, "experience": p_exp,
+                "n_experience_edge": int((uni.exp_edge_pts != 0).sum()),
+                "n_independent_led": int((uni.main_party == "I").sum()),
+                "n_three_way": int(uni.three_way.sum()),
                 "n_state_fallback_lean": int((uni.lean_source == "state_fallback_new_map").sum())})
     print(uni.groupby(["office", "inc_status"]).size())
     print(uni[["office", "lean", "lag_margin", "incumbency", "fund_share_dem"]].describe().T)

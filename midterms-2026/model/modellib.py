@@ -477,11 +477,32 @@ def predict_seats(idata, df: pd.DataFrame, nat_mean: float, nat_sd: float,
     fund = df["fund_logratio"].fillna(0.0).values if "fund_logratio" in df else 0.0
     inc = df["incumbency"].fillna(0.0).values
     mean = c[o] + b_nat[o] * nat_mean + b_lean[o] * df["lean"].values + b_inc[o] * inc + b_fund * fund
+
+    # Candidate experience (Hummel & Rothschild 2014): the difference in prior
+    # office held, in points, added directly rather than fitted, because the
+    # training cycles carry no experience coding. Incumbency is a separate
+    # fitted term and the scale excludes the contested seat, so no double count.
+    exp_edge = df["exp_edge_pts"].fillna(0.0).values if "exp_edge_pts" in df else 0.0
+    # Where an independent rather than a Democrat leads the anti-Republican
+    # vote, the lean-based prediction describes the wrong candidate; shift it.
+    ind_bonus = df["independent_bonus"].fillna(0.0).values if "independent_bonus" in df else 0.0
+    mean = mean + exp_edge + ind_bonus
+
     weak = (df.get("lean_source", pd.Series("", index=df.index)) == "state_fallback_new_map").values
-    sd_idio = np.sqrt(sig[o] ** 2 + np.where(weak, lean_penalty_sd ** 2, 0.0))
+    # A three-way race splits the anti-Republican vote in a way a two-party
+    # margin cannot express, so widen it rather than pretend to precision.
+    three = df.get("three_way", pd.Series(False, index=df.index)).fillna(False).astype(bool).values
+    sd_idio = np.sqrt(sig[o] ** 2
+                      + np.where(weak, lean_penalty_sd ** 2, 0.0)
+                      + np.where(three, config.THREE_WAY_EXTRA_SD ** 2, 0.0))
     out = df[["race_id", "office"]].copy()
     out["fund_margin"] = mean
     out["fund_sd_idio"] = sd_idio
+    out["exp_edge_pts"] = exp_edge
+    out["independent_bonus"] = ind_bonus
+    for col in ("main_party", "three_way", "caucus_prob_dem"):
+        if col in df:
+            out[col] = df[col].values
     out["fund_nat_loading"] = b_nat[o]
     out["fund_sd_total"] = np.sqrt(sd_idio ** 2 + (b_nat[o] * nat_sd) ** 2)
     return out

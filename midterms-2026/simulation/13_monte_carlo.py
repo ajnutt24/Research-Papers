@@ -91,6 +91,8 @@ class Simulator:
         self.n_draws, self.R = self.theta.shape
         self.state_idx = pd.Categorical(b.state, categories=config.STATES).codes
         self.office = b.office.values
+        self.main_party = b.get("main_party", pd.Series("D", index=b.index)).fillna("D").values
+        self.caucus_prob = b.get("caucus_prob_dem", pd.Series(1.0, index=b.index)).fillna(1.0).values.astype(float)
         self.w_hier = b.w_hier.values.astype(np.float32)
         self.w_fund = b.w_fund.values.astype(np.float32)
         self.fund_m = b.fund_margin.values.astype(np.float32)
@@ -126,10 +128,31 @@ class Simulator:
         return out
 
 
-def tally(margins: np.ndarray, office: np.ndarray) -> dict[str, np.ndarray]:
+def tally(margins: np.ndarray, office: np.ndarray, main_party: np.ndarray,
+          caucus_prob: np.ndarray, rng: np.random.Generator) -> dict[str, np.ndarray]:
+    """Seat counts per simulation.
+
+    `margins` is the leading non-Republican candidate minus the Republican. In
+    Idaho, Nebraska and South Dakota that leading candidate is an independent
+    rather than a Democrat, so a win there does NOT automatically add to the
+    Democratic caucus: it does so only if that independent caucuses with the
+    Democrats, drawn per simulation at `caucus_prob`. Treating those seats as
+    ordinary Democratic wins would overstate the party's Senate chances;
+    treating them as Republican holds would understate them.
+    """
     wins = margins > 0
+    sen = office == "Senate"
+    sen_wins = wins[:, sen]
+    is_ind = main_party[sen] == "I"
+    if is_ind.any():
+        caucus_draw = rng.random((margins.shape[0], int(is_ind.sum()))) < caucus_prob[sen][is_ind]
+        counted = sen_wins.astype(np.int8)
+        counted[:, is_ind] = (sen_wins[:, is_ind] & caucus_draw).astype(np.int8)
+        sen_total = counted.sum(1)
+    else:
+        sen_total = sen_wins.sum(1)
     return {"House": wins[:, office == "House"].sum(1),
-            "Senate": wins[:, office == "Senate"].sum(1) + config.SENATE_SEATS_NOT_UP["D"],
+            "Senate": sen_total + config.SENATE_SEATS_NOT_UP["D"],
             "Governor": wins[:, office == "Governor"].sum(1) + config.GOVERNORS_NOT_UP["D"]}
 
 
@@ -150,10 +173,15 @@ def main():
     elapsed = time.perf_counter() - t0
     log.info("ran %d simulations x %d races in %.1fs", n_sims, sim.R, elapsed)
 
-    seats = tally(margins, sim.office)
+    seats = tally(margins, sim.office, sim.main_party, sim.caucus_prob,
+                  np.random.default_rng(config.RANDOM_SEED + 7))
     p_dem = (margins > 0).mean(0)
     races = sim.b[["race_id", "office", "state", "polled", "rating", "blend_margin", "w_hier", "w_fund", "w_rating"]].copy()
     races["p_dem"] = p_dem
+    races["main_party"] = sim.main_party
+    # in independent-led races p_dem is P(the independent beats the Republican),
+    # which is not the same as P(the seat helps the Democratic caucus)
+    races["p_dem_caucus"] = np.where(sim.main_party == "I", p_dem * sim.caucus_prob, p_dem)
     races["margin_mean"] = margins.mean(0)
     races["margin_p10"] = np.percentile(margins, 10, axis=0)
     races["margin_p90"] = np.percentile(margins, 90, axis=0)

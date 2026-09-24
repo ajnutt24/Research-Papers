@@ -124,6 +124,45 @@ def fixture_series(series_id: str) -> pd.Series:
     return pd.Series(vals, index=idx)
 
 
+
+# --------------------------------------------------------------------------
+# State personal income (Hummel & Rothschild: the most predictive economic
+# variable for Senate races, and only as a TREND, not a level)
+# --------------------------------------------------------------------------
+# FRED publishes quarterly total personal income per state. The series id is
+# the two-letter state code followed by OTOT (for example MIOTOT). Naming has
+# changed before, so several patterns are tried and whichever returns data
+# wins. This is optional: if FRED is unreachable the rest of the pipeline is
+# unaffected and the income term is simply absent.
+STATE_INCOME_PATTERNS = ["{st}OTOT", "{st}PCPI", "{st}NQGSP"]
+
+
+def state_income_growth(force: bool = False) -> tuple[pd.DataFrame, str]:
+    """Year-over-year growth in personal income, per state, per quarter."""
+    frames, pattern_used, failures = [], None, 0
+    for st in config.STATES:
+        got = None
+        for pat in ([pattern_used] if pattern_used else STATE_INCOME_PATTERNS):
+            sid = pat.format(st=st)
+            ser, prov = fred_series(sid, force=force)
+            if not ser.empty:
+                got, pattern_used = ser, pat
+                break
+        if got is None:
+            failures += 1
+            if failures >= 5 and not frames:
+                log.warning("state personal income unavailable from FRED; skipping this term")
+                return pd.DataFrame(), "missing"
+            continue
+        g = 100 * (got / got.shift(4) - 1) if pattern_used.endswith("OTOT") else 100 * (got / got.shift(1) - 1)
+        frames.append(pd.DataFrame({"state": st, "date": g.index, "income_yoy": g.values}))
+    if not frames:
+        return pd.DataFrame(), "missing"
+    out = pd.concat(frames, ignore_index=True).dropna(subset=["income_yoy"])
+    log.info("state personal income: %d states via pattern %s", out.state.nunique(), pattern_used)
+    return out, "live"
+
+
 def main(force: bool = False):
     provs = []
     series = {}
@@ -172,6 +211,13 @@ def main(force: bool = False):
     # stage provenance follows the PRIMARY regressor (CPI); others are recorded in meta
     prov = provs[0]
     save_stage(monthly, "economic_monthly", prov, {"sources": dict(zip(["CPIAUCSL", "UNRATE", "GASREGW"], provs))})
+    inc, inc_prov = state_income_growth(force=force)
+    if len(inc):
+        save_stage(inc, "state_income_growth", inc_prov,
+                   {"n_states": int(inc.state.nunique())})
+    else:
+        log.info("no state income data; the state-economy term will be absent")
+
     save_stage(feats, "economic_cycle_features", prov,
                {"cpi_unrate_corr": corr,
                 "use_unemployment": bool(abs(corr) < 0.5) if corr == corr else False})
