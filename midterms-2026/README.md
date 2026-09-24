@@ -13,6 +13,36 @@ points**.
 
 ## Quick start
 
+### Google Colab (easiest, nothing to install)
+
+Colab runs Linux with a C compiler, so it avoids both the slow-backend and
+the Windows multiprocessing problems. Open a new notebook at
+[colab.research.google.com](https://colab.research.google.com) and paste this
+into the first cell:
+
+```python
+import urllib.request
+exec(urllib.request.urlopen(
+    "https://raw.githubusercontent.com/ajnutt24/research-papers/"
+    "claude/2026-midterms-forecast-model-jj4m98/midterms-2026/START_HERE.py"
+).read())
+```
+
+It detects Colab and installs whatever is missing automatically. Then
+`%run run_pipeline.py --full`.
+
+Colab's filesystem is wiped when the session ends. To keep results and any
+polls you enter, mount Drive *before* the setup cell:
+
+```python
+from google.colab import drive; drive.mount('/content/drive')
+%cd /content/drive/MyDrive
+```
+
+### Local machine
+
+
+
 Paste the contents of `START_HERE.py` into one Jupyter cell and run it. It
 downloads the project, moves into it, checks your packages, and prints the
 next command. Then run, in a new cell:
