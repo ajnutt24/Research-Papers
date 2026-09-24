@@ -5,6 +5,7 @@ Convenience runner. Three modes:
 
   python3 run_pipeline.py --update      # new polls dropped: 03 -> 08 -> 11 -> 12 -> 13   (~1 min)
   python3 run_pipeline.py --full        # everything, 01 -> 14                             (~5 min)
+  python3 run_pipeline.py --fast        # 01 -> 13, skips the backtest (stage 14)
   python3 run_pipeline.py 03 08 13      # any explicit list of stage numbers, in that order
   python3 run_pipeline.py --from 09     # resume the full order starting at stage 09
 
@@ -39,6 +40,9 @@ STAGES = {
     "13": "simulation/13_monte_carlo.py", "14": "validation/14_backtest.py",
 }
 FULL = ["01", "02", "03", "04", "05", "07", "06", "08", "09", "10", "11", "12", "13", "14"]
+# --fast: everything needed for a forecast, skipping the backtest (stage 14),
+# which re-scores four historical cycles and is the second-slowest stage.
+FAST = [s for s in FULL if s != "14"]
 UPDATE = ["03", "08", "11", "12", "13"]
 LOG = ROOT / "outputs" / "pipeline_log.txt"
 
@@ -63,13 +67,15 @@ def main(argv: list[str]):
     if "--from" in argv:
         start = argv[argv.index("--from") + 1].zfill(2)
         order = FULL[FULL.index(start):] if start in FULL else FULL
+    elif "--fast" in argv:
+        order = FAST
     elif "--full" in argv:
         order = FULL
     elif "--update" in argv or not any(a for a in argv if not a.startswith("--")):
         order = UPDATE
     else:
         order = [a.zfill(2) for a in argv if a.zfill(2) in STAGES]
-    skip = {"--full", "--update", "--from"}
+    skip = {"--full", "--fast", "--update", "--from"}
     drop = set()
     if "--from" in argv:
         drop.add(argv[argv.index("--from") + 1])

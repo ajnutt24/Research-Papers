@@ -22,6 +22,12 @@ next command. Then run, in a new cell:
 Do not paste the numbered scripts into cells. They import each other, so they
 have to exist as files, which the download handles.
 
+Expected runtime: about 5 minutes on a fast machine. Stages 09, 11 and 14
+run MCMC sampling and dominate the total; on a machine without an
+optimised BLAS or a C compiler they can be 5-10x slower, so 30-45
+minutes for `--full` is normal there. `--fast` skips the backtest
+(stage 14) and still produces the forecast.
+
 To see the forecast:
 
     %run show_results.py

@@ -162,12 +162,25 @@ def weights_for_2026(stack: pd.DataFrame, horizon: int, polled: np.ndarray, has_
 
 
 def main(refit: bool = False):
-    if refit or not STACK_FILE.exists():
+    REFERENCE = config.DATA_MANUAL / "reference" / "stacking_weights.parquet"
+    if refit:
         stack = fit_stacks()
         save_stage(stack, "stacking_weights", "mirror", {"horizons": HORIZONS})
-    else:
+    elif STACK_FILE.exists():
         stack = load_stage("stacking_weights")
         log.info("using cached stacking weights (pass --refit to recompute)")
+    elif REFERENCE.exists():
+        # Shipped precomputed weights: these depend only on the historical
+        # backtest cycles, not on this cycle's polls, so re-fitting them on
+        # every fresh install would cost ~37 PyMC fits for an identical answer.
+        stack = pd.read_parquet(REFERENCE)
+        save_stage(stack, "stacking_weights", "mirror",
+                   {"horizons": HORIZONS, "source": "shipped reference table"})
+        log.info("seeded stacking weights from the shipped reference table "
+                 "(pass --refit to recompute from scratch)")
+    else:
+        stack = fit_stacks()
+        save_stage(stack, "stacking_weights", "mirror", {"horizons": HORIZONS})
 
     hier = load_stage("hierarchical_estimates_2026")
     fund = load_stage("fundamentals_estimates_2026")
