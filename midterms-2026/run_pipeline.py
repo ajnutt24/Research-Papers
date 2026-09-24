@@ -40,6 +40,70 @@ STAGES = {
     "13": "simulation/13_monte_carlo.py", "14": "validation/14_backtest.py",
 }
 FULL = ["01", "02", "03", "04", "05", "07", "06", "08", "09", "10", "11", "12", "13", "14"]
+
+# Which stage produces which output, and what each stage needs before it can
+# run. Colab wipes its filesystem between sessions, so "--update" on a fresh
+# runtime would otherwise fail deep inside stage 08 with a missing-file error
+# for something stage 06 produces. The runner uses this to pull in whatever
+# prerequisites are genuinely absent.
+PRODUCES = {
+    "01": ["economic_monthly", "economic_cycle_features"],
+    "02": ["gas_prices"],
+    "03": ["polls_2026"],
+    "04": ["approval_2026", "approval_history"],
+    "05": ["race_ratings_2026", "race_ratings_historical"],
+    "07": ["historical_results", "historical_national"],
+    "06": ["fundamentals_2026"],
+    "08": ["poll_estimates_2026", "generic_ballot_trend", "national_environment",
+           "polling_error_history", "house_effects_2026"],
+    "09": ["fundamentals_national", "fundamentals_estimates_2026"],
+    "10": ["rating_calibration", "ratings_estimates_2026"],
+    "11": ["hierarchical_estimates_2026"],
+    "12": ["stacking_weights", "blend_2026"],
+    "13": [],
+    "14": [],
+}
+REQUIRES = {
+    "01": [], "02": [], "03": [], "04": [], "05": [], "07": [],
+    "06": ["historical_results"],
+    "08": ["polls_2026", "fundamentals_2026"],
+    "09": ["economic_cycle_features", "approval_history", "fundamentals_2026",
+           "historical_results", "historical_national"],
+    "10": ["race_ratings_2026", "race_ratings_historical", "historical_results"],
+    "11": ["fundamentals_2026", "fundamentals_estimates_2026", "fundamentals_national",
+           "national_environment", "poll_estimates_2026"],
+    "12": ["hierarchical_estimates_2026", "fundamentals_estimates_2026",
+           "fundamentals_national", "ratings_estimates_2026", "national_environment"],
+    "13": ["blend_2026"],
+    "14": ["national_environment", "historical_results", "rating_calibration"],
+}
+PRODUCER = {out: st for st, outs in PRODUCES.items() for out in outs}
+
+
+def output_exists(name: str) -> bool:
+    return (ROOT / "data_store" / "processed" / f"{name}.parquet").exists()
+
+
+def resolve_prerequisites(order: list[str]) -> tuple[list[str], list[str]]:
+    """Expand `order` with any missing upstream stages. Returns (order, added)."""
+    planned = list(order)
+    added: list[str] = []
+    changed = True
+    while changed:
+        changed = False
+        for st in list(planned):
+            for need in REQUIRES.get(st, []):
+                if output_exists(need):
+                    continue
+                producer = PRODUCER.get(need)
+                if producer is None or producer in planned:
+                    continue
+                planned.append(producer)
+                added.append(producer)
+                changed = True
+    # keep the canonical order so dependencies run before dependents
+    planned = [st for st in FULL if st in planned]
+    return planned, added
 # --fast: everything needed for a forecast, skipping the backtest (stage 14),
 # which re-scores four historical cycles and is the second-slowest stage.
 FAST = [s for s in FULL if s != "14"]
@@ -82,6 +146,11 @@ def main(argv: list[str]):
     if "--from" in argv:
         drop.add(argv[argv.index("--from") + 1])
     extra = [a for a in argv if a.startswith("--") and a not in skip and a not in drop]
+
+    order, added = resolve_prerequisites(order)
+    if added:
+        print(f"Adding missing prerequisite stage(s): {', '.join(sorted(set(added)))}")
+        print("(their outputs are not on disk yet, e.g. after a fresh Colab session)\n")
 
     LOG.parent.mkdir(parents=True, exist_ok=True)
     failed = None

@@ -251,7 +251,16 @@ subfolder for them, and raises a message naming the fix if it cannot.
 
 Shortcut runner: `python3 run_pipeline.py --update` re-runs only what new
 polls can change (03 -> 08 -> 11 -> 12 -> 13, about a minute);
-`--full` runs everything; a list of stage numbers runs just those.
+`--full` runs everything; `--fast` skips the backtest; a list of stage numbers
+runs just those; `--from 09` resumes there.
+
+**Missing prerequisites are pulled in automatically.** Each stage reads the
+cached parquet outputs of the stages it depends on. On a fresh machine, or a
+new Colab session (which starts with an empty filesystem), those files do not
+exist yet, so `--update` alone would fail inside stage 08 looking for output
+that stage 06 produces. The runner checks what is actually on disk, adds any
+missing producers, and reorders so dependencies run first. It prints which
+stages it added.
 
 Useful environment variables: `FORECAST_ASOF=YYYY-MM-DD` freezes the as-of
 date; `MCMC_DRAWS`, `MCMC_TUNE`, `MCMC_CHAINS` control PyMC; `NYT_POLLS_URL`
