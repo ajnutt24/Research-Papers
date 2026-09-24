@@ -143,6 +143,30 @@ Note that polls alone do not clear the `fixture` label: presidential approval
 (stage 04) and race ratings (stage 05) have their own placeholders. `%run
 check_data.py` lists exactly which inputs are still placeholders.
 
+### Watchlist
+
+`data_store/manual/watchlist.csv` holds the races you are tracking (race_id,
+office, rating_at_entry, note). It does not change what is modelled: all 506
+races are always forecast. It is a lens for reporting and a priority list for
+poll entry.
+
+```
+%run show_results.py --watchlist
+```
+
+shows only those races, least to most Democratic, with expected seats for the
+subset. Without the flag you get the competitive races by probability.
+
+### Supplying race ratings
+
+`data_store/manual/race_ratings_2026.csv` (race_id, source, rating) takes
+ratings you enter by hand, which is the reliable path since the rating sites
+are JavaScript-rendered. Accepted values: Safe/Likely/Lean D or R, and
+Toss-up. A hand-entered list usually covers only competitive races, so stage
+05 fills the remaining seats from partisan lean and labels each row with its
+origin (`user_provided` vs `fixture_pvi_derived`). `%run check_data.py` and
+the stage metadata report the mix.
+
 To see the forecast:
 
     %run show_results.py

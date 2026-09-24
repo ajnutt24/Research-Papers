@@ -1,0 +1,69 @@
+race_id,source,rating
+H-AK-01,user_provided,Likely R
+H-AL-02,user_provided,Likely R
+H-AZ-01,user_provided,Toss-up
+H-AZ-02,user_provided,Likely R
+H-AZ-06,user_provided,Toss-up
+H-CA-13,user_provided,Lean D
+H-CA-21,user_provided,Likely D
+H-CA-22,user_provided,Toss-up
+H-CA-45,user_provided,Likely D
+H-CA-48,user_provided,Lean D
+H-CO-03,user_provided,Likely R
+H-CO-05,user_provided,Likely R
+H-CO-08,user_provided,Toss-up
+H-FL-07,user_provided,Likely R
+H-FL-09,user_provided,Likely R
+H-FL-13,user_provided,Likely R
+H-FL-14,user_provided,Toss-up
+H-FL-22,user_provided,Lean R
+H-FL-25,user_provided,Toss-up
+H-FL-27,user_provided,Likely R
+H-IA-01,user_provided,Toss-up
+H-IA-02,user_provided,Lean R
+H-IA-03,user_provided,Toss-up
+H-IN-01,user_provided,Likely D
+H-ME-02,user_provided,Likely R
+H-MI-04,user_provided,Lean R
+H-MI-07,user_provided,Toss-up
+H-MI-08,user_provided,Likely D
+H-MI-10,user_provided,Toss-up
+H-MN-01,user_provided,Likely R
+H-MN-02,user_provided,Likely D
+H-MT-01,user_provided,Likely R
+H-NC-01,user_provided,Lean R
+H-NC-11,user_provided,Lean R
+H-NE-02,user_provided,Lean D
+H-NH-01,user_provided,Likely D
+H-NJ-07,user_provided,Toss-up
+H-NJ-09,user_provided,Likely D
+H-NM-02,user_provided,Lean D
+H-NV-01,user_provided,Likely D
+H-NV-03,user_provided,Lean D
+H-NV-04,user_provided,Likely D
+H-NY-03,user_provided,Lean D
+H-NY-04,user_provided,Lean D
+H-NY-17,user_provided,Toss-up
+H-NY-19,user_provided,Likely D
+H-OH-01,user_provided,Lean D
+H-OH-07,user_provided,Toss-up
+H-OH-09,user_provided,Toss-up
+H-OH-10,user_provided,Likely R
+H-OH-13,user_provided,Likely D
+H-OH-15,user_provided,Likely R
+H-PA-01,user_provided,Likely R
+H-PA-07,user_provided,Toss-up
+H-PA-08,user_provided,Toss-up
+H-PA-10,user_provided,Toss-up
+H-SC-01,user_provided,Likely R
+H-TX-15,user_provided,Lean R
+H-TX-23,user_provided,Likely R
+H-TX-28,user_provided,Lean D
+H-TX-34,user_provided,Toss-up
+H-TX-35,user_provided,Likely R
+H-VA-01,user_provided,Lean R
+H-VA-02,user_provided,Toss-up
+H-VA-07,user_provided,Likely D
+H-WA-03,user_provided,Toss-up
+H-WI-01,user_provided,Likely R
+H-WI-03,user_provided,Toss-up

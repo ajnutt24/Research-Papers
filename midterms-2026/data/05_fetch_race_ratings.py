@@ -233,13 +233,28 @@ def main():
         log.warning("no ratings from scrape or manual file; using FIXTURE derived from partisan lean")
         df = fixture_ratings()
         prov = "fixture"
+
+    # A hand-entered list usually covers only the competitive races. Rather than
+    # leave several hundred safe seats unrated, fill the gaps from partisan lean
+    # and label each row with where it came from, so the mix stays visible.
+    n_real = int(df.race_id.nunique())
+    covered = set(df.race_id)
+    uni_ids = set(config.race_universe().race_id)
+    if prov != "fixture" and len(covered) < len(uni_ids):
+        gap = fixture_ratings()
+        gap = gap[~gap.race_id.isin(covered)]
+        df = pd.concat([df, gap], ignore_index=True)
+        log.info("ratings: %d supplied, %d filled from partisan lean (labelled fixture_pvi_derived)",
+                 n_real, int(gap.race_id.nunique()))
     out = consensus(df)
     uni = config.race_universe()
     missing = set(uni.race_id) - set(out.race_id)
     if missing:
         log.warning("%d races have no rating; they will be treated as 'unrated' downstream", len(missing))
-    save_stage(out, "race_ratings_2026", prov, {"n_rated": int(out[out.source == "consensus"].race_id.nunique()),
-                                                 "n_missing": len(missing)})
+    per_source = df.groupby("source").race_id.nunique().to_dict()
+    save_stage(out, "race_ratings_2026", prov,
+               {"n_rated": int(out[out.source == "consensus"].race_id.nunique()),
+                "n_missing": len(missing), "by_source": per_source})
     hist, hprov = historical()
     save_stage(hist, "race_ratings_historical", hprov, {"cycles": sorted(hist.cycle.unique().tolist())})
     print(out[out.source == "consensus"].rating.value_counts())

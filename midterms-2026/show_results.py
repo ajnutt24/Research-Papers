@@ -72,10 +72,38 @@ if d["provenance"] == "fixture":
 if rp.exists():
     import pandas as pd
     r = pd.read_csv(rp)
-    comp = r[(r.p_dem > .25) & (r.p_dem < .75)].sort_values("p_dem")
-    print(f"\n{len(comp)} competitive races (win probability between 25% and 75%):")
     cols = ["race_id", "office", "polled", "rating", "blend_margin", "p_dem"]
-    with pd.option_context("display.max_rows", 100, "display.width", 120):
-        print(comp[cols].to_string(index=False,
-              formatters={"blend_margin": "{:+.1f}".format, "p_dem": "{:.0%}".format}))
+    fmt = {"blend_margin": "{:+.1f}".format, "p_dem": "{:.0%}".format}
+
+    watch_file = PROJECT / "data_store" / "manual" / "watchlist.csv"
+    use_watch = "--watchlist" in sys.argv or "--watch" in sys.argv
+    if use_watch and not watch_file.exists():
+        print(f"\nNo watchlist at {watch_file}")
+        use_watch = False
+
+    if use_watch:
+        wl = pd.read_csv(watch_file, comment="#")
+        sub = r[r.race_id.isin(set(wl.race_id))].copy()
+        missing = set(wl.race_id) - set(r.race_id)
+        print(f"\nWatchlist: {len(sub)} of {len(wl)} races"
+              + (f" ({len(missing)} not in the forecast: {sorted(missing)})" if missing else ""))
+        exp = sub.groupby("office").p_dem.sum().round(1)
+        print("\nExpected Democratic seats from the watchlist alone:")
+        for office, v in exp.items():
+            n = int((sub.office == office).sum())
+            print(f"   {office:9s} {v:5.1f} of {n}")
+        for office in ["Senate", "House"]:
+            part = sub[sub.office == office].sort_values("p_dem")
+            if not len(part):
+                continue
+            print(f"\n{office} watchlist ({len(part)} races), least to most Democratic:")
+            with pd.option_context("display.max_rows", 200, "display.width", 130):
+                print(part[cols].to_string(index=False, formatters=fmt))
+    else:
+        comp = r[(r.p_dem > .25) & (r.p_dem < .75)].sort_values("p_dem")
+        print(f"\n{len(comp)} competitive races (win probability between 25% and 75%):")
+        with pd.option_context("display.max_rows", 100, "display.width", 120):
+            print(comp[cols].to_string(index=False, formatters=fmt))
+        if watch_file.exists():
+            print("\n(a watchlist exists: run  %run show_results.py --watchlist  to see just those races)")
     print(f"\nFull table: {rp}")
