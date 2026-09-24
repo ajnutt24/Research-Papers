@@ -33,13 +33,19 @@ SAMPLE = [
     ("G-AZ", "2026_Arizona_gubernatorial_election"),
 ]
 
+import importlib.util  # noqa: E402
+spec = importlib.util.spec_from_file_location("s3", _ROOT / "data" / "03_fetch_polls.py")
+s3 = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(s3)
+
 if "--all" in sys.argv:
-    sys.path.insert(0, str(_ROOT / "data"))
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("s3", _ROOT / "data" / "03_fetch_polls.py")
-    m = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m)
-    targets = m.wiki_titles()
+    print("Crawling the hub pages for race article links ...")
+    discovered = s3.discover_race_articles()
+    targets = dict(s3.wiki_titles())
+    for rid, title in discovered.items():
+        targets.setdefault(rid, title)
+    targets = list(targets.items())
+    print(f"   {len(discovered)} discovered by link, {len(targets)} total after merging\n")
 else:
     targets = SAMPLE
 
@@ -55,7 +61,19 @@ for rid, title in targets:
         print(f"{rid:16s} {'-':>6s}  {'-':>12s}  unreachable ({type(e).__name__})")
         continue
     reachable += 1
-    df = wikipolls.parse_html(html, rid, default_year=config.CYCLE)
+    if rid.endswith("-*"):
+        state = rid.split("-")[1]
+        n_seats = config.HOUSE_SEATS_BY_STATE.get(state, 0)
+
+        def rid_for(h, _st=state, _n=n_seats):
+            d = wikipolls.district_from_heading(h)
+            if d is None and _n == 1:
+                return f"H-{_st}-01"
+            return f"H-{_st}-{d:02d}" if d and 1 <= d <= _n else None
+    else:
+        def rid_for(h, _rid=rid):
+            return _rid
+    df = wikipolls.parse_html_sections(html, rid_for, default_year=config.CYCLE)
     if len(df):
         rows_all.append(df)
         latest = max(df.end_date)

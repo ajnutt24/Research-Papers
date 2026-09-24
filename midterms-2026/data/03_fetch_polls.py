@@ -288,41 +288,131 @@ def wiki_titles() -> list[tuple[str, str]]:
     return out
 
 
-def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
-    """Fetch and parse the polling tables for every 2026 race article."""
+HUB_PAGES = [
+    "2026_United_States_Senate_elections",
+    "2026_United_States_gubernatorial_elections",
+    "2026_United_States_House_of_Representatives_elections",
+]
+RACE_LINK_RE = re.compile(
+    r"2026.*(Senate (special )?election in|gubernatorial election|"
+    r"House of Representatives elections in)", re.I)
+
+
+def title_to_race_id(title: str) -> str | None:
+    """Map a Wikipedia article title to a race_id, or None if it is not one.
+
+    Statewide House articles return "H-<ST>-*", a marker meaning the article
+    covers many districts and must be parsed section by section.
+    """
+    t = title.replace("_", " ")
+    name_to_abbr = {v.lower(): k for k, v in config.STATE_NAMES.items()}
+
+    m = re.search(r"Senate (special )?election in (.+)$", t, re.I)
+    if m:
+        st = name_to_abbr.get(m.group(2).strip().lower())
+        if st:
+            return f"S-{st}-special" if m.group(1) else f"S-{st}"
+        return None
+    m = re.search(r"^2026 (.+?) gubernatorial election", t, re.I)
+    if m:
+        st = name_to_abbr.get(m.group(1).strip().lower())
+        return f"G-{st}" if st else None
+    m = re.search(r"House of Representatives elections in (.+)$", t, re.I)
+    if m:
+        st = name_to_abbr.get(m.group(1).strip().lower())
+        return f"H-{st}-*" if st else None
+    return None
+
+
+def discover_race_articles() -> dict[str, str]:
+    """Crawl the hub pages for links to individual race articles.
+
+    Guessing titles covers most races, but Wikipedia's naming varies and
+    articles get renamed or redirected, so the real links are harvested too.
+    Returns {race_id: article title}.
+    """
     sys.path.insert(0, str(_ROOT))
     import wikipolls
 
-    targets = wiki_titles()
-    if limit:
-        targets = targets[:limit]
-    frames, found, missing = [], 0, 0
-    consecutive_failures = 0
-    for rid, title in targets:
+    found: dict[str, str] = {}
+    for hub in HUB_PAGES:
         try:
-            html, prov = fetch_text(WIKI_API + title, f"wiki_{rid}.html", max_age_hours=12)
+            html, _ = fetch_text(WIKI_API + hub, f"wiki_hub_{hub[:40]}.html", max_age_hours=12)
+        except Exception as e:
+            log.debug("hub %s unreachable: %s", hub, e)
+            continue
+        for title in wikipolls.discover_links(html, RACE_LINK_RE):
+            rid = title_to_race_id(title)
+            if rid:
+                found.setdefault(rid, title)
+    if found:
+        log.info("Wikipedia link discovery: %d race articles found on the hub pages", len(found))
+    return found
+
+
+def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
+    """Fetch and parse polling tables for every 2026 race.
+
+    Two passes: the hub articles are crawled for real links to race articles,
+    and those are merged with directly-guessed titles so a naming change on
+    either side does not lose a race. Each article is then parsed section by
+    section, which keeps per-district House tables attached to the right seat
+    and drops primary and hypothetical-matchup tables.
+    """
+    sys.path.insert(0, str(_ROOT))
+    import wikipolls
+
+    targets: dict[str, str] = dict(wiki_titles())          # guessed
+    discovered = discover_race_articles()                  # crawled
+    for rid, title in discovered.items():
+        targets.setdefault(rid, title)                     # adds House state pages
+    items = list(targets.items())
+    if limit:
+        items = items[:limit]
+
+    frames, found, missing, consecutive_failures = [], 0, 0, 0
+    for rid, title in items:
+        try:
+            html, prov = fetch_text(WIKI_API + title, f"wiki_{rid.replace('*', 'all')}.html",
+                                    max_age_hours=12)
             consecutive_failures = 0
-        except Exception as e:  # article may not exist yet; that is normal
+        except Exception as e:
             missing += 1
             consecutive_failures += 1
             log.debug("wikipedia %s (%s): %s", rid, title, e)
-            # A handful of missing articles is expected; a long unbroken run of
-            # failures means the network is blocking Wikipedia, so stop rather
-            # than spend minutes retrying all 72.
-            if consecutive_failures >= 5:
+            if consecutive_failures >= 5 and not frames:
                 log.warning("Wikipedia unreachable (%d consecutive failures); giving up on this source",
                             consecutive_failures)
                 break
             continue
-        df = wikipolls.parse_html(html, rid, default_year=config.CYCLE)
+
+        if rid.endswith("-*"):        # statewide House article: one race per section
+            state = rid.split("-")[1]
+            n_seats = config.HOUSE_SEATS_BY_STATE.get(state, 0)
+
+            def rid_for(heading, _st=state, _n=n_seats):
+                d = wikipolls.district_from_heading(heading)
+                if d is None and _n == 1:
+                    return f"H-{_st}-01"      # at-large states have no district heading
+                return f"H-{_st}-{d:02d}" if d and 1 <= d <= _n else None
+        else:
+            def rid_for(heading, _rid=rid):
+                return _rid
+
+        df = wikipolls.parse_html_sections(html, rid_for, default_year=config.CYCLE)
         if len(df):
             found += 1
             frames.append(standardise(df, f"wikipedia:{prov}"))
+
+    n_rows = sum(len(f) for f in frames)
     log.info("Wikipedia: %d articles with polls, %d unreachable, %d poll rows",
-             found, missing, sum(len(f) for f in frames))
+             found, missing, n_rows)
     if not frames:
         return None
-    return pd.concat(frames, ignore_index=True)
+    out = pd.concat(frames, ignore_index=True)
+    by_office = out.race_id.str[0].map({"H": "House", "S": "Senate", "G": "Governor"}).fillna("Generic")
+    log.info("    polls by office: %s", by_office.value_counts().to_dict())
+    return out
 
 
 # --------------------------------------------------------------------------

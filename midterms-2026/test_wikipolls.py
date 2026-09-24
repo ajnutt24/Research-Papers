@@ -40,6 +40,29 @@ SAMPLE_HTML = """<h3>Georgia</h3>
 </tbody></table>
 """
 
+HOUSE_HTML = """<h2>District 1</h2>
+<table class="wikitable"><tbody>
+<tr><th>Poll source</th><th>Date(s) administered</th><th>Sample size</th><th>Alice Adams (D)</th><th>Bob Brown (R)</th></tr>
+<tr><td>Public Policy Polling</td><td>September 5&#8211;7, 2026</td><td>600 (LV)</td><td>47%</td><td>49%</td></tr>
+</tbody></table>
+<h2>District 2</h2>
+<table class="wikitable"><tbody>
+<tr><th>Poll source</th><th>Date(s) administered</th><th>Sample size</th><th>Carol Chen (D)</th><th>Dan Davis (R)</th></tr>
+<tr><td>Split Ticket</td><td>September 9&#8211;11, 2026</td><td>500 (LV)</td><td>52%</td><td>44%</td></tr>
+<tr><td>Cygnal*</td><td>September 1&#8211;3, 2026</td><td>450 (LV)</td><td>48%</td><td>48%</td></tr>
+</tbody></table>
+<h2>Democratic primary</h2>
+<table class="wikitable"><tbody>
+<tr><th>Poll source</th><th>Date(s) administered</th><th>Sample size</th><th>Carol Chen (D)</th><th>Eve Evans (D)</th></tr>
+<tr><td>Some Pollster</td><td>May 1&#8211;3, 2026</td><td>400 (LV)</td><td>55%</td><td>40%</td></tr>
+</tbody></table>
+<h2>See also</h2>
+<p>Links: <a href="/wiki/2026_United_States_Senate_election_in_Georgia">Georgia</a>
+<a href="/wiki/2026_United_States_Senate_election_in_North_Carolina">North Carolina</a>
+<a href="/wiki/File:Something.png">an image</a>
+<a href="/wiki/2026_Arizona_gubernatorial_election">Arizona governor</a></p>
+"""
+
 ok = True
 def check(label, got, want):
     global ok
@@ -90,6 +113,30 @@ if len(df):
     check("first sample", r.sample_size, 800.0)
     check("first population", r.population, "lv")
     check("partisan flagged", df[df.pollster == "AtlasIntel"].partisan.iloc[0], "partisan")
+
+
+print("\nsection-aware parsing (statewide House article)")
+def _rid(heading):
+    d = w.district_from_heading(heading)
+    return f"H-NE-{d:02d}" if d else None
+
+hdf = w.parse_html_sections(HOUSE_HTML, _rid)
+check("general-election polls only (primary table skipped)", len(hdf), 3)
+check("districts assigned", sorted(set(hdf.race_id)), ["H-NE-01", "H-NE-02"])
+check("primary pollster excluded", "Some Pollster" in set(hdf.pollster), False)
+check("partisan asterisk carried through", set(hdf[hdf.pollster == "Cygnal"].partisan), {"partisan"})
+
+print("\ndistrict_from_heading")
+check("District 2", w.district_from_heading("District 2"), 2)
+check("2nd congressional district", w.district_from_heading("2nd congressional district"), 2)
+check("primary heading", w.district_from_heading("Democratic primary"), None)
+
+print("\nlink discovery")
+import re as _re
+links = w.discover_links(HOUSE_HTML, _re.compile(r"2026.*(Senate election|gubernatorial election)", _re.I))
+check("finds Georgia Senate", "2026_United_States_Senate_election_in_Georgia" in links, True)
+check("finds Arizona governor", "2026_Arizona_gubernatorial_election" in links, True)
+check("skips File: links", any("File:" in t for t in links), False)
 
 print("\n" + ("ALL TESTS PASSED" if ok else "SOME TESTS FAILED"))
 sys.exit(0 if ok else 1)

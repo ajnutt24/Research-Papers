@@ -188,3 +188,102 @@ def parse_html(html: str, race_id: str, default_year: int = 2026) -> pd.DataFram
     except ValueError:
         return pd.DataFrame()
     return parse_tables(tables, race_id, default_year)
+
+# --------------------------------------------------------------------------
+# Section-aware parsing
+# --------------------------------------------------------------------------
+# `pandas.read_html` returns tables with no idea which heading they sat under.
+# That is fine for a single-race article, but a statewide House article holds
+# one polling table per district, and a Senate article can hold a general
+# election table plus primary and hypothetical-matchup tables. Walking the DOM
+# keeps each table attached to its nearest preceding heading so the caller can
+# tell them apart.
+HEADING_TAGS = ("h1", "h2", "h3", "h4", "h5", "h6")
+DISTRICT_RE = re.compile(r"(?:district\s+(\d{1,2})\b|\b(\d{1,2})(?:st|nd|rd|th)\s+(?:congressional\s+)?district)", re.I)
+PRIMARY_RE = re.compile(r"primary|caucus|nomination|runoff", re.I)
+# Sections polling match-ups that cannot happen (a candidate who lost a
+# primary, or a declared non-candidate). The build spec requires these be
+# excluded: they measure a ballot no voter will see.
+HYPOTHETICAL_RE = re.compile(r"hypothetical|potential match|if .* were", re.I)
+
+
+def iter_tables_with_sections(html: str):
+    """Yield (section_heading, DataFrame) for every table in the article."""
+    from bs4 import BeautifulSoup
+    import io
+
+    soup = BeautifulSoup(html, "lxml")
+    for tbl in soup.find_all("table"):
+        heading = ""
+        node = tbl
+        # walk backwards through the document for the nearest heading
+        while node is not None:
+            node = node.find_previous(HEADING_TAGS)
+            if node is None:
+                break
+            text = node.get_text(" ", strip=True)
+            if text:
+                heading = text
+                break
+        try:
+            dfs = pd.read_html(io.StringIO(str(tbl)))
+        except ValueError:
+            continue
+        for df in dfs:
+            yield heading, df
+
+
+def district_from_heading(heading: str) -> int | None:
+    """'District 2' or '2nd congressional district' -> 2."""
+    m = DISTRICT_RE.search(heading or "")
+    if not m:
+        return None
+    num = m.group(1) or m.group(2)
+    try:
+        return int(num)
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_html_sections(html: str, race_id_for: callable, default_year: int = 2026) -> pd.DataFrame:
+    """Parse an article whose tables belong to different races.
+
+    `race_id_for(heading)` maps a section heading to a race_id, or returns
+    None to skip that table. Tables under a primary/nomination heading are
+    always skipped: this model forecasts general elections.
+    """
+    rows = []
+    for heading, df in iter_tables_with_sections(html):
+        if PRIMARY_RE.search(heading or "") or HYPOTHETICAL_RE.search(heading or ""):
+            continue
+        rid = race_id_for(heading)
+        if rid is None:
+            continue
+        part = parse_tables([df], rid, default_year)
+        if len(part):
+            rows.append(part)
+    return pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
+
+
+# --------------------------------------------------------------------------
+# Link discovery
+# --------------------------------------------------------------------------
+# Wikipedia's hub articles ("2026 United States Senate elections") link out to
+# each race's own article. Guessing titles works most of the time but breaks on
+# naming variations and redirects, so we also harvest the real links.
+def discover_links(html: str, pattern: re.Pattern) -> dict[str, str]:
+    """Return {article title: link text} for every /wiki/ link matching pattern."""
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html, "lxml")
+    out = {}
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if not href.startswith(("/wiki/", "./")):
+            continue
+        title = href.split("/wiki/")[-1].lstrip("./").split("#")[0]
+        if ":" in title:            # skip File:, Category:, Help: ...
+            continue
+        if pattern.search(title.replace("_", " ")):
+            out.setdefault(title, a.get_text(" ", strip=True))
+    return out

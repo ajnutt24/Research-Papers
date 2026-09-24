@@ -93,6 +93,21 @@ The 2026 poll fetchers try, in order:
 If all four come up empty the model builds clearly-labelled placeholder polls
 so the pipeline still runs, and every output says `provenance=fixture`.
 
+**How the articles are found.** Guessing titles alone is fragile: Wikipedia
+renames and redirects articles, and the polling for a race often lives one
+click away from the hub page rather than at the title you would guess. Stage
+03 therefore does both. It crawls the three hub articles (Senate, gubernatorial
+and House elections) for real links to race articles, maps each link back to a
+`race_id`, and merges that with the guessed titles, so a naming change on
+either side does not lose a race.
+
+**How each article is read.** Tables are parsed section by section rather than
+in bulk, because one statewide House article holds a separate polling table per
+district, and a Senate article can hold general-election, primary and
+hypothetical-matchup tables side by side. Each table stays attached to its
+nearest heading, which lets the parser assign district polls to the right seat
+and drop primary and hypothetical sections (a ballot no voter will see).
+
 **Why Wikipedia.** FiveThirtyEight's poll database was discontinued in 2025.
 The commercial aggregators (RealClearPolitics, Silver Bulletin, FiftyPlusOne)
 render their tables in JavaScript and restrict reuse, so a plain HTTP fetch
