@@ -354,14 +354,40 @@ def filter_hypothetical(df: pd.DataFrame, raw_names: pd.DataFrame | None = None)
 
 def main(force_fixture: bool = False):
     frames, provs = [], []
+    report = []
     if not force_fixture:
-        for fn, prov in [(fetch_nyt_csv, "live"), (fetch_rcp, "live"), (load_manual, "manual")]:
-            df = fn()
-            if df is not None and len(df):
+        for name, fn, prov in [("NYT feed (NYT_POLLS_URL)", fetch_nyt_csv, "live"),
+                               ("RealClearPolitics scrape", fetch_rcp, "live"),
+                               ("manual CSV (data_store/manual/polls_2026.csv)", load_manual, "manual")]:
+            try:
+                df = fn()
+            except Exception as e:  # noqa: BLE001
+                report.append((name, f"error: {type(e).__name__}: {e}"))
+                continue
+            if df is None:
+                report.append((name, "not available"))
+            elif not len(df):
+                report.append((name, "reachable but returned 0 usable polls"))
+            else:
+                report.append((name, f"{len(df)} polls"))
                 frames.append(df)
                 provs.append("live" if "live" in df["source"].iloc[0] else ("cache" if "cache" in df["source"].iloc[0] else prov))
+
+    log.info("poll sources tried:")
+    for name, outcome in report:
+        log.info("    %-48s %s", name, outcome)
+
     if not frames:
-        log.warning("NO real polls available - building a labelled FIXTURE. Do not publish this run.")
+        log.warning("=" * 70)
+        log.warning("NO REAL POLLS FOUND - building a labelled FIXTURE.")
+        log.warning("The forecast from this run is a pipeline test, not a forecast.")
+        log.warning("")
+        log.warning("To fix, put real polls in:")
+        log.warning("    %s", MANUAL_POLLS)
+        log.warning("A ready-to-fill template with the right columns is at:")
+        log.warning("    %s", config.DATA_MANUAL / "templates" / "polls_2026.template.csv")
+        log.warning("Or run:  python3 add_polls.py --example   to see the format.")
+        log.warning("=" * 70)
         frames.append(build_fixture())
         provs.append("fixture")
     polls = pd.concat(frames, ignore_index=True).drop_duplicates("poll_id")

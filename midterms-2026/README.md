@@ -81,6 +81,38 @@ rights and no toolchain, and it keeps a compiler-less machine usable.
 runtimes. A C toolchain is still slightly faster if you want it
 (`conda install -c conda-forge m2w64-toolchain`).
 
+### Getting real polls in
+
+The 2026 poll fetchers try, in order: a CSV endpoint named by `NYT_POLLS_URL`,
+a RealClearPolitics scrape, then `data_store/manual/polls_2026.csv`. If all
+three come up empty the model builds clearly-labelled placeholder polls so the
+pipeline still runs, and every output says `provenance=fixture`.
+
+The commercial poll sites are JavaScript-heavy and change often, so the manual
+CSV is the dependable route. `add_polls.py` writes it for you:
+
+```
+python3 add_polls.py --example     # show the format
+python3 add_polls.py --file my_polls.txt
+python3 add_polls.py --check       # what is loaded now
+```
+
+Each line is `race_id, pollster, end_date, sample, population, dem_pct, rep_pct`:
+
+```
+GENERIC, Quinnipiac, 2026-09-18, 1500, rv, 49, 43
+S-GA, Emerson College, 2026-09-15, 800, lv, 51, 45
+H-NE-02, Split Ticket, 2026-09-10, 500, lv, 52, 44
+```
+
+Entries are validated (unknown race ids, impossible dates and percentages are
+rejected) and de-duplicated, so re-adding the same poll is harmless. Once the
+file exists the placeholder generator switches off. Then `%run run_pipeline.py --update`.
+
+Note that polls alone do not clear the `fixture` label: presidential approval
+(stage 04) and race ratings (stage 05) have their own placeholders. `%run
+check_data.py` lists exactly which inputs are still placeholders.
+
 To see the forecast:
 
     %run show_results.py
