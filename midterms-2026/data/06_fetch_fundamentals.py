@@ -82,6 +82,7 @@ MANUAL_PVI = config.DATA_MANUAL / "pvi_manual.csv"
 MANUAL_INC = config.DATA_MANUAL / "incumbency_overrides_2026.csv"
 MANUAL_FEC = config.DATA_MANUAL / "fec_totals_manual.csv"
 MANUAL_CANDIDATES = config.DATA_MANUAL / "candidates_2026.csv"
+AUTO_CANDIDATES = config.DATA_MANUAL / "candidates_auto.csv"
 FEC_BASE = "https://api.open.fec.gov/v1/candidates/totals/"
 
 
@@ -271,11 +272,31 @@ def candidate_experience(uni: pd.DataFrame) -> tuple[pd.DataFrame, str]:
         uni.loc[m, "caucus_prob_dem"] = float(cfg.get("caucus_prob_dem", 0.5))
         uni.loc[m, "independent_bonus"] = float(config.INDEPENDENT_BONUS_PTS.get(rid, 0.0))
 
-    if not MANUAL_CANDIDATES.exists():
-        log.warning("candidates_2026.csv missing: no candidate-experience adjustment applied")
+    # Two sources: the auto-built table from 06b (FEC names + a derived
+    # experience index) and the hand-maintained file. The hand-maintained file
+    # always wins, because automated name matching is imperfect and a
+    # correction entered by hand should never be undone by a later fetch.
+    frames = []
+    if AUTO_CANDIDATES.exists():
+        auto = pd.read_csv(AUTO_CANDIDATES, comment="#")
+        auto["_src"] = "auto"
+        frames.append(auto)
+    if MANUAL_CANDIDATES.exists():
+        man = pd.read_csv(MANUAL_CANDIDATES, comment="#")
+        man["_src"] = "manual"
+        frames.append(man)
+    if not frames:
+        log.warning("no candidate table (neither candidates_auto.csv nor candidates_2026.csv); "
+                    "no experience adjustment applied")
         return uni, "missing"
 
-    cand = pd.read_csv(MANUAL_CANDIDATES, comment="#")
+    cand = pd.concat(frames, ignore_index=True)
+    # manual last, so drop_duplicates(keep="last") lets it override
+    cand = cand.sort_values("_src", ascending=False).drop_duplicates("race_id", keep="last")
+    n_auto = int((cand._src == "auto").sum())
+    n_man = int((cand._src == "manual").sum())
+    log.info("candidate table: %d rows (%d auto, %d hand-entered and overriding)",
+             len(cand), n_auto, n_man)
     applied = 0
     for r in cand.itertuples():
         m = uni.race_id == r.race_id

@@ -34,12 +34,12 @@ STAGES = {
     "01": "data/01_fetch_economic_data.py", "02": "data/02_fetch_gas_prices.py",
     "03": "data/03_fetch_polls.py", "04": "data/04_fetch_approval.py",
     "05": "data/05_fetch_race_ratings.py", "07": "data/07_fetch_historical_results.py",
-    "06": "data/06_fetch_fundamentals.py", "08": "model/08_poll_aggregation.py",
+    "06b": "data/06b_fetch_candidates.py", "06": "data/06_fetch_fundamentals.py", "08": "model/08_poll_aggregation.py",
     "09": "model/09_fundamentals_model.py", "10": "model/10_rating_to_margin_calibration.py",
     "11": "model/11_hierarchical_model.py", "12": "model/12_blend_stacking.py",
     "13": "simulation/13_monte_carlo.py", "14": "validation/14_backtest.py",
 }
-FULL = ["01", "02", "03", "04", "05", "07", "06", "08", "09", "10", "11", "12", "13", "14"]
+FULL = ["01", "02", "03", "04", "05", "07", "06b", "06", "08", "09", "10", "11", "12", "13", "14"]
 
 # Which stage produces which output, and what each stage needs before it can
 # run. Colab wipes its filesystem between sessions, so "--update" on a fresh
@@ -53,6 +53,7 @@ PRODUCES = {
     "04": ["approval_2026", "approval_history"],
     "05": ["race_ratings_2026", "race_ratings_historical"],
     "07": ["historical_results", "historical_national"],
+    "06b": [],
     "06": ["fundamentals_2026"],
     "08": ["poll_estimates_2026", "generic_ballot_trend", "national_environment",
            "polling_error_history", "house_effects_2026"],
@@ -66,6 +67,7 @@ PRODUCES = {
 REQUIRES = {
     "01": [], "02": [], "03": [], "04": [], "05": [], "07": [],
     "06": ["historical_results"],
+    # 06b produces a manual-dir CSV, not a stage output, so it has no REQUIRES entry
     "08": ["polls_2026", "fundamentals_2026"],
     "09": ["economic_cycle_features", "approval_history", "fundamentals_2026",
            "historical_results", "historical_national"],
