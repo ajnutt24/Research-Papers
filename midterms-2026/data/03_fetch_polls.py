@@ -45,6 +45,7 @@ dem_pct, rep_pct, margin, hypothetical, source
 from __future__ import annotations
 
 import hashlib
+import time
 import io
 import os
 import re
@@ -259,6 +260,9 @@ def fetch_rcp() -> pd.DataFrame | None:
         except Exception as e:
             log.warning("RCP %s failed: %s", rid, e)
     if not frames:
+        log.warning("Wikipedia returned no polls this run. If most requests were "
+                    "rate-limited, simply run stage 03 again: cached articles are "
+                    "reused and the run picks up where it left off.")
         return None
     out = pd.concat(frames, ignore_index=True)
     log.info("RCP: %d rows", len(out))
@@ -376,19 +380,41 @@ def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
     if limit:
         items = items[:limit]
 
-    frames, found, missing, consecutive_failures = [], 0, 0, 0
+    frames, found = [], 0
+    reasons = {"missing_article": 0, "rate_limited": 0, "network": 0}
+    consecutive_network = 0
     for rid, title in items:
-        try:
-            html, prov = fetch_text(WIKI_API + title, f"wiki_{rid.replace('*', 'all')}.html",
-                                    max_age_hours=12)
-            consecutive_failures = 0
-        except Exception as e:
-            missing += 1
-            consecutive_failures += 1
-            log.debug("wikipedia %s (%s): %s", rid, title, e)
-            if consecutive_failures >= 5 and not frames:
-                log.warning("Wikipedia unreachable (%d consecutive failures); giving up on this source",
-                            consecutive_failures)
+        html = None
+        for attempt in range(3):
+            try:
+                html, prov = fetch_text(WIKI_API + title, f"wiki_{rid.replace('*', 'all')}.html",
+                                        max_age_hours=12)
+                consecutive_network = 0
+                break
+            except Exception as e:
+                msg = str(e)
+                if "404" in msg:
+                    # No article for this race. Entirely normal, and never a
+                    # reason to stop: many races have no page yet.
+                    reasons["missing_article"] += 1
+                    break
+                if "429" in msg:
+                    # Throttling, not refusal. Wikipedia rate-limits a long run
+                    # of requests. Pause briefly and move on rather than
+                    # spending minutes per article: whatever is missed this run
+                    # is picked up on the next, because successful fetches are
+                    # cached for 12 hours and the cache accumulates.
+                    reasons["rate_limited"] += 1
+                    time.sleep(8)
+                    continue
+                reasons["network"] += 1
+                consecutive_network += 1
+                break
+        if html is None:
+            # Only a genuine network fault, repeated, means the host is gone.
+            if consecutive_network >= 8 and not frames:
+                log.warning("Wikipedia unreachable after %d consecutive network errors; "
+                            "giving up on this source", consecutive_network)
                 break
             continue
 
@@ -409,10 +435,17 @@ def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
         if len(df):
             found += 1
             frames.append(standardise(df, f"wikipedia:{prov}"))
+        if (found + sum(reasons.values())) % 25 == 0 and (found + sum(reasons.values())) > 0:
+            log.info("    ... %d articles processed, %d with polls so far",
+                     found + sum(reasons.values()), found)
 
     n_rows = sum(len(f) for f in frames)
-    log.info("Wikipedia: %d articles with polls, %d unreachable, %d poll rows",
-             found, missing, n_rows)
+    log.info("Wikipedia: %d of %d articles had polls, %d poll rows", found, len(items), n_rows)
+    log.info("    skipped: %d no article, %d rate-limited, %d network error",
+             reasons["missing_article"], reasons["rate_limited"], reasons["network"])
+    if reasons["rate_limited"] > len(items) // 4:
+        log.warning("    Wikipedia throttled a large share of requests. Re-running will "
+                    "reuse what was cached and fetch the rest.")
     if not frames:
         return None
     out = pd.concat(frames, ignore_index=True)
