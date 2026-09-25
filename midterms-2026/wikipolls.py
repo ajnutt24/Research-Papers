@@ -43,7 +43,11 @@ SAMPLE_RE = re.compile(r"([\d,]+)\s*(?:\(\s*(LV|RV|A|V)\s*\))?", re.I)
 POLLSTER_COL = re.compile(r"poll(ster)?(\s*source)?|source", re.I)
 DATE_COL = re.compile(r"date", re.I)
 SAMPLE_COL = re.compile(r"sample", re.I)
-DEM_COL = re.compile(r"\(\s*D\s*\)|\bdemocrat", re.I)
+# Two states do not put "(D)" on the ballot: Minnesota's affiliate is the
+# Democratic-Farmer-Labor party (DFL) and North Dakota's is the
+# Democratic-Nonpartisan League (DNL). Without them, every Minnesota poll
+# is silently discarded.
+DEM_COL = re.compile(r"\(\s*(D|DFL|DNL)\s*\)|\bdemocrat", re.I)
 # An independent can be the main alternative to the Republican, and in Idaho,
 # Nebraska and South Dakota there is no Democrat at all. A parser that insists
 # on a (D) column silently discards every poll of the actual contest.
@@ -215,8 +219,8 @@ def parse_html(html: str, race_id: str, default_year: int = 2026) -> pd.DataFram
     """Read every table in an article and return the poll rows found."""
     import io
     try:
-        tables = pd.read_html(io.StringIO(html))
-    except ValueError:
+        tables = pd.read_html(io.StringIO(html), flavor="lxml")
+    except Exception:
         return pd.DataFrame()
     return parse_tables(tables, race_id, default_year)
 
@@ -260,8 +264,11 @@ def iter_tables_with_sections(html: str):
             # Wikipedia puts header <th> cells inside <tbody>, which pandas does
             # not always recognise; without header=0 every column comes back as
             # 0,1,2,3 and nothing can be identified.
-            dfs = pd.read_html(io.StringIO(str(tbl)), header=0)
-        except ValueError:
+            dfs = pd.read_html(io.StringIO(str(tbl)), header=0, flavor="lxml")
+        except Exception:
+            # One unreadable table is normal (nested layouts, colspan tricks).
+            # It must never abort the article, let alone the run: pandas raises
+            # ImportError here, not ValueError, when it falls back to html5lib.
             continue
         for df in dfs:
             yield heading, df

@@ -260,9 +260,8 @@ def fetch_rcp() -> pd.DataFrame | None:
         except Exception as e:
             log.warning("RCP %s failed: %s", rid, e)
     if not frames:
-        log.warning("Wikipedia returned no polls this run. If most requests were "
-                    "rate-limited, simply run stage 03 again: cached articles are "
-                    "reused and the run picks up where it left off.")
+        log.warning("RealClearPolitics returned no polls (it blocks automated "
+                    "requests). Wikipedia is the primary source; this is expected.")
         return None
     out = pd.concat(frames, ignore_index=True)
     log.info("RCP: %d rows", len(out))
@@ -381,7 +380,7 @@ def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
         items = items[:limit]
 
     frames, found = [], 0
-    reasons = {"missing_article": 0, "rate_limited": 0, "network": 0}
+    reasons = {"missing_article": 0, "rate_limited": 0, "network": 0, "parse_error": 0}
     consecutive_network = 0
     for rid, title in items:
         html = None
@@ -431,18 +430,26 @@ def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
             def rid_for(heading, _rid=rid):
                 return _rid
 
-        df = wikipolls.parse_html_sections(html, rid_for, default_year=config.CYCLE)
-        if len(df):
-            found += 1
-            frames.append(standardise(df, f"wikipedia:{prov}"))
+        # A parse failure on one article must never discard the articles that
+        # already succeeded. An earlier run lost 50 articles' worth of real
+        # polls to a single ImportError raised deep inside pandas.read_html.
+        try:
+            df = wikipolls.parse_html_sections(html, rid_for, default_year=config.CYCLE)
+            if len(df):
+                frames.append(standardise(df, f"wikipedia:{prov}"))
+                found += 1
+        except Exception as e:  # noqa: BLE001
+            reasons["parse_error"] += 1
+            log.warning("    %s: parse failed (%s: %s)", rid, type(e).__name__, e)
         if (found + sum(reasons.values())) % 25 == 0 and (found + sum(reasons.values())) > 0:
             log.info("    ... %d articles processed, %d with polls so far",
                      found + sum(reasons.values()), found)
 
     n_rows = sum(len(f) for f in frames)
     log.info("Wikipedia: %d of %d articles had polls, %d poll rows", found, len(items), n_rows)
-    log.info("    skipped: %d no article, %d rate-limited, %d network error",
-             reasons["missing_article"], reasons["rate_limited"], reasons["network"])
+    log.info("    skipped: %d no article, %d rate-limited, %d network error, %d parse error",
+             reasons["missing_article"], reasons["rate_limited"], reasons["network"],
+             reasons["parse_error"])
     if reasons["rate_limited"] > len(items) // 4:
         log.warning("    Wikipedia throttled a large share of requests. Re-running will "
                     "reuse what was cached and fetch the rest.")

@@ -408,13 +408,20 @@ RANDOM_SEED = 20261103
 # --------------------------------------------------------------------------
 MCMC_DRAWS = int(os.environ.get("MCMC_DRAWS", 1000))
 MCMC_TUNE = int(os.environ.get("MCMC_TUNE", 1000))
-MCMC_CHAINS = int(os.environ.get("MCMC_CHAINS", 2))
+# 4 chains is the standard minimum for trustworthy convergence diagnostics:
+# R-hat and effective sample size are both between-chain statistics, so with
+# 2 chains they have almost no power to detect a chain stuck in the wrong
+# part of the posterior. 4 chains is the Vehtari et al. (2021) recommendation
+# and what Stan and PyMC default to. Set MCMC_CHAINS=2 to trade diagnostic
+# power for roughly half the sampling time.
+MCMC_CHAINS = int(os.environ.get("MCMC_CHAINS", 4))
 # Number of worker PROCESSES PyMC may use for parallel chains.
 # Default 1 (sequential) on purpose. Each stage already runs inside a
 # subprocess whose stdout is a pipe; letting PyMC spawn its own workers on top
 # of that deadlocks on Windows, where multiprocessing uses spawn and the
 # workers inherit the pipe. Sequential sampling costs roughly 2x wall time for
-# 2 chains and removes that failure mode entirely. Set MCMC_CORES=2 to opt in.
+# each chain and removes that failure mode entirely. Set MCMC_CORES=4 to opt
+# in on Linux or macOS, where it is safe and roughly 4x faster.
 MCMC_CORES = int(os.environ.get("MCMC_CORES", 1))
 MCMC_TARGET_ACCEPT = 0.9
 

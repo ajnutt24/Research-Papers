@@ -244,7 +244,7 @@ One-shot run:
 
 ```bash
 cd midterms-2026
-pip install pandas numpy scipy pyarrow requests beautifulsoup4 lxml pyyaml matplotlib pymc arviz
+pip install pandas numpy scipy pyarrow requests beautifulsoup4 lxml html5lib pyyaml matplotlib pymc arviz
 export FRED_API_KEY=...   FEC_API_KEY=...        # optional but recommended
 for s in data/01 data/02 data/03 data/04 data/05 data/07 data/06 \
          model/08 model/09 model/10 model/11 model/12 simulation/13 validation/14; do

@@ -17,7 +17,7 @@ import importlib
 import sys
 from pathlib import Path
 
-REQUIRED = ["pandas", "numpy", "scipy", "pyarrow", "requests", "bs4", "lxml", "yaml",
+REQUIRED = ["pandas", "numpy", "scipy", "pyarrow", "requests", "bs4", "lxml", "html5lib", "yaml",
             "matplotlib", "pymc", "arviz", "numba"]
 STAGE_FILES = ["config.py", "utils.py", "run_pipeline.py", "data/01_fetch_economic_data.py",
                "model/modellib.py", "simulation/13_monte_carlo.py"]
