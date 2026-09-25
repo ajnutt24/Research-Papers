@@ -102,9 +102,13 @@ def build_experience_index(force: bool = False) -> dict[str, str]:
     import yaml
     idx: dict[str, str] = {}
 
-    def add(k: str, office: str):
+    holders: dict[str, set] = {}
+
+    def add(k: str, office: str, who: str = ""):
         if k not in idx or RANK.index(office) < RANK.index(idx[k]):
             idx[k] = office
+        if who:
+            holders.setdefault(k, set()).add(who)
 
     for url, cache, label in [(LEG_CURRENT, "legislators-current.yaml", "current"),
                               (LEG_HISTORICAL, "legislators-historical.yaml", "historical")]:
@@ -125,8 +129,9 @@ def build_experience_index(force: bool = False) -> dict[str, str]:
                     continue
                 office = "senator" if t.get("type") == "sen" else ("us_house" if t.get("type") == "rep" else None)
                 if office:
-                    add(key(last, st, first), office)
-                    add(key(last, st), office)      # fallback for a bare surname
+                    who = f"{first} {last}".strip().lower()
+                    add(key(last, st, first), office, who)
+                    add(key(last, st), office, who)   # bare-surname fallback
         log.info("%s legislators: %d people indexed", label, len(people))
 
     # Governors: winners of recent gubernatorial elections, from the results mirror
@@ -138,13 +143,21 @@ def build_experience_index(force: bool = False) -> dict[str, str]:
         for r in g.itertuples():
             nm = str(getattr(r, "candidate_name", "") or "")
             st = str(getattr(r, "state_abbrev", "") or "")
-            parts = nm.split()
+            parts = _clean_name(nm).split()
             if len(parts) >= 2 and st:
-                add(key(parts[-1], st, parts[0]), "governor")
-                add(key(parts[-1], st), "governor")
+                who = f"{parts[0]} {parts[-1]}".lower()
+                add(key(parts[-1], st, parts[0]), "governor", who)
+                add(key(parts[-1], st), "governor", who)
         log.info("governors indexed from %d election winners since 2010", len(g))
     except Exception as e:
         log.warning("gubernatorial winners unavailable (%s)", e)
+
+    # Drop bare-surname keys shared by more than one person: with no first
+    # name to separate them, a lookup would be a coin flip between careers.
+    ambiguous = [k for k, people in holders.items() if k.count("||") and len(people) > 1]
+    for k in ambiguous:
+        idx.pop(k, None)
+    log.info("dropped %d ambiguous surname-only keys", len(ambiguous))
 
     INDEX_CACHE.parent.mkdir(parents=True, exist_ok=True)
     INDEX_CACHE.write_text(json.dumps(idx))
@@ -184,20 +197,50 @@ def fetch_fec_candidates(offices=("S", "H")) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def fec_name_to_first(name: str) -> str:
-    n = str(name)
-    return n.split(",")[1].strip().split()[0] if "," in n and len(n.split(",")) > 1 else ""
+def _clean_name(name) -> str:
+    """Normalise whatever the FEC returned into a plain string.
+
+    The API yields blanks, nulls and surname-only filings such as "SMITH,",
+    so every accessor below has to tolerate a missing part rather than index
+    into an empty list.
+    """
+    if name is None:
+        return ""
+    n = str(name).strip()
+    return "" if n.lower() in ("nan", "none") else n
 
 
-def fec_name_to_last(name: str) -> str:
-    """FEC stores 'LASTNAME, FIRSTNAME MIDDLE'."""
-    n = str(name)
-    return n.split(",")[0].strip() if "," in n else n.split()[-1]
+def fec_name_to_first(name) -> str:
+    """'SMITH, JOHN Q' -> 'JOHN'. Empty when no first name was filed."""
+    n = _clean_name(name)
+    if "," not in n:
+        return ""
+    parts = n.split(",", 1)[1].split()
+    return parts[0] if parts else ""
+
+
+def fec_name_to_last(name) -> str:
+    """'SMITH, JOHN Q' -> 'SMITH'. Empty when nothing usable was filed."""
+    n = _clean_name(name)
+    if not n:
+        return ""
+    if "," in n:
+        return n.split(",", 1)[0].strip()
+    parts = n.split()
+    return parts[-1] if parts else ""
 
 
 def to_race_id(office: str, state: str, district) -> str | None:
     if office == "S":
-        return f"S-{state}"
+        # The FEC reports only the state, but where a state's 2026 contest is a
+        # special election the race id carries a -special suffix. Mapping to a
+        # plain S-<state> silently drops those races: Ohio and Florida both.
+        plain, special = f"S-{state}", f"S-{state}-special"
+        known = {f"S-{st}-special" if sp else f"S-{st}"
+                 for st, cls, sp, inc, op, note in config.SENATE_2026}
+        if plain in known:
+            return plain
+        return special if special in known else None
     try:
         d = int(district)
     except (TypeError, ValueError):
@@ -232,6 +275,10 @@ def main(senate_only: bool = False, force: bool = False):
             return "unknown"
         return idx.get(key(last, state, first)) or idx.get(key(last, state)) or "unknown"
 
+    unnamed = int((fec.last.str.len() == 0).sum())
+    if unnamed:
+        log.info("dropping %d FEC row(s) with no usable candidate name", unnamed)
+        fec = fec[fec.last.str.len() > 0]
     fec["experience"] = [lookup(l, f, s, inc)
                          for l, f, s, inc in zip(fec.last, fec.first, fec.state, fec.incumbent)]
 
