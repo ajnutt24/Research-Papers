@@ -76,10 +76,21 @@ for label, url in CHECKS:
         # answer again shortly. Treating it as unreachable would send you to
         # Colab for a problem that fixes itself.
         throttled = "429" in msg
-        short = "rate limited (429) - temporary, reachable" if throttled else type(e).__name__
+        if throttled:
+            short = "rate limited (429) - temporary, reachable"
+        elif "403" in msg:
+            short = "403 forbidden - blocked or needs a key"
+        elif "404" in msg:
+            short = "404 - wrong URL"
+        else:
+            short = f"{type(e).__name__}: {msg[-90:]}"
         print(f"   {'WARN' if throttled else 'FAIL'}  {label}  -> {short}")
         if "Wikipedia" in label:
             problems.append("wikipedia_throttled" if throttled else "no_wikipedia")
+        if "FEC" in label:
+            print("         (FEC only supplies candidate NAMES for stage 06b; polls are")
+            print("          unaffected. The shared DEMO_KEY is heavily throttled - get a")
+            print("          free key at api.open.fec.gov/developers and set FEC_API_KEY.)")
 
 # 3. What did the last run actually do?
 print("\n3. LAST PIPELINE RUN")
@@ -101,6 +112,10 @@ else:
     print(f"   sources   : {m.get('sources')}")
     if m.get("provenance") == "fixture":
         problems.append("ran_but_fixture")
+        if m.get("sources") == ["fixture"]:
+            print("\n   Every poll source failed on that run. With the network working")
+            print("   now, the usual explanation is that the run happened BEFORE the")
+            print("   code was refreshed, so it used the old parser. Re-running is the fix.")
 
 # ---- verdict ----
 print("\n" + "=" * 62)
