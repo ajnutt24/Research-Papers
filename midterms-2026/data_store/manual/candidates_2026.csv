@@ -28,7 +28,7 @@ S-RI,D,,unknown,True,,unknown,False,False,True,Reed
 S-SC,D,,unknown,False,,unknown,True,False,True,Graham
 S-SD,I,,unknown,False,,unknown,True,False,True,Independent vs Rounds (R); no Democrat. Verify.
 S-TN,D,,unknown,False,,unknown,True,False,True,Hagerty
-S-TX,D,James Talarico,state_legislator,False,John Cornyn,statewide,True,False,True,Talarico: Texas state House. VERIFY the Republican nominee (contested primary).
+S-TX,D,James Talarico,state_legislator,False,Ken Paxton,statewide,False,False,True,"Paxton (R, AG) beat Cornyn in the primary. Experience scale scores him the same as Cornyn (statewide); it cannot see scandal or candidate weakness, which is what the polls showing Talarico ahead are capturing."
 S-VA,D,,unknown,True,,unknown,False,False,True,Warner
 S-WV,D,,unknown,False,,unknown,True,False,True,Capito
 S-WY,D,,unknown,False,,unknown,True,False,True,Lummis
