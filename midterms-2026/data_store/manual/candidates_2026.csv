@@ -28,9 +28,9 @@ S-RI,D,,unknown,True,,unknown,False,False,True,Reed
 S-SC,D,,unknown,False,,unknown,True,False,True,Graham
 S-SD,I,,unknown,False,,unknown,True,False,True,Independent vs Rounds (R); no Democrat. Verify.
 S-TN,D,,unknown,False,,unknown,True,False,True,Hagerty
-S-TX,D,,unknown,False,John Cornyn,statewide,True,False,True,Cornyn (verify primary/runoff outcome)
+S-TX,D,James Talarico,state_legislator,False,John Cornyn,statewide,True,False,True,Talarico: Texas state House. VERIFY the Republican nominee (contested primary).
 S-VA,D,,unknown,True,,unknown,False,False,True,Warner
 S-WV,D,,unknown,False,,unknown,True,False,True,Capito
 S-WY,D,,unknown,False,,unknown,True,False,True,Lummis
-S-OH-special,D,,unknown,False,Jon Husted,lt_governor,True,False,True,special: Husted (appointed)
-S-FL-special,D,,unknown,False,Ashley Moody,statewide,True,False,True,special: Moody (appointed)
+S-OH-special,D,Sherrod Brown,senator,False,Jon Husted,lt_governor,True,False,True,"Brown: three-term US senator (lost 2024). 'senator' is an EXTRAPOLATION: the paper publishes governor=10.8 for Senate candidates, not former senator."
+S-FL-special,D,Angie Nixon,state_legislator,False,Ashley Moody,statewide,True,False,True,Nixon: Florida state House.

@@ -233,12 +233,18 @@ assert len(GOVERNOR_2026) == 36
 #                        "genuinely unknown". Set it per race from what the
 #                        candidate has actually said.
 INDEPENDENT_RACES_2026 = {
-    "S-NE": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.5,
-             "independent": "", "note": "Independent vs Ricketts (R). Verify nominee names."},
+    "S-NE": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.90,
+             "independent": "Dan Osborn",
+             "note": "Osborn (I) vs Ricketts (R); no Democrat. 0.90 rather than 1.0 because "
+                     "Osborn has publicly said he would caucus with neither party, so a small "
+                     "amount of doubt is warranted even on a confident expectation."},
     "S-ID": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.5,
-             "independent": "", "note": "Independent vs Risch (R); no Democrat. Verify."},
+             "independent": "Achilles",
+             "note": "Achilles (I) vs Risch (R); no Democrat. Caucus intent unknown, so 0.5 "
+                     "is a deliberate coin flip rather than a guess dressed as an estimate."},
     "S-SD": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.5,
-             "independent": "", "note": "Independent vs Rounds (R); no Democrat. Verify."},
+             "independent": "Beng",
+             "note": "Beng (I) vs Rounds (R); no Democrat. Caucus intent unknown; 0.5."},
     "S-MT": {"has_democrat": True, "three_way": True, "caucus_prob_dem": 0.5,
              "independent": "", "note": "Three-way: Daines (R) vs a Democrat vs an independent."},
 }
