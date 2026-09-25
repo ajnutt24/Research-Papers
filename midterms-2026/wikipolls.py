@@ -44,8 +44,19 @@ POLLSTER_COL = re.compile(r"poll(ster)?(\s*source)?|source", re.I)
 DATE_COL = re.compile(r"date", re.I)
 SAMPLE_COL = re.compile(r"sample", re.I)
 DEM_COL = re.compile(r"\(\s*D\s*\)|\bdemocrat", re.I)
+# An independent can be the main alternative to the Republican, and in Idaho,
+# Nebraska and South Dakota there is no Democrat at all. A parser that insists
+# on a (D) column silently discards every poll of the actual contest.
+IND_COL = re.compile(r"\(\s*(I|IND|L|G)\s*\)|\bindependent\b", re.I)
 REP_COL = re.compile(r"\(\s*R\s*\)|\brepublican", re.I)
 IGNORE_COL = re.compile(r"other|undecided|margin|error|lead|spread|none|someone", re.I)
+# "Generic Democrat" is a hypothetical, not a candidate on any ballot.
+GENERIC_COL = re.compile(r"\bgeneric\b|\bunnamed\b|\bany\s+(democrat|republican)", re.I)
+# Tables that summarise other people's averages are not polls.
+AGGREGATOR_COL = re.compile(r"aggregat|average", re.I)
+AGGREGATOR_ROW = re.compile(r"270towin|race to the wh|realclear|rcp|fivethirtyeight|538|"
+                            r"silver bulletin|decision desk|average|aggregat|split ticket average",
+                            re.I)
 
 
 def _flatten(col) -> str:
@@ -126,7 +137,9 @@ def clean_pollster(text: str) -> tuple[str, bool]:
 def identify_columns(columns: list[str]) -> dict | None:
     """Map a table's columns to roles, or return None if it is not a poll table."""
     pollster = date_c = sample = None
-    dem = rep = None
+    dem = rep = ind = None
+    if any(AGGREGATOR_COL.search(c) for c in columns):
+        return None          # a table of other aggregators' averages
     for c in columns:
         low = c.lower()
         if pollster is None and POLLSTER_COL.search(low) and not IGNORE_COL.search(low):
@@ -138,17 +151,32 @@ def identify_columns(columns: list[str]) -> dict | None:
         if sample is None and SAMPLE_COL.search(low):
             sample = c
             continue
-        if IGNORE_COL.search(low):
-            continue
-        if dem is None and DEM_COL.search(c):
-            dem = c
+        if IGNORE_COL.search(low) or GENERIC_COL.search(c):
             continue
         if rep is None and REP_COL.search(c):
             rep = c
             continue
-    if pollster is None or date_c is None or dem is None or rep is None:
+        if dem is None and DEM_COL.search(c):
+            dem = c
+            continue
+        if ind is None and IND_COL.search(c):
+            ind = c
+            continue
+    # The Democrat is the main alternative when one is running; otherwise the
+    # independent is. Either way the margin is main-non-Republican minus
+    # Republican, which is what the model consumes.
+    main = dem or ind
+    if pollster is None or date_c is None or main is None or rep is None:
         return None
-    return {"pollster": pollster, "date": date_c, "sample": sample, "dem": dem, "rep": rep}
+    return {"pollster": pollster, "date": date_c, "sample": sample,
+            "dem": main, "rep": rep, "main_is_independent": dem is None}
+
+
+
+def _candidate_name(column_header: str) -> str:
+    """'Dan Osborn (I)' -> 'Dan Osborn'. Lets a caller check whether a table
+    polls the actual nominees or a match-up that is no longer on the ballot."""
+    return re.sub(r"\s*\(\s*[A-Za-z]{1,3}\s*\)\s*$", "", str(column_header)).strip()
 
 
 def parse_tables(tables: list[pd.DataFrame], race_id: str, default_year: int = 2026) -> pd.DataFrame:
@@ -164,7 +192,7 @@ def parse_tables(tables: list[pd.DataFrame], race_id: str, default_year: int = 2
             continue
         for _, r in t.iterrows():
             name, partisan = clean_pollster(r[roles["pollster"]])
-            if not name or re.match(r"^(average|rcp|poll)", name, re.I):
+            if not name or AGGREGATOR_ROW.search(name):
                 continue
             end = parse_end_date(r[roles["date"]], default_year)
             dem = parse_pct(r[roles["dem"]])
@@ -173,6 +201,9 @@ def parse_tables(tables: list[pd.DataFrame], race_id: str, default_year: int = 2
                 continue
             n, pop = parse_sample(r[roles["sample"]]) if roles["sample"] else (np.nan, "unknown")
             rows.append({"race_id": race_id, "pollster": name, "sponsor": "",
+                         "dem_candidate": _candidate_name(roles["dem"]),
+                         "rep_candidate": _candidate_name(roles["rep"]),
+                         "main_is_independent": bool(roles.get("main_is_independent")),
                          "partisan": "partisan" if partisan else "",
                          "start_date": end, "end_date": end, "sample_size": n,
                          "population": pop, "methodology": "",
@@ -226,7 +257,10 @@ def iter_tables_with_sections(html: str):
                 heading = text
                 break
         try:
-            dfs = pd.read_html(io.StringIO(str(tbl)))
+            # Wikipedia puts header <th> cells inside <tbody>, which pandas does
+            # not always recognise; without header=0 every column comes back as
+            # 0,1,2,3 and nothing can be identified.
+            dfs = pd.read_html(io.StringIO(str(tbl)), header=0)
         except ValueError:
             continue
         for df in dfs:

@@ -181,7 +181,9 @@ def standardise(df: pd.DataFrame, source: str) -> pd.DataFrame:
     out["methodology"] = out["methodology"].fillna("").astype(str)
     out["source"] = source
     out["poll_id"] = [make_poll_id(r) for _, r in out.iterrows()]
-    return out[OUT_COLS]
+    for c in ("dem_candidate", "rep_candidate", "main_is_independent"):
+        out[c] = df[c].values if c in df.columns else ("" if c != "main_is_independent" else False)
+    return out[OUT_COLS + ["dem_candidate", "rep_candidate", "main_is_independent"]]
 
 
 # --------------------------------------------------------------------------
@@ -512,6 +514,43 @@ def filter_hypothetical(df: pd.DataFrame, raw_names: pd.DataFrame | None = None)
     return df
 
 
+
+def filter_to_nominees(df: pd.DataFrame) -> pd.DataFrame:
+    """Drop polls of match-ups that are no longer on the ballot.
+
+    Wikipedia keeps historical tables for candidates who lost a primary or
+    withdrew. Those are real polls of an unreal contest, and averaging them in
+    drags a race toward a match-up no voter will see. Where the candidate table
+    names a nominee, only polls of that nominee are kept; where it does not,
+    everything is kept rather than guessing.
+    """
+    names = {}
+    for f in (config.DATA_MANUAL / "candidates_2026.csv", config.DATA_MANUAL / "candidates_auto.csv"):
+        if not f.exists():
+            continue
+        c = pd.read_csv(f, comment="#")
+        for r in c.itertuples():
+            nm = str(getattr(r, "main_name", "") or "").strip()
+            if nm and nm.lower() != "nan":
+                names[r.race_id] = nm.split()[-1].lower()
+    if not names or "dem_candidate" not in df.columns:
+        return df
+
+    def keep(row):
+        want = names.get(row["race_id"])
+        got = str(row.get("dem_candidate") or "").strip().lower()
+        if not want or not got:
+            return True
+        return want in got
+
+    before = len(df)
+    out = df[df.apply(keep, axis=1)]
+    dropped = before - len(out)
+    if dropped:
+        log.info("dropped %d poll(s) of candidates who are not the nominee", dropped)
+    return out
+
+
 def main(force_fixture: bool = False):
     frames, provs = [], []
     report = []
@@ -553,6 +592,7 @@ def main(force_fixture: bool = False):
         provs.append("fixture")
     polls = pd.concat(frames, ignore_index=True).drop_duplicates("poll_id")
     polls = filter_hypothetical(polls)
+    polls = filter_to_nominees(polls)
     prov = max(provs, key=lambda p: {"live": 0, "cache": 1, "manual": 1, "fixture": 3}[p])
     save_stage(polls, "polls_2026", prov, {"n_races_polled": int(polls.race_id.nunique()),
                                             "sources": sorted(polls.source.unique().tolist())})

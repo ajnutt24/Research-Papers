@@ -52,10 +52,12 @@ print(f"Article: https://en.wikipedia.org/wiki/{title}\n")
 try:
     html, prov = fetch_text(WIKI_API + title, f"wiki_{race}.html", max_age_hours=0)  # always fresh
 except Exception as e:
+    import traceback
+    traceback.print_exc()
     raise SystemExit(
-        f"Could not reach Wikipedia: {type(e).__name__}\n"
-        "This machine has no route to en.wikipedia.org. Run this on Colab, "
-        "where it is reachable."
+        f"\nFetch failed: {type(e).__name__}: {e}\n"
+        "If this is a network error, the environment cannot reach "
+        "en.wikipedia.org. Otherwise the traceback above shows the real cause."
     )
 print(f"Fetched {len(html):,} characters ({prov})\n")
 
