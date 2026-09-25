@@ -35,6 +35,10 @@ except NameError:
     sys.path.insert(0, str(Path.cwd()))
 import config  # noqa: E402
 
+class NoRetryHTTPError(Exception):
+    """A client error (4xx other than 429): retrying cannot help."""
+
+
 PROVENANCE_RANK = {"live": 0, "cache": 1, "manual": 1, "mirror": 1, "fixture": 3}
 
 
@@ -88,11 +92,29 @@ class PoliteSession:
         rp = self._robots[host]
         return True if rp is None else rp.can_fetch(config.USER_AGENT, url)
 
+    # Hosts disagree about what User-Agent they will answer. Wikipedia rejects
+    # requests without a descriptive one (403 with a policy link). FRED does the
+    # opposite: it answers a curl-like agent instantly and silently hangs on a
+    # descriptive or browser-like one until the read times out. So the header is
+    # chosen per host rather than set once globally.
+    UA_BY_HOST = {
+        "fred.stlouisfed.org": "curl/8.0",
+        "api.stlouisfed.org": "curl/8.0",
+        "gasprices.aaa.com": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
+    }
+
+    def _headers_for(self, host: str) -> dict:
+        ua = self.UA_BY_HOST.get(host)
+        return {"User-Agent": ua, "Accept": "*/*"} if ua else {}
+
     def get(self, url: str, *, check_robots: bool = False, **kw) -> requests.Response:
         if check_robots and not self.allowed_by_robots(url):
             raise PermissionError(f"robots.txt disallows fetching {url}")
         host = urlparse(url).netloc
         kw.setdefault("timeout", config.HTTP_TIMEOUT)
+        per_host = self._headers_for(host)
+        if per_host:
+            kw["headers"] = {**per_host, **kw.get("headers", {})}
         err: Exception | None = None
         for attempt in range(config.HTTP_RETRIES):
             self._wait(host)
@@ -100,8 +122,16 @@ class PoliteSession:
                 r = self.s.get(url, **kw)
                 if r.status_code == 429 or r.status_code >= 500:
                     raise requests.HTTPError(f"{r.status_code} from {host}", response=r)
+                # A 404 means the resource does not exist; retrying with backoff
+                # just multiplies the wait. This matters when probing many
+                # candidate URLs (for example FRED series ids across 50 states),
+                # where retrying every miss turns seconds into tens of minutes.
+                if 400 <= r.status_code < 500:
+                    raise NoRetryHTTPError(f"{r.status_code} from {host}")
                 r.raise_for_status()
                 return r
+            except NoRetryHTTPError as e:
+                raise RuntimeError(f"GET {url}: {e}") from None
             except requests.RequestException as e:  # includes proxy/TLS failures
                 err = e
                 # A proxy/network-policy refusal will not heal on retry: fail fast.

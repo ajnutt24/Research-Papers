@@ -30,6 +30,7 @@ economic_cycle_features.parquet   cycle, cpi_yoy_oct, unrate_oct  (1946..2026)
 from __future__ import annotations
 
 import io
+import os
 import sys
 from pathlib import Path
 
@@ -139,8 +140,15 @@ STATE_INCOME_PATTERNS = ["{st}OTOT", "{st}PCPI", "{st}NQGSP"]
 
 def state_income_growth(force: bool = False) -> tuple[pd.DataFrame, str]:
     """Year-over-year growth in personal income, per state, per quarter."""
+    import time as _time
+    started = _time.monotonic()
+    budget_s = float(os.environ.get("STATE_INCOME_BUDGET_S", 180))
     frames, pattern_used, failures = [], None, 0
     for st in config.STATES:
+        if _time.monotonic() - started > budget_s:
+            log.warning("state personal income: %.0fs budget reached after %d states; "
+                        "continuing with what was fetched", budget_s, len(frames))
+            break
         got = None
         for pat in ([pattern_used] if pattern_used else STATE_INCOME_PATTERNS):
             sid = pat.format(st=st)
@@ -211,7 +219,13 @@ def main(force: bool = False):
     # stage provenance follows the PRIMARY regressor (CPI); others are recorded in meta
     prov = provs[0]
     save_stage(monthly, "economic_monthly", prov, {"sources": dict(zip(["CPIAUCSL", "UNRATE", "GASREGW"], provs))})
-    inc, inc_prov = state_income_growth(force=force)
+    # Opt-in: fetching 50 state series is slow and FRED throttles aggressively,
+    # and no stage depends on the result yet. Enable with STATE_INCOME=1.
+    if os.environ.get("STATE_INCOME", "0") == "1":
+        inc, inc_prov = state_income_growth(force=force)
+    else:
+        inc, inc_prov = pd.DataFrame(), "skipped"
+        log.info("state personal income: skipped (set STATE_INCOME=1 to fetch)")
     if len(inc):
         save_stage(inc, "state_income_growth", inc_prov,
                    {"n_states": int(inc.state.nunique())})
