@@ -125,8 +125,41 @@ def fetch_live() -> tuple[pd.DataFrame | None, str]:
     return None, "missing"
 
 
+
+APPROVAL_WINDOW = 10   # polls averaged for the headline figure
+
+WIKI_APPROVAL = ("https://en.wikipedia.org/api/rest_v1/page/html/"
+                 "Opinion_polling_on_the_second_Donald_Trump_administration")
+
+
+def fetch_wikipedia_approval() -> tuple[pd.DataFrame | None, str]:
+    """Individual approval polls from Wikipedia's approval-polling article.
+
+    This is the same reasoning as the race polls: FiftyPlusOne and the other
+    trackers render in JavaScript and restrict reuse, while Wikipedia's tables
+    are plain HTML citing each original pollster.
+    """
+    try:
+        sys.path.insert(0, str(_ROOT))
+        import wikipolls
+        txt, prov = fetch_text(WIKI_APPROVAL, "wiki_approval.html", max_age_hours=12)
+        df = wikipolls.parse_approval(txt, config.CYCLE)
+        if not len(df):
+            return None, "missing"
+        out = df[["date", "approve", "disapprove"]].copy()
+        out["source"] = "wikipedia"
+        log.info("Wikipedia approval: %d polls, %s to %s",
+                 len(out), out.date.min(), out.date.max())
+        return out, prov
+    except Exception as e:  # noqa: BLE001
+        log.warning("Wikipedia approval unavailable: %s", e)
+        return None, "missing"
+
+
 def main():
     df, prov = fetch_live()
+    if df is None:
+        df, prov = fetch_wikipedia_approval()
     if df is None and MANUAL.exists():
         df = pd.read_csv(MANUAL, comment="#")
         df["date"] = pd.to_datetime(df["date"]).dt.date
@@ -142,8 +175,21 @@ def main():
         prov = "fixture"
     df = df.sort_values("date")
     df["net"] = df["approve"] - df["disapprove"]
-    save_stage(df, "approval_2026", prov, {"latest_approve": float(df.approve.iloc[-1]),
-                                            "latest_net": float(df.net.iloc[-1])})
+
+    # Use the MEDIAN of recent polls, not the single most recent reading. One
+    # poll is noisy, and a subgroup row that slipped past the filters would
+    # otherwise set the national figure on its own. The median of a handful of
+    # polls is unmoved by either.
+    recent = df.tail(APPROVAL_WINDOW)
+    approve = float(recent.approve.median())
+    net = float(recent.net.median())
+    log.info("approval: median of the last %d polls = %.1f approve, %+.1f net "
+             "(latest single poll: %.1f, %+.1f)",
+             len(recent), approve, net, df.approve.iloc[-1], df.net.iloc[-1])
+    save_stage(df, "approval_2026", prov,
+               {"latest_approve": approve, "latest_net": net,
+                "n_polls_in_median": int(len(recent)),
+                "single_latest_approve": float(df.approve.iloc[-1])})
 
     # historical table (editable seed)
     if not HIST.exists():
@@ -158,7 +204,7 @@ def main():
     else:
         war_2026, weeks_2026, wprov = 0.5, np.nan, "fixture"
         log.warning("war_salience_2026.csv missing; using placeholder attention_index=0.5")
-    cur = pd.DataFrame([{"cycle": config.CYCLE, "pres_party": "R", "approval": float(df.approve.iloc[-1]),
+    cur = pd.DataFrame([{"cycle": config.CYCLE, "pres_party": "R", "approval": approve,
                          "war_salience": war_2026, "weeks_since_escalation": weeks_2026, "verify": True}])
     hist = pd.concat([hist[hist.cycle != config.CYCLE], cur], ignore_index=True).sort_values("cycle")
     save_stage(hist, "approval_history", "manual" if prov != "fixture" else "fixture",

@@ -321,3 +321,88 @@ def discover_links(html: str, pattern: re.Pattern) -> dict[str, str]:
         if pattern.search(title.replace("_", " ")):
             out.setdefault(title, a.get_text(" ", strip=True))
     return out
+
+# --------------------------------------------------------------------------
+# Presidential approval
+# --------------------------------------------------------------------------
+# Wikipedia's approval article lists individual polls in per-month tables
+# ("July 2026"), with Approve / Disapprove columns. The row's own date is often
+# partial ("July 23-27"), so the section heading supplies the month and year.
+APPROVE_COL = re.compile(r"^approve", re.I)
+DISAPPROVE_COL = re.compile(r"^disapprove", re.I)
+MONTH_YEAR_RE = re.compile(rf"({MONTHS})\s+(\d{{4}})", re.I)
+# Demographic and partisan breakdown tables repeat a poll once per subgroup.
+# Averaging those in would weight a single poll many times and mix "approval
+# among Republicans" into a national figure.
+SUBGROUP_HEADING = re.compile(r"\bby (party|gender|race|age|education|region)\b|"
+                              r"subgroup|demograph|crosstab|among\b", re.I)
+
+
+def _approval_date(cell: str, heading: str, default_year: int) -> date | None:
+    """Resolve a partial poll date using its section heading for context."""
+    my = MONTH_YEAR_RE.search(heading or "")
+    month, year = (my.group(1), int(my.group(2))) if my else (None, default_year)
+    txt = re.sub(r"\[.*?\]", "", str(cell)).strip()
+    full = parse_end_date(txt, year)
+    if full:
+        return full
+    # "July 23-27" or "23-27" -> take the last day, with the heading's month
+    m = re.search(rf"(?:({MONTHS})\s+)?(\d{{1,2}})\s*[\u2013\u2014-]\s*(\d{{1,2}})", txt, re.I)
+    if m:
+        mon = m.group(1) or month
+        if mon:
+            try:
+                return pd.to_datetime(f"{mon} {m.group(3)}, {year}").date()
+            except Exception:
+                return None
+    m2 = re.search(rf"(?:({MONTHS})\s+)?(\d{{1,2}})$", txt, re.I)
+    if m2 and (m2.group(1) or month):
+        try:
+            return pd.to_datetime(f"{m2.group(1) or month} {m2.group(2)}, {year}").date()
+        except Exception:
+            return None
+    return None
+
+
+def parse_approval(html: str, default_year: int = 2026) -> pd.DataFrame:
+    """Individual presidential-approval polls from a Wikipedia article."""
+    rows = []
+    for heading, df in iter_tables_with_sections(html):
+        cols = [_flatten(c) for c in df.columns]
+        appr = next((c for c in cols if APPROVE_COL.search(c)), None)
+        disa = next((c for c in cols if DISAPPROVE_COL.search(c)), None)
+        pollster = next((c for c in cols if POLLSTER_COL.search(c.lower())), None)
+        datec = next((c for c in cols if DATE_COL.search(c.lower())), None)
+        if not (appr and disa and pollster and datec):
+            continue
+        if any(AGGREGATOR_COL.search(c) for c in cols):
+            continue          # the summary-of-aggregators table
+        if SUBGROUP_HEADING.search(heading or ""):
+            continue          # a breakdown, not a national poll
+        t = df.copy()
+        t.columns = cols
+        for _, r in t.iterrows():
+            name, partisan = clean_pollster(r[pollster])
+            if not name or AGGREGATOR_ROW.search(name):
+                continue
+            d = _approval_date(r[datec], heading, default_year)
+            a, dd = parse_pct(r[appr]), parse_pct(r[disa])
+            if d is None or a != a or dd != dd:
+                continue
+            n, pop = (np.nan, "unknown")
+            sample_col = next((c for c in cols if SAMPLE_COL.search(c.lower())), None)
+            if sample_col:
+                n, pop = parse_sample(r[sample_col])
+            rows.append({"date": d, "pollster": name, "approve": a, "disapprove": dd,
+                         "sample_size": n, "population": pop,
+                         "partisan": "partisan" if partisan else ""})
+    out = pd.DataFrame(rows)
+    if not len(out):
+        return out
+    # One national number per pollster per field period. Where a table still
+    # lists several rows for one poll, the first is the overall figure.
+    out = out.sort_values("date").drop_duplicates(["date", "pollster"], keep="first")
+    # Approve and disapprove should account for nearly everyone; a pair that
+    # does not is a subgroup or a mis-parse.
+    total = out.approve + out.disapprove
+    return out[(total > 80) & (total <= 105)].reset_index(drop=True)

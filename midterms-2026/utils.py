@@ -69,11 +69,16 @@ class PoliteSession:
         self._last: dict[str, float] = {}
         self._robots: dict[str, robotparser.RobotFileParser | None] = {}
 
+    # Wikipedia rate-limits a burst of requests with 429 well before any
+    # documented quota, so it gets a wider spacing than the default.
+    MIN_INTERVAL_BY_HOST = {"en.wikipedia.org": 3.0}
+
     def _wait(self, host: str):
+        interval = self.MIN_INTERVAL_BY_HOST.get(host, self.min_interval)
         last = self._last.get(host, 0.0)
         gap = time.monotonic() - last
-        if gap < self.min_interval:
-            time.sleep(self.min_interval - gap)
+        if gap < interval:
+            time.sleep(interval - gap)
         self._last[host] = time.monotonic()
 
     def allowed_by_robots(self, url: str) -> bool:
@@ -137,7 +142,9 @@ class PoliteSession:
                 # A proxy/network-policy refusal will not heal on retry: fail fast.
                 if isinstance(e, requests.exceptions.ProxyError) or "Tunnel connection failed" in str(e):
                     break
-                time.sleep(2 ** attempt)
+                # A 429 needs a real pause, not a one-second one.
+                backoff = 15 * (attempt + 1) if "429" in str(e) else 2 ** attempt
+                time.sleep(backoff)
         raise RuntimeError(f"GET {url} failed after {config.HTTP_RETRIES} attempts: {err}")
 
 
