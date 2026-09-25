@@ -155,6 +155,20 @@ def race_id_from(office: str, state: str, district) -> str:
     return f"?-{state}"
 
 
+def office_of(race_id: pd.Series) -> pd.Series:
+    """Map race_id to office.
+
+    "GENERIC" must be tested before the first-letter rule, because it also
+    starts with "G" and would otherwise be filed as a governor's race. That
+    mistake is quiet and expensive: several hundred national generic-ballot
+    polls get attributed to state governor contests, and the generic ballot,
+    which is the model's single most important national input, goes missing.
+    """
+    rid = race_id.astype("string")
+    return rid.str[0].map({"H": "House", "S": "Senate", "G": "Governor"}) \
+              .where(rid != "GENERIC", "Generic").fillna("Generic")
+
+
 def standardise(df: pd.DataFrame, source: str) -> pd.DataFrame:
     """Map an arbitrary poll table to the output schema."""
     out = pd.DataFrame(index=df.index)
@@ -165,7 +179,7 @@ def standardise(df: pd.DataFrame, source: str) -> pd.DataFrame:
         out["race_id"] = df["race_id"]
     else:
         out["race_id"] = [race_id_from(o, s, d if d == d else 0) for o, s, d in zip(out.office, out.state, out.district)]
-    out["office"] = out["race_id"].str[0].map({"H": "House", "S": "Senate", "G": "Governor"}).fillna("Generic")
+    out["office"] = office_of(out["race_id"])
     out["state"] = out["race_id"].str.split("-").str[1].where(out["office"] != "Generic", "US")
     out["district"] = pd.to_numeric(out["race_id"].str.split("-").str[2], errors="coerce").fillna(0).astype(int)
     out["start_date"] = pd.to_datetime(out["start_date"], errors="coerce").dt.date
@@ -280,7 +294,14 @@ WIKI_API = "https://en.wikipedia.org/api/rest_v1/page/html/"
 
 def wiki_titles() -> list[tuple[str, str]]:
     """(race_id, article title) for every race Wikipedia is likely to cover."""
-    out = [("GENERIC", "2026_United_States_House_of_Representatives_elections")]
+    # The generic congressional ballot lives on the cycle-wide "2026 United
+    # States elections" article, not on the House article. The House article
+    # carries only an aggregate-of-aggregators table, which this parser
+    # deliberately rejects: aggregator rows are not independent observations,
+    # and feeding six of them in as six polls would badly understate
+    # uncertainty. The cycle article carries the individual polls themselves
+    # (600+ rows across 2024-2026), which is what the Kalman filter needs.
+    out = [("GENERIC", "2026_United_States_elections")]
     for st, cls, special, inc, open_seat, note in config.SENATE_2026:
         name = config.STATE_NAMES[st].replace(" ", "_")
         if special:
@@ -456,7 +477,7 @@ def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
     if not frames:
         return None
     out = pd.concat(frames, ignore_index=True)
-    by_office = out.race_id.str[0].map({"H": "House", "S": "Senate", "G": "Governor"}).fillna("Generic")
+    by_office = office_of(out.race_id)
     log.info("    polls by office: %s", by_office.value_counts().to_dict())
     return out
 
@@ -560,34 +581,70 @@ def filter_to_nominees(df: pd.DataFrame) -> pd.DataFrame:
 
     Wikipedia keeps historical tables for candidates who lost a primary or
     withdrew. Those are real polls of an unreal contest, and averaging them in
-    drags a race toward a match-up no voter will see. Where the candidate table
-    names a nominee, only polls of that nominee are kept; where it does not,
-    everything is kept rather than guessing.
+    drags a race toward a match-up no voter will see.
+
+    Three rules keep this from doing more harm than good, each learned from a
+    way an earlier version of it destroyed real data:
+
+    1. Only the hand-verified candidate file is consulted. The auto-derived
+       file is built from Federal Election Commission (FEC) filings, and an
+       FEC filing is a Statement of Candidacy, not a nomination: anyone may
+       file. Treating the alphabetically-first filer as the nominee dropped
+       Peggy Flanagan's Minnesota polls in favour of a filer named Angie
+       Craig, James Talarico's Texas polls in favour of one named Colin
+       Allred, and every poll of sitting senators Jack Reed, Mark Warner and
+       Ed Markey. The auto file remains the right input for the candidate
+       experience index, which is what it was built for, and the wrong input
+       for deciding who is on the ballot.
+
+    2. A race is only filtered when the named nominee actually appears in at
+       least one of its polls. If the name never appears, the more likely
+       explanation is that the candidate record is wrong or spelled
+       differently, not that every poll of the race is stale. Filtering on a
+       name the polls have never heard of would silently delete the race.
+
+    3. Nothing is dropped without saying which race lost what, so a bad
+       candidate record shows up in the log instead of hiding in a seat count.
     """
-    names = {}
-    for f in (config.DATA_MANUAL / "candidates_2026.csv", config.DATA_MANUAL / "candidates_auto.csv"):
-        if not f.exists():
-            continue
-        c = pd.read_csv(f, comment="#")
-        for r in c.itertuples():
-            nm = str(getattr(r, "main_name", "") or "").strip()
-            if nm and nm.lower() != "nan":
-                names[r.race_id] = nm.split()[-1].lower()
-    if not names or "dem_candidate" not in df.columns:
+    manual = config.DATA_MANUAL / "candidates_2026.csv"
+    if not manual.exists() or "dem_candidate" not in df.columns:
+        return df
+    c = pd.read_csv(manual, comment="#")
+    names: dict[str, str] = {}
+    for r in c.itertuples():
+        nm = str(getattr(r, "main_name", "") or "").strip()
+        if nm and nm.lower() != "nan":
+            names[r.race_id] = nm.split()[-1].lower()
+    if not names:
         return df
 
-    def keep(row):
-        want = names.get(row["race_id"])
-        got = str(row.get("dem_candidate") or "").strip().lower()
-        if not want or not got:
-            return True
-        return want in got
+    got = df["dem_candidate"].fillna("").astype(str).str.strip().str.lower()
+    keep = pd.Series(True, index=df.index)
+    for rid, want in names.items():
+        in_race = df["race_id"] == rid
+        if not in_race.any():
+            continue
+        matches = in_race & got.str.contains(want, regex=False)
+        named = in_race & (got != "")
+        if not matches.any():
+            # Rule 2: the nominee is absent from every poll of this race, so
+            # the record is more suspect than the polls.
+            if named.any():
+                log.warning("    %s: nominee '%s' appears in none of its %d polls; "
+                            "keeping them all rather than emptying the race",
+                            rid, want, int(named.sum()))
+            continue
+        dropped = named & ~matches
+        if dropped.any():
+            log.info("    %s: dropped %d of %d polls (not the nominee: %s)", rid,
+                     int(dropped.sum()), int(named.sum()),
+                     ", ".join(sorted(set(df.loc[dropped, "dem_candidate"].astype(str)))[:4]))
+        keep &= ~dropped
 
-    before = len(df)
-    out = df[df.apply(keep, axis=1)]
-    dropped = before - len(out)
-    if dropped:
-        log.info("dropped %d poll(s) of candidates who are not the nominee", dropped)
+    out = df[keep]
+    n = len(df) - len(out)
+    if n:
+        log.info("dropped %d poll(s) of candidates who are not the nominee", n)
     return out
 
 

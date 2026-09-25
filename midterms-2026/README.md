@@ -167,7 +167,22 @@ Toss-up. A hand-entered list usually covers only competitive races, so stage
 origin (`user_provided` vs `fixture_pvi_derived`). `%run check_data.py` and
 the stage metadata report the mix.
 
-To see the forecast:
+### Reading the forecast
+
+There are two views, for two audiences.
+
+For a plain-English briefing with no jargon, which is the right starting point
+and the thing to share with anyone who does not build models:
+
+    %run briefing.py
+
+It says who is favored and by how much in words, pairs every probability with
+the frequency it implies (so "38%" is never misread as "no"), names the
+tipping-point Senate race, lists the genuinely contested seats with their
+margins in plain language, and closes with what the model does not know. It
+also writes `outputs/forecast_briefing.md`, which is shareable as-is.
+
+For the numbers themselves, with ratings, blend weights and margins:
 
     %run show_results.py
 
