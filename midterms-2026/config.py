@@ -425,6 +425,64 @@ MCMC_CHAINS = int(os.environ.get("MCMC_CHAINS", 4))
 MCMC_CORES = int(os.environ.get("MCMC_CORES", 1))
 MCMC_TARGET_ACCEPT = 0.9
 
+# --------------------------------------------------------------------------
+# How the shared polling error is treated in the hierarchical fit
+# --------------------------------------------------------------------------
+# This is the most consequential modelling choice in the project, worth roughly
+# 35 points of Senate win probability, so it is an explicit switch.
+#
+# `poll_bias` is the shared polling error: one number added to every poll
+# observation, representing polls being collectively wrong in one direction.
+# Its job is not only to shift the polls. It is what makes the polls
+# CORRELATED with each other, and that second role turns out to matter more.
+#
+#   "estimated"  poll_bias ~ N(0, poll_shock_sd), free, prior centred on zero.
+#                The default, and the structurally correct specification.
+#                Because the polls share a term, 58 statewide polls count as
+#                strong but not independent evidence about the national
+#                environment. On 2026 data the posterior lands near +3.0,
+#                meaning the model reads polled races as about 3 points less
+#                Democratic than their polls. The historical record agrees
+#                independently: final-three-week polls overstated Democrats in
+#                4 of the last 5 cycles (+3.9, +4.3, -0.2, +6.9, +0.1),
+#                averaging +2.97.
+#                The honest caveat is that this estimate is confounded. The
+#                fundamentals are badly wrong in exactly the races that get
+#                polled, for reasons unrelated to polling: they cannot see the
+#                independent candidates in South Dakota (+17.5) or Idaho
+#                (+12.3), Alaska's politics (+12.8) or Kansas (+14.6), and they
+#                miss in both directions (Vermont -20.2, Massachusetts -17.2).
+#                Some of the +3.0 is therefore fundamentals error wearing a
+#                polling-error label. Treat the Senate number as conditional on
+#                this parameter, and read the sensitivity below before quoting
+#                it.
+#
+#   "symmetric"  poll_bias pinned to 0 in the fit, with the correlated polling
+#                error entering only as a zero-mean shared shock in the
+#                simulation. Available as a sensitivity check, NOT recommended,
+#                because it is broken in a way that is easy to miss. Removing
+#                the parameter removes the correlation between polls, so the
+#                fit treats 58 correlated statewide polls as 58 independent
+#                readings of the national environment and over-determines it.
+#                Measured: nat_dev posterior sd falls to 1.96 under "symmetric"
+#                against 2.77 under "estimated", i.e. pinning a parameter made
+#                the model MORE confident, and tightened national uncertainty
+#                below the 4.03-point polling miss the model itself estimates.
+#                The visible symptom is a 100% House probability.
+#
+# Sensitivity on the 2026 data, 39 days out (both with the shared simulation
+# shock in place):
+#                       House      Senate     Governor
+#   estimated            95%         28%         26%
+#   symmetric           100%         63%         59%
+#
+# Neither is close to a published forecaster's Senate number, and this
+# parameter is why. Anyone quoting the Senate figure should quote the
+# assumption with it.
+POLL_BIAS_MODE = os.environ.get("POLL_BIAS_MODE", "estimated")
+if POLL_BIAS_MODE not in ("estimated", "symmetric"):
+    raise ValueError(f"POLL_BIAS_MODE must be 'estimated' or 'symmetric', got {POLL_BIAS_MODE!r}")
+
 
 def race_universe():
     """Return a DataFrame of every 2026 race with a stable `race_id`.

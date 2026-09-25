@@ -104,6 +104,32 @@ class Simulator:
         self.floor = np.float32(config.RACE_NOISE_FLOOR_SD)
         self.state_sd = np.float32(config.STATE_SHOCK_SD)
 
+        # --- the second correlated error source: shared polling error --------
+        # The specification calls for two distinct correlated errors, one for
+        # the national environment and one for polling. nat_dev supplies the
+        # first. The second was missing here: the simulation drew a national
+        # error, a state shock and per-race noise, but nothing that moved every
+        # poll-driven race together. Stage 12's marginal probabilities already
+        # included (w_poll * poll_shock_sd)^2, so the marginals and this joint
+        # simulation disagreed.
+        #
+        # Under POLL_BIAS_MODE="estimated" the shock is already carried: poll_bias
+        # is a fitted parameter, so both its central value and its posterior
+        # spread propagate into theta through the poll likelihood, and drawing it
+        # again here would double-count. Under "symmetric" poll_bias is pinned at
+        # exactly 0 with no variance, so without this term the correlated polling
+        # error disappears from the forecast altogether, which is what made the
+        # House read 100%.
+        #
+        # It is applied in proportion to how much each race's estimate actually
+        # rests on polls. A race forecast from fundamentals or its rating carries
+        # no polling error, and a lightly-polled race carries less than a heavily
+        # polled one.
+        shock_sd = float(load_meta("national_environment").get("poll_shock_sd", 0.0) or 0.0)
+        self.poll_shock_sd = np.float32(shock_sd if config.POLL_BIAS_MODE == "symmetric" else 0.0)
+        self.poll_reliance = (b.get("poll_weight_in_hier", pd.Series(0.0, index=b.index))
+                              .fillna(0.0).clip(0.0, 1.0).values.astype(np.float32))
+
     def run_chunk(self, n: int, rng: np.random.Generator) -> np.ndarray:
         d = rng.integers(self.n_draws, size=n)
         theta = self.theta[d]                                  # (n, R) shared structure inside each draw
@@ -116,6 +142,13 @@ class Simulator:
         fund_val = self.fund_m + nat + state + self.fund_sd * z
         rat_val = self.rat_m + nat + state + self.rat_sd * z
         margin = np.where(pick_hier, theta, np.where(pick_fund, fund_val, rat_val))
+        if self.poll_shock_sd > 0:
+            # One draw per simulated election, shared across every race, scaled
+            # by each race's reliance on polls. Zero-mean: the direction of a
+            # polling miss is not knowable in advance, so this widens the
+            # distribution rather than shifting it.
+            poll_shock = rng.normal(0.0, self.poll_shock_sd, size=(n, 1)).astype(np.float32)
+            margin += np.where(pick_hier, poll_shock * self.poll_reliance[None, :], 0.0)
         margin += self.floor * rng.standard_normal((n, self.R), dtype=np.float32)
         return margin
 

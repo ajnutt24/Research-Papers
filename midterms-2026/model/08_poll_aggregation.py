@@ -125,9 +125,14 @@ def main():
         trend = kalman_daily_path(pd.to_datetime(gb.end_date).dt.date.values, gb.adj.values, gb["var"].values,
                                   asof - timedelta(days=200), asof, kind="generic")
         gb_mean, gb_sd = float(gb_row.poll_margin.iloc[0]), float(gb_row.poll_sd.iloc[0])
+        # poll_sd is how precisely we know TODAY'S average; poll_sd_election adds
+        # the latent random walk out to election day. The second is what any
+        # forecast likelihood must use, because 397 polls pin today's average
+        # far more tightly than they pin November.
+        gb_sd_el = float(gb_row.poll_sd_election.iloc[0])
     else:
         trend = pd.DataFrame(columns=["date", "mean", "sd"])
-        gb_mean, gb_sd = np.nan, np.nan
+        gb_mean, gb_sd, gb_sd_el = np.nan, np.nan, np.nan
 
     # --- implied national environment from seat polls --------------------------
     races = est[est.race_id != "GENERIC"].merge(fund[["race_id", "office", "lean", "incumbency", "lean_source"]], on="race_id")
@@ -147,12 +152,14 @@ def main():
     else:
         comb_mean, comb_sd = np.nan, np.nan
     nat = pd.DataFrame([{"asof": asof, "generic_mean": gb_mean, "generic_sd": gb_sd,
+                         "generic_sd_election": gb_sd_el,
                          "seat_implied_mean": imp_mean, "seat_implied_sd": imp_sd,
                          "n_house_races_polled": int(len(hs)),
                          "combined_mean": comb_mean, "combined_sd": comb_sd,
                          "poll_shock_sd": poll_shock_sd}])
-    log.info("national environment: generic %.1f±%.1f, seat-implied %.1f±%.1f, combined %.1f±%.1f",
-             gb_mean, gb_sd, imp_mean, imp_sd, comb_mean, comb_sd)
+    log.info("national environment: generic %.1f±%.1f (±%.1f to election), "
+             "seat-implied %.1f±%.1f, combined %.1f±%.1f",
+             gb_mean, gb_sd, gb_sd_el, imp_mean, imp_sd, comb_mean, comb_sd)
 
     prov = worst_provenance(p_prov)
     save_stage(est, "poll_estimates_2026", prov, {"n_races": int((est.race_id != "GENERIC").sum())})

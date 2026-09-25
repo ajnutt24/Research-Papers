@@ -222,8 +222,9 @@ def main() -> None:
     add("")
     add("Two habits protect you from misreading it:")
     add("")
-    add("1. Read the range, not the point. \"241 seats\" is the middle of a distribution, "
-        "not a prediction. The range is the forecast.")
+    add(f"1. Read the range, not the point. \"{h['dem_seats_median']:.0f} seats\" is the middle "
+        f"of a distribution, not a prediction. The range "
+        f"({h['dem_seats_p10']:.0f} to {h['dem_seats_p90']:.0f}) is the forecast.")
     add("2. An upset is not a failed forecast. If the trailing side wins a race the model "
         "gave them 30%, the model was not wrong. Roughly a third of such races are "
         "supposed to go that way.")
@@ -321,6 +322,26 @@ def main() -> None:
         add("- **Redistricting is unsettled.** Several states are litigating their maps. Where a "
             "district is new or redrawn, the model deliberately widens its uncertainty, because "
             "past results in the old district say less about the new one.")
+        add(f"- **One assumption drives the Senate number.** The model estimates that polls "
+            f"currently overstate Democratic support by about 3 points, from the gap between "
+            f"what polls say and what the economic and approval fundamentals predict. History "
+            f"supports it: polls overstated Democrats in 4 of the last 5 cycles, by 3 points on "
+            f"average. But it is not cleanly measured, because the fundamentals are also badly "
+            f"wrong in several of the polled races for unrelated reasons, chiefly that they "
+            f"cannot see independent candidates. Switch that assumption off and the Senate "
+            f"figure moves from {s['p_dem_control']:.0%} to roughly 63%. That single parameter, "
+            f"not the polls, is most of the difference between this model and the published "
+            f"forecasters. See `config.POLL_BIAS_MODE`.")
+        add("- **Zero House districts have their own poll.** Every one of the 435 House forecasts "
+            "comes from district partisanship, the race rating and the national environment, "
+            "with no district-level survey anywhere in it. Wikipedia, the model's poll source, "
+            "carries statewide polls in abundance and district polls almost not at all. The "
+            "House number is therefore a statement about the national environment, not about "
+            "435 individual contests.")
+        add("- **The model has been slightly underconfident historically.** In the 2010 to 2022 "
+            "backtest, races it put at 55% won 73% of the time and races it put at 65% won 79% "
+            "of the time. Read its leans as a little stronger than the number says, and note "
+            "that this also means its Senate figure may understate the favorite.")
         add("- **Late-breaking events are not forecastable.** A scandal, an economic shock or an "
             "external crisis in October is not in these numbers, and cannot be.")
         add("- **Turnout in midterms is volatile.** Roughly 40% of eligible voters show up, "

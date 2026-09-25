@@ -1,0 +1,31 @@
+race_id,main_party,main_name,main_experience,main_is_incumbent,rep_name,rep_experience,rep_is_incumbent,n_dem_filed,n_rep_filed,n_other_filed,source
+S-AL,D,,unknown,False,"BRITT, KATIE BOYD",unknown,True,0,2,0,fec_auto
+S-AR,D,,unknown,False,"ASHBY, MICAH",unknown,False,0,3,0,fec_auto
+S-CO,D,"BENNET, MICHAEL F.",unknown,True,"BAISLEY, MARK",unknown,False,2,1,2,fec_auto
+S-DE,D,"APPELHANS, JEFFERY RYAN",unknown,False,,unknown,False,4,0,0,fec_auto
+S-FL-special,D,"ATKINS, JOEY MENDOZA",unknown,False,,unknown,False,1,0,0,fec_auto
+S-GA,D,,unknown,False,"BOX, REAGAN",unknown,False,0,4,0,fec_auto
+S-IA,D,,unknown,False,"ARENHOLZ, ASHLEY HINSON",unknown,False,0,2,0,fec_auto
+S-ID,I,"ACHILLES, TODD BAKER",unknown,False,"CRAPO, MICHAEL D",unknown,True,0,1,1,fec_auto
+S-IL,D,"BOTSFORD, STEVE",unknown,False,"BENNETT, DOUGLAS",unknown,False,5,3,0,fec_auto
+S-KS,D,"DAVIS, CHRISTY",us_house,False,,unknown,False,1,0,0,fec_auto
+S-KY,D,"BOOKER, CHARLES",unknown,False,"BARR, GARLAND ANDY",us_house,False,1,2,1,fec_auto
+S-LA,D,"ALBARES, NICHOLAS S.",unknown,False,"CASSIDY, WILLIAM M.",unknown,True,3,1,0,fec_auto
+S-MA,I,"AYYADURAI, SHIVA DR",unknown,False,"BECH, NATHAN ALEXANDER",unknown,False,0,2,2,fec_auto
+S-ME,D,"BELLOWS, SHENNA",unknown,False,"CALABRESE, CARMEM VINCENT MR.",unknown,False,2,3,0,fec_auto
+S-MN,D,"CRAIG, ANGIE",us_house,False,,unknown,False,1,0,0,fec_auto
+S-MS,D,"COLOM, SCOTT",unknown,False,"ADLAKHA, SARAH ANNE DR",unknown,False,1,1,0,fec_auto
+S-MT,D,"BANKHEAD, ALANI INES",unknown,False,"ALME, KURT",unknown,False,2,3,2,fec_auto
+S-NC,D,"COOPER, ROY",governor,False,"BROWN, DON",senator,False,1,2,0,fec_auto
+S-NE,I,"BURBANK, CINDY",unknown,False,,unknown,False,0,0,1,fec_auto
+S-NH,D,,unknown,False,"BROWN, SCOTT P.",unknown,False,0,1,0,fec_auto
+S-NJ,D,"BOOKER, CORY A.",unknown,True,,unknown,False,1,0,0,fec_auto
+S-OH-special,D,"BROWN, SHERROD",senator,False,,unknown,False,1,0,0,fec_auto
+S-RI,D,"BURBRIDGE, CONNOR",unknown,False,,unknown,False,1,0,1,fec_auto
+S-SC,D,"ANDREWS, ANNIE",unknown,False,"BAUER, ANDRE",unknown,False,2,5,0,fec_auto
+S-SD,D,"BEAUDION, JULIAN C",unknown,False,,unknown,False,1,0,1,fec_auto
+S-TN,D,"BREWER, MARIA A",unknown,False,"BLACKBURN, MARSHA MRS.",unknown,True,1,1,0,fec_auto
+S-TX,D,"ALLRED, COLIN",us_house,False,"BENDER, ANNA",unknown,False,2,5,1,fec_auto
+S-VA,D,"DANIELS, LORITA DR.",unknown,False,"DE PAULA, ALEX",unknown,False,1,1,0,fec_auto
+S-WV,D,,unknown,False,"CAPITO, SHELLEY MOORE",unknown,True,0,1,0,fec_auto
+S-WY,D,"BYRD, JAMES WILLARD MR.",unknown,False,,unknown,False,1,0,0,fec_auto

@@ -14,11 +14,41 @@ Model (PyMC)
     delta[r]    ~ N(0, fund_sd_idio[r] * shrink_mult[r])             # race offset vs fundamentals
     theta[r]    = fund_margin[r] + loading[r]*nat_dev + alpha[state r] + delta[r]
     poll_est[r] ~ N(theta[r] + poll_bias, poll_sd_election[r])       # for polled races
-    generic     ~ N(nat_fund_mean + nat_dev + poll_bias, generic_sd)
+    generic     ~ N(nat_fund_mean + nat_dev, generic_sd_forecast)    # national level only
 
 * `fund_margin`, `fund_sd_idio`, `loading` come from script 09 (fundamentals
   prior); `poll_est` from script 08 (the house-adjusted Kalman estimate,
   projected to Election Day); `generic` from the generic-ballot filter.
+* Why the generic ballot loads on `nat_dev` alone, and not on
+  `nat_dev + poll_bias`. Writing it the second way is conceptually tempting,
+  since the generic ballot is itself a poll and so carries the polling bias.
+  But it makes the model pathological, because one national observation cannot
+  separate two national latents of similar prior width: it identifies only
+  their sum. Measured on the 2026 data, the two came out at
+  corr(nat_dev, poll_bias) = -0.975 with sd(nat_dev + poll_bias) = 0.56
+  against priors of 4.38 and 4.03. The pair became a rigid see-saw, and because
+  `nat_dev` shifts all 506 races through `loading` while `poll_bias` shifts only
+  the 59 poll observations, the split had large consequences. State polls being
+  less Democratic than a D+8 fundamentals prediction was then resolved as
+  "polls overstate Democrats by 3.4 points and the environment is 4.3 points
+  worse for them", rather than the simpler "the fundamentals national
+  prediction is too Democratic". The tight likelihood made that second reading
+  arithmetically impossible. Loading the generic ballot on `nat_dev` alone
+  keeps the two error sources the specification calls for genuinely distinct:
+  `nat_dev` is the national environment, measured by the generic ballot, and
+  `poll_bias` stays prior-driven from the historical record, still informed by
+  the common component of state-poll deviation but no longer able to drag the
+  national environment with it.
+* Why `generic_sd_forecast` is not the standard error of the average.
+  `generic_sd` (0.58 pts here) is how precisely 397 polls pin TODAY'S average.
+  As a predictor of the November environment it must also carry the latent
+  drift between now and then (`generic_sd_election`, 0.85) and the generic
+  ballot's own capacity to be wrong, which is the historical RMS polling miss
+  the same script estimates (`poll_shock_sd`, 4.03). The likelihood therefore
+  uses sqrt(generic_sd_election^2 + poll_shock_sd^2). Using 0.58 instead
+  asserted that 397 polls fix the national vote to within a point, which
+  contradicts the model's own measurement of how far final averages have
+  missed.
 * Partial pooling: alpha[s] is learned from every polled race in a state, so
   an unpolled district in Michigan inherits Michigan's observed swing; delta[r]
   is shrunk toward zero with a race-specific scale.
@@ -56,6 +86,7 @@ import arviz as az
 import numpy as np
 import pandas as pd
 import pymc as pm
+import pytensor.tensor as pt
 
 
 def _find_project_root() -> Path:
@@ -102,9 +133,16 @@ def build_frame() -> tuple[pd.DataFrame, dict]:
     df["shrink_mult"] = np.where(df["weak_lean"], config.NEW_MAP_SHRINK_MULTIPLIER, 1.0)
     df["state_idx"] = pd.Categorical(df["state"], categories=config.STATES).codes
     df["polled"] = df["poll_margin"].notna()
+    poll_shock_sd = float(nat.poll_shock_sd)
+    # Fall back to generic_sd only for parquet written before generic_sd_election
+    # existed, so an old cache degrades loudly rather than crashing.
+    gb_sd_el = float(nat.get("generic_sd_election", nat.generic_sd))
+    if gb_sd_el != gb_sd_el:
+        gb_sd_el = float(nat.generic_sd)
     shared = {"nat_fund_mean": float(natf.nat_fund_mean), "nat_fund_sd": float(natf.nat_fund_sd_pred),
-              "poll_shock_sd": float(nat.poll_shock_sd),
-              "generic_mean": float(nat.generic_mean), "generic_sd": float(nat.generic_sd)}
+              "poll_shock_sd": poll_shock_sd,
+              "generic_mean": float(nat.generic_mean),
+              "generic_sd_forecast": float(np.sqrt(gb_sd_el ** 2 + poll_shock_sd ** 2))}
     return df.reset_index(drop=True), shared
 
 
@@ -112,7 +150,15 @@ def fit(df: pd.DataFrame, shared: dict):
     polled = df.index[df.polled].values
     with pm.Model() as model:
         nat_dev = pm.Normal("nat_dev", 0.0, shared["nat_fund_sd"])
-        poll_bias = pm.Normal("poll_bias", 0.0, shared["poll_shock_sd"])
+        # See config.POLL_BIAS_MODE for why this is a switch. Under "symmetric"
+        # the shared polling error is held at 0 here and enters only as
+        # symmetric uncertainty in the simulation, which is both what
+        # modellib.historical_polling_error says the project intends and what
+        # avoids counting the same shock twice.
+        if config.POLL_BIAS_MODE == "estimated":
+            poll_bias = pm.Normal("poll_bias", 0.0, shared["poll_shock_sd"])
+        else:
+            poll_bias = pm.Deterministic("poll_bias", pt.constant(0.0))
         tau_state = pm.HalfNormal("tau_state", 1.5 * config.STATE_SHOCK_SD)
         z_state = pm.Normal("z_state", 0.0, 1.0, shape=len(config.STATES))
         alpha = pm.Deterministic("alpha_state", tau_state * z_state)
@@ -123,8 +169,8 @@ def fit(df: pd.DataFrame, shared: dict):
         pm.Normal("poll_obs", theta[polled] + poll_bias, df.loc[polled, "poll_sd_election"].values,
                   observed=df.loc[polled, "poll_margin"].values)
         if shared["generic_mean"] == shared["generic_mean"]:
-            pm.Normal("generic_obs", shared["nat_fund_mean"] + nat_dev + poll_bias, shared["generic_sd"],
-                      observed=shared["generic_mean"])
+            pm.Normal("generic_obs", shared["nat_fund_mean"] + nat_dev,
+                      shared["generic_sd_forecast"], observed=shared["generic_mean"])
         idata = pm.sample(draws=config.MCMC_DRAWS, tune=config.MCMC_TUNE, chains=config.MCMC_CHAINS,
                           cores=config.MCMC_CORES, random_seed=config.RANDOM_SEED,
                           target_accept=config.MCMC_TARGET_ACCEPT, progressbar=False)
