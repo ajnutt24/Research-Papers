@@ -102,12 +102,25 @@ def main():
         err = historical_polling_error(rp)
         cyc = err[err.office == "All"]
         poll_shock_sd = float(np.sqrt(np.mean(cyc["mean_bias"] ** 2)))
+        # Two different questions, two different reference classes. See
+        # config.POLL_BIAS_PRIOR_CYCLES. poll_shock_sd answers "how badly could
+        # polls miss", and the presidential years belong in it because that risk
+        # should widen the intervals. poll_bias_prior_sd answers "how badly do
+        # polls usually miss in a midterm", which is what the fit should expect,
+        # and there the presidential years do not belong.
+        mid = cyc[cyc["cycle"].isin(config.POLL_BIAS_PRIOR_CYCLES)]
+        poll_bias_prior_sd = (float(np.sqrt(np.mean(mid["mean_bias"] ** 2)))
+                              if len(mid) else poll_shock_sd)
         err_prov = "mirror"
         log.info("historical polling miss by cycle (All offices):\n%s", cyc.to_string(index=False))
     except Exception as e:
         log.warning("historical poll archive unavailable (%s); using config fallback", e)
-        prior_bias, err, poll_shock_sd, err_prov = {}, pd.DataFrame(), config.POLL_SHOCK_SD_FALLBACK, "fixture"
-    log.info("correlated polling-shock prior sd = %.2f pts", poll_shock_sd)
+        prior_bias, err, err_prov = {}, pd.DataFrame(), "fixture"
+        poll_shock_sd = poll_bias_prior_sd = config.POLL_SHOCK_SD_FALLBACK
+    log.info("correlated polling error: risk sd = %.2f pts (cycles %s), "
+             "drift prior sd = %.2f pts (cycles %s)",
+             poll_shock_sd, config.POLL_MISS_CYCLES,
+             poll_bias_prior_sd, config.POLL_BIAS_PRIOR_CYCLES)
 
     # --- house effects + Kalman per race ---------------------------------------
     est, h, g = aggregate_polls(polls, asof, election, prior_bias=prior_bias)
@@ -156,7 +169,8 @@ def main():
                          "seat_implied_mean": imp_mean, "seat_implied_sd": imp_sd,
                          "n_house_races_polled": int(len(hs)),
                          "combined_mean": comb_mean, "combined_sd": comb_sd,
-                         "poll_shock_sd": poll_shock_sd}])
+                         "poll_shock_sd": poll_shock_sd,
+                         "poll_bias_prior_sd": poll_bias_prior_sd}])
     log.info("national environment: generic %.1f±%.1f (±%.1f to election), "
              "seat-implied %.1f±%.1f, combined %.1f±%.1f",
              gb_mean, gb_sd, gb_sd_el, imp_mean, imp_sd, comb_mean, comb_sd)
@@ -164,7 +178,8 @@ def main():
     prov = worst_provenance(p_prov)
     save_stage(est, "poll_estimates_2026", prov, {"n_races": int((est.race_id != "GENERIC").sum())})
     save_stage(trend, "generic_ballot_trend", prov)
-    save_stage(nat, "national_environment", prov, {"poll_shock_sd": poll_shock_sd})
+    save_stage(nat, "national_environment", prov,
+               {"poll_shock_sd": poll_shock_sd, "poll_bias_prior_sd": poll_bias_prior_sd})
     save_stage(err, "polling_error_history", err_prov, {"poll_shock_sd_rms": poll_shock_sd})
     save_stage(he, "house_effects_2026", prov)
 

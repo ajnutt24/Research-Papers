@@ -149,8 +149,13 @@ def build_frame() -> tuple[pd.DataFrame, dict]:
     gb_sd_el = float(nat.get("generic_sd_election", nat.generic_sd))
     if gb_sd_el != gb_sd_el:
         gb_sd_el = float(nat.generic_sd)
+    # The drift prior is narrower than the risk sd on purpose; see
+    # config.POLL_BIAS_PRIOR_CYCLES. Old parquet without the column falls back.
+    bias_prior_sd = float(nat.get("poll_bias_prior_sd", poll_shock_sd))
+    if bias_prior_sd != bias_prior_sd:
+        bias_prior_sd = poll_shock_sd
     shared = {"nat_fund_mean": float(natf.nat_fund_mean), "nat_fund_sd": float(natf.nat_fund_sd_pred),
-              "poll_shock_sd": poll_shock_sd,
+              "poll_shock_sd": poll_shock_sd, "poll_bias_prior_sd": bias_prior_sd,
               "generic_mean": float(nat.generic_mean),
               "generic_sd_forecast": float(np.sqrt(gb_sd_el ** 2 + poll_shock_sd ** 2))}
     return df.reset_index(drop=True), shared
@@ -166,7 +171,7 @@ def fit(df: pd.DataFrame, shared: dict):
         # modellib.historical_polling_error says the project intends and what
         # avoids counting the same shock twice.
         if config.POLL_BIAS_MODE == "estimated":
-            poll_bias = pm.Normal("poll_bias", 0.0, shared["poll_shock_sd"])
+            poll_bias = pm.Normal("poll_bias", 0.0, shared["poll_bias_prior_sd"])
         else:
             poll_bias = pm.Deterministic("poll_bias", pt.constant(0.0))
         tau_state = pm.HalfNormal("tau_state", 1.5 * config.STATE_SHOCK_SD)

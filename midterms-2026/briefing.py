@@ -323,16 +323,24 @@ def main() -> None:
             "district is new or redrawn, the model deliberately widens its uncertainty, because "
             "past results in the old district say less about the new one.")
         add(f"- **One assumption drives the Senate number.** The model estimates that polls "
-            f"currently overstate Democratic support by about 3 points, from the gap between "
-            f"what polls say and what the economic and approval fundamentals predict. History "
-            f"supports it: polls overstated Democrats in 4 of the last 5 cycles, by 3 points on "
-            f"average. But it is not cleanly measured, because the fundamentals are also badly "
-            f"wrong in several of the polled races for unrelated reasons, chiefly that they "
-            f"cannot see independent candidates. Turning that assumption off roughly "
-            f"doubles the Senate figure, from {s['p_dem_control']:.0%} to the low sixties. That "
-            f"single parameter, not the polls, is most of the difference between this model and "
-            f"the published forecasters. The alternative setting has its own flaw, documented "
-            f"at `config.POLL_BIAS_MODE`, so neither number should be read as the answer.")
+            f"currently overstate Democratic support by about 2 points, from the gap between "
+            f"what polls say and what the economic and approval fundamentals predict. How large "
+            f"that correction should be is the single biggest lever on the Senate figure, and it "
+            f"is genuinely uncertain. Polling misses split sharply by the kind of election: in "
+            f"the last three midterms polls overstated Democrats by 3.9 points, then 0.2 the "
+            f"other way, then 0.1, averaging about 1 point, while in 2016 and 2020, with Trump "
+            f"himself on the ballot, they overstated Democrats by 4.3 and 6.9 points. 2026 is a "
+            f"midterm without Trump on the ballot, so the model calibrates the correction on "
+            f"midterms. Calibrate it on all five cycles instead and the Senate falls from "
+            f"{s['p_dem_control']:.0%} to about 24%; remove the correction entirely and it rises "
+            f"to about 62%. Each of those settings has a documented drawback, at "
+            f"`config.POLL_BIAS_PRIOR_CYCLES` and `config.POLL_BIAS_MODE`, so none of the three "
+            f"should be read as simply the answer.")
+        add("- **The correction is not cleanly measured.** It is inferred from polls disagreeing "
+            "with the fundamentals, and the fundamentals are also badly wrong in several polled "
+            "races for reasons that have nothing to do with polling, chiefly that they cannot see "
+            "independent candidates. Some of the correction is therefore fundamentals error "
+            "wearing a polling-error label.")
         n_h_polled = int(hr.polled.sum())
         if n_h_polled == 0:
             add("- **No House district has its own poll.** Every one of the 435 House forecasts "

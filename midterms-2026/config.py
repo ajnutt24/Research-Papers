@@ -67,10 +67,43 @@ DAYS_TO_ELECTION = max((ELECTION_DATE - FORECAST_ASOF).days, 0)
 
 # Historical midterm cycles used for backtesting (script 14) and calibration
 BACKTEST_CYCLES = [2010, 2014, 2018, 2022]
-# Cycles whose polling *miss* informs the correlated-polling-error prior.
-# 2016 and 2020 are included because the spec asks that the polling-error
-# prior reflect those misses, not just this cycle's poll-to-poll spread.
+# Cycles whose polling *miss* informs how much correlated polling RISK the
+# forecast carries. 2016 and 2020 are included deliberately: a presidential-
+# scale miss could happen in a midterm, and the prudent thing is to let that
+# possibility widen the intervals rather than assume it away.
 POLL_MISS_CYCLES = [2014, 2016, 2018, 2020, 2022]
+
+# Cycles that inform how far the shared polling error is allowed to DRIFT FROM
+# ZERO when the model fits it (the prior sd on poll_bias in script 11).
+#
+# This is a different question from the one above, and answering both with one
+# number was a mistake. "How badly could polls miss?" is about risk, and there
+# the presidential years belong. "How badly do polls usually miss in a midterm?"
+# is about the expected central value, and there they do not, because the
+# historical record separates cleanly:
+#
+#     midterms      2014 +3.92   2018 -0.16   2022 +0.10   mean +1.29  RMS 2.27
+#     presidential  2016 +4.29   2020 +6.90                mean +5.59  RMS 5.74
+#
+# (Positive means polls overstated Democrats. Poll margin minus actual result,
+# final three weeks, averaged per race then per cycle.)
+#
+# The two most recent midterms were essentially unbiased. The mechanism usually
+# offered for the 2016 and 2020 misses, low-education and low-trust voters
+# under-represented in samples when Trump himself was on the ballot, is specific
+# to a presidential ballot. 2026 is a midterm with Trump not on the ballot,
+# which is the 2018 and 2022 situation.
+#
+# Pooling all five cycles gave a drift prior of sd 4.03, wide enough that the
+# gap between polls and fundamentals could push poll_bias to +3.08, which
+# haircut every polled race by three points. Calibrating the drift prior on the
+# right comparison class does not assume the bias away; it just stops the model
+# expecting a presidential-year miss in a midterm.
+#
+# Caveats, because three cycles is thin: 2014 was a real +3.92 midterm miss, so
+# midterm bias is not zero, and this narrows rather than eliminates the term.
+# Set this to POLL_MISS_CYCLES to restore the pooled behaviour.
+POLL_BIAS_PRIOR_CYCLES = [2014, 2018, 2022]
 
 # --------------------------------------------------------------------------
 # Credentials & HTTP behaviour
@@ -519,16 +552,27 @@ MCMC_TARGET_ACCEPT = 0.9
 #                below the 4.03-point polling miss the model itself estimates.
 #                The visible symptom is a 100% House probability.
 #
-# Sensitivity on the workbook data, 36 days out (both with the shared
-# simulation shock in place):
-#                       House      Senate     Governor
-#   estimated            87%         24%         20%
-#   symmetric           100%         62%         56%
+# Sensitivity on the workbook data, 36 days out (all with the shared simulation
+# shock in place):
+#                                          House   Senate   Governor  poll_bias
+#   estimated, drift prior 2.27 (default)    97%      38%       31%      +1.96
+#   estimated, drift prior 4.03 (pooled)     87%      24%       20%      +3.08
+#   symmetric                               100%      62%       56%       0 (fixed)
+#
+# The first two differ only in POLL_BIAS_PRIOR_CYCLES. Calibrating the drift
+# prior on midterms rather than on all five cycles moves the Senate from 24% to
+# 38%, and the fitted poll_bias lands at +1.96 against a historical midterm mean
+# of +1.29, so the prior is informing the estimate rather than dictating it.
 #
 # Note that "symmetric" still returns a 100% House probability even now that 87
-# House districts have their own polls. The over-determination is a property of
-# the specification, not a symptom of thin House data, which is the clearest
-# argument for leaving the default alone.
+# House districts have their own polls. Its over-determination is a property of
+# the specification, not a symptom of thin House data.
+#
+# The backtest does not settle the choice between these: its calibration table is
+# unchanged across all three, because it scores the blend components at historical
+# cycles and never re-fits this cycle's poll_bias. The case for the midterm drift
+# prior is the reference-class argument in POLL_BIAS_PRIOR_CYCLES, not backtest
+# evidence, and it should be quoted that way.
 #
 # Neither is close to a published forecaster's Senate number, and this
 # parameter is why. Anyone quoting the Senate figure should quote the
