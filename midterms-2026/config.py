@@ -404,6 +404,55 @@ SIM_RUNTIME_LIMIT_SECONDS = 120
 RANDOM_SEED = 20261103
 
 # --------------------------------------------------------------------------
+# Hand-maintained polling workbook (MidtermPolls2026.xlsx)
+# --------------------------------------------------------------------------
+# When this workbook is found it becomes THE poll source and the scrapers are
+# skipped, rather than being averaged in alongside them. Two reasons, both
+# about not undoing work a person has already done:
+#
+#   Its include_in_model column records a human decision that a scraper cannot
+#   make, separating live general-election matchups from pre-primary ballot
+#   tests, withdrawn candidates and superseded duplicates. Re-scraping would
+#   put the excluded rows back.
+#
+#   The workbook was built partly from the same Wikipedia articles the scraper
+#   reads. The same poll carries a different identifier in each source, so it
+#   would survive de-duplication twice and be counted twice.
+#
+# Set MIDTERM_WORKBOOK to point a run at a different copy without editing this
+# file. Paths are tried in the order workbook.candidate_paths() lists them:
+# the environment variable, then POLL_WORKBOOK, then the repository-local copy,
+# then WORKBOOK_EXTRA_PATHS.
+POLL_WORKBOOK = os.environ.get(
+    "MIDTERM_WORKBOOK",
+    r"C:\Users\slima\OneDrive\Election Model Project\Election Model Project"
+    r"\Midterm Polls Toolkit\MidtermPolls2026.xlsx")
+
+# Further places to look. The repository-local copy at
+# data_store/manual/MidtermPolls2026.xlsx is always tried and is what makes the
+# same code run in Colab, in a container and on a second machine, none of which
+# have the OneDrive path above.
+WORKBOOK_EXTRA_PATHS = [
+    Path.home() / "OneDrive" / "Election Model Project" / "Election Model Project"
+    / "Midterm Polls Toolkit" / "MidtermPolls2026.xlsx",
+    Path.home() / "Downloads" / "MidtermPolls2026.xlsx",
+]
+
+# The workbook marks additional versions of an already-included release as
+# "Review" (a different population, leaners pushed, or reworded question).
+# Including them counts the same release more than once, and the aggregator
+# treats each row as independent evidence, so the default is to take only the
+# primary row. Turn this on to inspect the effect of the alternates.
+WORKBOOK_INCLUDE_REVIEW = os.environ.get("WORKBOOK_INCLUDE_REVIEW", "0") not in ("0", "", "false", "False")
+
+# Whether the workbook may also supply presidential approval (stage 04) and
+# expert ratings (stage 05). Both live in the same file, and both are otherwise
+# weak spots: approval is scraped, and ratings fall back to partisan lean for
+# every race a hand-written CSV does not cover.
+WORKBOOK_FEEDS_APPROVAL = True
+WORKBOOK_FEEDS_RATINGS = True
+
+# --------------------------------------------------------------------------
 # PyMC sampling defaults (small models; increase for publication runs)
 # --------------------------------------------------------------------------
 MCMC_DRAWS = int(os.environ.get("MCMC_DRAWS", 1000))
@@ -470,11 +519,16 @@ MCMC_TARGET_ACCEPT = 0.9
 #                below the 4.03-point polling miss the model itself estimates.
 #                The visible symptom is a 100% House probability.
 #
-# Sensitivity on the 2026 data, 39 days out (both with the shared simulation
-# shock in place):
+# Sensitivity on the workbook data, 36 days out (both with the shared
+# simulation shock in place):
 #                       House      Senate     Governor
-#   estimated            95%         28%         26%
-#   symmetric           100%         63%         59%
+#   estimated            87%         24%         20%
+#   symmetric           100%         62%         56%
+#
+# Note that "symmetric" still returns a 100% House probability even now that 87
+# House districts have their own polls. The over-determination is a property of
+# the specification, not a symptom of thin House data, which is the clearest
+# argument for leaving the default alone.
 #
 # Neither is close to a published forecaster's Senate number, and this
 # parameter is why. Anyone quoting the Senate figure should quote the

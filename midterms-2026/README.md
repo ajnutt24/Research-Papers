@@ -117,7 +117,82 @@ pollster, and the licence permits reuse. `wikipolls.py` does the parsing and
 `test_wikipolls.py` covers it with fixtures (dates spanning months, comma
 sample sizes, partisan asterisks, non-poll tables that must be skipped).
 
-Check it works from your machine before a full run:
+### The Excel workbook (the preferred poll source)
+
+`MidtermPolls2026.xlsx` is the primary input. When the pipeline finds it, the
+workbook supplies the polls and the scrapers are skipped entirely.
+
+```
+%run workbook.py        # find it, read it, report what it holds
+%run check_data.py      # also prints the workbook's path and how stale it is
+```
+
+Where the pipeline looks, in order:
+
+1. `$MIDTERM_WORKBOOK`, if set
+2. `config.POLL_WORKBOOK` (the OneDrive path on the author's machine)
+3. `data_store/manual/MidtermPolls2026.xlsx` (the copy that makes this work in
+   Colab, in a container, and on a second machine)
+4. `config.WORKBOOK_EXTRA_PATHS`
+
+Set the environment variable to use a copy elsewhere without editing anything:
+
+```
+import os; os.environ["MIDTERM_WORKBOOK"] = r"D:\path\to\MidtermPolls2026.xlsx"
+```
+
+**Sheets read.** Only the four input sheets: `Polls`, `Races`, `Ratings` and
+`Rating_Scale`. The per-state tabs are generated views that say "Do not edit
+here", so reading them would mean reading the same polls twice.
+
+**The workbook replaces the scrapers rather than joining them.** Two reasons.
+Its `include_in_model` column records a judgement a scraper cannot make,
+separating live general-election matchups from pre-primary ballot tests,
+withdrawn candidates and superseded duplicates; re-scraping would put those
+excluded rows back. And the workbook was built partly from the same Wikipedia
+articles the scraper reads, where the same poll carries a different identifier
+in each source, so it would survive de-duplication twice and be counted twice.
+
+**What the model takes from it.** Polls (stage 03), presidential approval from
+the `US-APPROVAL` rows (stage 04), and current Cook / Inside Elections /
+Sabato ratings from the `Ratings` sheet (stage 05). The last two are
+controlled by `config.WORKBOOK_FEEDS_APPROVAL` and
+`config.WORKBOOK_FEEDS_RATINGS`.
+
+**Conventions it relies on**, all handled in `workbook.py`:
+
+| Workbook | Model |
+| --- | --- |
+| `US-GB` | `GENERIC` |
+| `AL-SEN`, `OH-SEN-S` | `S-AL`, `S-OH-special` |
+| `AL-GOV` | `G-AL` |
+| `AL-02`, `AK-AL` | `H-AL-02`, `H-AK-01` |
+| shares as fractions (0.51) | percentage points (51.0) |
+| option A = D, or the independent where there is no Democrat | main candidate |
+| `LV` / `RV` / `A` / `V` | `lv` / `rv` / `a` / `unknown` |
+
+The percentage scale is detected rather than assumed, so switching the sheet to
+whole numbers later will not silently divide the forecast by 100. Pollster names
+are normalised before house effects are fitted, because the workbook's own notes
+warn that its two sources spell the same pollster differently; left alone, one
+pollster becomes two and its house effect is estimated twice from half the data.
+Sample size is recovered from the margin of error where it is missing.
+
+**Weekly refresh.** Save the workbook, then:
+
+```
+%run run_pipeline.py --from 03
+```
+
+Nothing about the workbook is cached, so a re-run always reads the file on
+disk. `check_data.py` prints when it was last saved and warns if that was more
+than 10 days ago, because a stale workbook is the easiest way to get a
+confident forecast built on old polls.
+
+### Scraping Wikipedia (the fallback)
+
+Used only when no workbook is found. Check it works from your machine before a
+full run:
 
 ```
 %run test_wikipedia_live.py          # a few representative races
@@ -259,7 +334,7 @@ One-shot run:
 
 ```bash
 cd midterms-2026
-pip install pandas numpy scipy pyarrow requests beautifulsoup4 lxml html5lib pyyaml matplotlib pymc arviz
+pip install pandas numpy scipy pyarrow requests beautifulsoup4 lxml html5lib openpyxl pyyaml matplotlib pymc arviz
 export FRED_API_KEY=...   FEC_API_KEY=...        # optional but recommended
 for s in data/01 data/02 data/03 data/04 data/05 data/07 data/06 \
          model/08 model/09 model/10 model/11 model/12 simulation/13 validation/14; do

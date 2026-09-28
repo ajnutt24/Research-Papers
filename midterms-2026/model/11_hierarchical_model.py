@@ -133,6 +133,16 @@ def build_frame() -> tuple[pd.DataFrame, dict]:
     df["shrink_mult"] = np.where(df["weak_lean"], config.NEW_MAP_SHRINK_MULTIPLIER, 1.0)
     df["state_idx"] = pd.Categorical(df["state"], categories=config.STATES).codes
     df["polled"] = df["poll_margin"].notna()
+    # Deliberately generic_mean, not combined_mean. national_environment.parquet
+    # also carries a "seat-implied" estimate, built from House district polls
+    # minus district lean and incumbency, and a "combined" figure that pools the
+    # two. Now that the workbook supplies district polls the seat-implied number
+    # exists (9.6 against the generic ballot's 6.8) and pooling looks like an
+    # upgrade, but it would double-count: those same district polls are already
+    # race-level observations in poll_obs below, so they would inform the
+    # national environment twice and shrink its uncertainty spuriously. The
+    # generic ballot is the only national measurement that enters nowhere else,
+    # which is what makes it the right one here.
     poll_shock_sd = float(nat.poll_shock_sd)
     # Fall back to generic_sd only for parquet written before generic_sd_election
     # existed, so an old cache degrades loudly rather than crashing.

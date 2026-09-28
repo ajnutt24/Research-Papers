@@ -106,7 +106,7 @@ print(f"Working folder: {project}\n")
 missing = []
 for mod, install in [("pandas", "pandas"), ("numpy", "numpy"), ("scipy", "scipy"),
                      ("pyarrow", "pyarrow"), ("requests", "requests"), ("bs4", "beautifulsoup4"),
-                     ("lxml", "lxml"), ("html5lib", "html5lib"),
+                     ("lxml", "lxml"), ("html5lib", "html5lib"), ("openpyxl", "openpyxl"),
                      ("yaml", "pyyaml"), ("matplotlib", "matplotlib"),
                      ("pymc", "pymc"), ("arviz", "arviz"), ("numba", "numba")]:
     try:

@@ -46,6 +46,7 @@ from __future__ import annotations
 
 import hashlib
 import time
+import datetime as dt
 import io
 import os
 import re
@@ -199,6 +200,49 @@ def standardise(df: pd.DataFrame, source: str) -> pd.DataFrame:
     for c in ("dem_candidate", "rep_candidate", "main_is_independent"):
         out[c] = df[c].values if c in df.columns else ("" if c != "main_is_independent" else False)
     return out[OUT_COLS + ["dem_candidate", "rep_candidate", "main_is_independent"]]
+
+
+# --------------------------------------------------------------------------
+# Source 0: the hand-maintained Excel workbook
+# --------------------------------------------------------------------------
+# This is the preferred source. See config.POLL_WORKBOOK and workbook.py for
+# why it replaces the scrapers rather than being averaged in with them.
+def fetch_workbook() -> pd.DataFrame | None:
+    sys.path.insert(0, str(_ROOT))
+    try:
+        import workbook
+    except Exception as e:  # noqa: BLE001
+        log.warning("could not import workbook.py (%s: %s); falling back to scrapers",
+                    type(e).__name__, e)
+        return None
+    path = workbook.find_workbook()
+    if path is None:
+        return None
+    try:
+        raw = workbook.load_polls(path)
+    except Exception as e:  # noqa: BLE001
+        # A workbook that cannot be read must not silently become a fixture
+        # forecast. Say exactly what is wrong, then let the scrapers run.
+        log.error("workbook %s could not be read: %s: %s", path, type(e).__name__, e)
+        log.error("    fix the workbook or unset MIDTERM_WORKBOOK; using scrapers for now")
+        return None
+    if raw is None or not len(raw):
+        return None
+    mtime = dt.datetime.fromtimestamp(path.stat().st_mtime)
+    age_days = (dt.datetime.now() - mtime).days
+    log.info("    workbook last saved %s (%d day(s) ago)", mtime.strftime("%Y-%m-%d %H:%M"), age_days)
+    if age_days > 10:
+        log.warning("    the workbook has not been saved in %d days; the forecast will be "
+                    "as stale as the file if new polls have dropped since", age_days)
+    out = standardise(raw, f"workbook:{path.name}")
+    # The workbook carries its own stable poll_id. Preferring it over a
+    # generated one means a poll keeps the same identity across weekly
+    # refreshes, so de-duplication works and an edited row replaces its
+    # earlier self instead of joining it.
+    if "workbook_poll_id" in raw.columns:
+        wid = raw["workbook_poll_id"].astype(str).str.strip()
+        out["poll_id"] = wid.where(wid.ne("") & wid.ne("nan"), out["poll_id"]).values
+    return out
 
 
 # --------------------------------------------------------------------------
@@ -651,11 +695,13 @@ def filter_to_nominees(df: pd.DataFrame) -> pd.DataFrame:
 def main(force_fixture: bool = False):
     frames, provs = [], []
     report = []
+    sources = [("Excel workbook (MidtermPolls2026.xlsx)", fetch_workbook, "manual"),
+               ("NYT feed (NYT_POLLS_URL)", fetch_nyt_csv, "live"),
+               ("Wikipedia polling tables", fetch_wikipedia, "live"),
+               ("RealClearPolitics scrape", fetch_rcp, "live"),
+               ("manual CSV (data_store/manual/polls_2026.csv)", load_manual, "manual")]
     if not force_fixture:
-        for name, fn, prov in [("NYT feed (NYT_POLLS_URL)", fetch_nyt_csv, "live"),
-                               ("Wikipedia polling tables", fetch_wikipedia, "live"),
-                               ("RealClearPolitics scrape", fetch_rcp, "live"),
-                               ("manual CSV (data_store/manual/polls_2026.csv)", load_manual, "manual")]:
+        for name, fn, prov in sources:
             try:
                 df = fn()
             except Exception as e:  # noqa: BLE001
@@ -669,6 +715,15 @@ def main(force_fixture: bool = False):
                 report.append((name, f"{len(df)} polls"))
                 frames.append(df)
                 provs.append("live" if "live" in df["source"].iloc[0] else ("cache" if "cache" in df["source"].iloc[0] else prov))
+                if fn is fetch_workbook:
+                    # The workbook is curated and already includes what the
+                    # scrapers would fetch. Running them on top would restore
+                    # the rows it deliberately excluded and double-count the
+                    # rest, since the same poll carries a different identifier
+                    # in each source.
+                    for skipped, _, _ in sources[1:]:
+                        report.append((skipped, "not tried (workbook supplied the polls)"))
+                    break
 
     log.info("poll sources tried:")
     for name, outcome in report:

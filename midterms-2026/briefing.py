@@ -328,16 +328,24 @@ def main() -> None:
             f"supports it: polls overstated Democrats in 4 of the last 5 cycles, by 3 points on "
             f"average. But it is not cleanly measured, because the fundamentals are also badly "
             f"wrong in several of the polled races for unrelated reasons, chiefly that they "
-            f"cannot see independent candidates. Switch that assumption off and the Senate "
-            f"figure moves from {s['p_dem_control']:.0%} to roughly 63%. That single parameter, "
-            f"not the polls, is most of the difference between this model and the published "
-            f"forecasters. See `config.POLL_BIAS_MODE`.")
-        add("- **Zero House districts have their own poll.** Every one of the 435 House forecasts "
-            "comes from district partisanship, the race rating and the national environment, "
-            "with no district-level survey anywhere in it. Wikipedia, the model's poll source, "
-            "carries statewide polls in abundance and district polls almost not at all. The "
-            "House number is therefore a statement about the national environment, not about "
-            "435 individual contests.")
+            f"cannot see independent candidates. Turning that assumption off roughly "
+            f"doubles the Senate figure, from {s['p_dem_control']:.0%} to the low sixties. That "
+            f"single parameter, not the polls, is most of the difference between this model and "
+            f"the published forecasters. The alternative setting has its own flaw, documented "
+            f"at `config.POLL_BIAS_MODE`, so neither number should be read as the answer.")
+        n_h_polled = int(hr.polled.sum())
+        if n_h_polled == 0:
+            add("- **No House district has its own poll.** Every one of the 435 House forecasts "
+                "comes from district partisanship, the race rating and the national environment, "
+                "with no district-level survey anywhere in it. The House number is therefore a "
+                "statement about the national environment, not about 435 individual contests.")
+        else:
+            add(f"- **Most House districts have no poll of their own.** {n_h_polled} of 435 "
+                f"districts have at least one district-level survey; the other "
+                f"{435 - n_h_polled} are forecast from district partisanship, the race rating "
+                f"and the national environment. District polling is concentrated in the "
+                f"competitive seats, which is where it matters most, but it means the House "
+                f"number still leans heavily on the national picture.")
         add("- **The model has been slightly underconfident historically.** In the 2010 to 2022 "
             "backtest, races it put at 55% won 73% of the time and races it put at 65% won 79% "
             "of the time. Read its leans as a little stronger than the number says, and note "

@@ -35,11 +35,12 @@ INPUTS = [
     ("gas_prices", "AAA daily gas price", "02",
      "needs gasprices.aaa.com reachable; EIA (in stage 01) is the backup series"),
     ("polls_2026", "2026 polls", "03",
-     "fill data_store/manual/polls_2026.csv (template in manual/templates/)"),
+     "point config.POLL_WORKBOOK at MidtermPolls2026.xlsx, or fill "
+     "data_store/manual/polls_2026.csv (template in manual/templates/)"),
     ("approval_2026", "presidential approval", "04",
-     "fill data_store/manual/approval_manual.csv"),
+     "the workbook's US-APPROVAL rows, or data_store/manual/approval_manual.csv"),
     ("race_ratings_2026", "Cook / Sabato / Inside ratings", "05",
-     "fill data_store/manual/race_ratings_2026.csv"),
+     "the workbook's Ratings sheet, or data_store/manual/race_ratings_2026.csv"),
     ("fundamentals_2026", "partisan lean, incumbency, fundraising", "06",
      "add pvi_manual.csv and incumbency overrides; FEC needs api.open.fec.gov"),
     ("historical_results", "1976-2024 election results", "07", "-"),
@@ -48,6 +49,28 @@ INPUTS = [
 ]
 
 print(f"Forecast date: {config.FORECAST_ASOF}  ({config.DAYS_TO_ELECTION} days to the election)\n")
+
+# The polling workbook is the primary input, and a workbook that was not saved
+# this week is the likeliest way to get a confident forecast built on old polls.
+try:
+    import datetime as _dt
+
+    import workbook as _wb
+    _p = _wb.find_workbook(quiet=True)
+    if _p is None:
+        print("Polling workbook: NOT FOUND (falling back to the Wikipedia scraper)")
+        print("   looked in:")
+        for _c in _wb.candidate_paths():
+            print(f"      {_c}")
+    else:
+        _m = _dt.datetime.fromtimestamp(_p.stat().st_mtime)
+        _age = (_dt.datetime.now() - _m).days
+        print(f"Polling workbook: {_p}")
+        print(f"   last saved {_m:%Y-%m-%d %H:%M} ({_age} day(s) ago)"
+              + ("   <-- STALE, re-save it before trusting this run" if _age > 10 else ""))
+    print()
+except Exception as _e:  # noqa: BLE001
+    print(f"Polling workbook: could not be checked ({type(_e).__name__}: {_e})\n")
 print(f"{'INPUT':38s} {'SOURCE':9s} {'STAGE':5s}")
 print("-" * 70)
 

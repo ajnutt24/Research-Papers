@@ -156,8 +156,40 @@ def fetch_wikipedia_approval() -> tuple[pd.DataFrame | None, str]:
         return None, "missing"
 
 
+def fetch_workbook_approval():
+    """Approval from the hand-maintained Excel workbook, or (None, None).
+
+    Preferred over the scrape because it is a curated series of individual
+    polls with a human's include/exclude decision on each, rather than whatever
+    a page happened to be showing when it was fetched.
+    """
+    if not getattr(config, "WORKBOOK_FEEDS_APPROVAL", True):
+        return None, None
+    sys.path.insert(0, str(_ROOT))
+    try:
+        import workbook
+    except Exception as e:  # noqa: BLE001
+        log.warning("could not import workbook.py (%s: %s)", type(e).__name__, e)
+        return None, None
+    path = workbook.find_workbook(quiet=True)
+    if path is None:
+        return None, None
+    try:
+        df = workbook.load_approval(path)
+    except Exception as e:  # noqa: BLE001
+        log.error("workbook approval could not be read: %s: %s", type(e).__name__, e)
+        return None, None
+    if df is None or not len(df):
+        return None, None
+    df = df.copy()
+    df["date"] = pd.to_datetime(df["date"]).dt.date
+    return df[["date", "approve", "disapprove"]], "manual"
+
+
 def main():
-    df, prov = fetch_live()
+    df, prov = fetch_workbook_approval()
+    if df is None:
+        df, prov = fetch_live()
     if df is None:
         df, prov = fetch_wikipedia_approval()
     if df is None and MANUAL.exists():

@@ -220,9 +220,47 @@ def historical() -> tuple[pd.DataFrame, str]:
     return h, prov
 
 
+def load_workbook_ratings():
+    """Current Cook / Inside Elections / Sabato ratings from the Excel workbook.
+
+    Tried before the scrape, because the rating sites are JavaScript-rendered
+    and block automated requests, so the scrape almost always fails, and before
+    the hand-written CSV, because the workbook keeps ratings as a time series
+    with an as-of date per rater rather than one row per race.
+    """
+    if not getattr(config, "WORKBOOK_FEEDS_RATINGS", True):
+        return None
+    sys.path.insert(0, str(_ROOT))
+    try:
+        import workbook
+    except Exception as e:  # noqa: BLE001
+        log.warning("could not import workbook.py (%s: %s)", type(e).__name__, e)
+        return None
+    path = workbook.find_workbook(quiet=True)
+    if path is None:
+        return None
+    try:
+        df = workbook.load_ratings(path)
+    except Exception as e:  # noqa: BLE001
+        log.error("workbook ratings could not be read: %s: %s", type(e).__name__, e)
+        return None
+    if df is None or not len(df):
+        return None
+    df = df.copy()
+    df["rating"] = df["rating"].map(normalise_rating)
+    df = df.dropna(subset=["rating"])
+    return df if len(df) >= 50 else None
+
+
 def main():
-    df = scrape_all()
-    prov = "live"
+    df = load_workbook_ratings()
+    prov = "manual" if df is not None else None
+    if df is not None:
+        log.info("ratings from the Excel workbook: %d rows covering %d races",
+                 len(df), df.race_id.nunique())
+    if df is None:
+        df = scrape_all()
+        prov = "live"
     if (df is None or len(df) < 50) and MANUAL.exists():
         df = pd.read_csv(MANUAL, comment="#")
         df["rating"] = df["rating"].map(normalise_rating)
