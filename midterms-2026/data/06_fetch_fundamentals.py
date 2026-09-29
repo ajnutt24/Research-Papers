@@ -132,11 +132,6 @@ def partisan_lean(uni: pd.DataFrame) -> tuple[pd.DataFrame, str]:
             uni.loc[hit, "lean_source"] = "workbook_pvi"
             n_h = int(hit[uni.office == "House"].sum())
             log.info("workbook PVI applied to %d race(s) (%d House)", int(hit.sum()), n_h)
-        still = int((uni.lean_source == "state_fallback_new_map").sum())
-        if still:
-            log.warning("%d redistricted race(s) still use their STATE lean, which cannot tell a "
-                        "safe seat from a competitive one. Fill the House rows of the workbook's "
-                        "Races.pvi column (or pvi_manual.csv) to fix this.", still)
 
     if MANUAL_PVI.exists():
         m = pd.read_csv(MANUAL_PVI, comment="#").dropna(subset=["pvi"]).set_index("race_id")["pvi"]
@@ -146,8 +141,18 @@ def partisan_lean(uni: pd.DataFrame) -> tuple[pd.DataFrame, str]:
         prov = "manual"
         log.info("manual PVI applied to %d races", int(hit.sum()))
     else:
-        log.warning("pvi_manual.csv missing: %d new-map districts use their STATE lean",
-                    int(newmap.sum()))
+        log.warning("pvi_manual.csv missing: run  python3 fetch_pvi.py  to build it from "
+                    "The Downballot's new-map presidential results")
+
+    # Reported last, after every source has had its turn, because a warning
+    # raised before the overrides are applied says the opposite of the truth.
+    still = int((uni.lean_source == "state_fallback_new_map").sum())
+    if still:
+        log.warning("%d redistricted race(s) still use their STATE lean, which cannot tell a safe "
+                    "seat from a competitive one. Run  python3 fetch_pvi.py  (or fill the House "
+                    "rows of the workbook's Races.pvi column) to fix this.", still)
+    else:
+        log.info("every race has a per-district lean; none fall back to a state average")
     return uni, prov
 
 

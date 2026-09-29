@@ -129,7 +129,20 @@ def build_frame() -> tuple[pd.DataFrame, dict]:
     nat = load_stage("national_environment").iloc[0]
     natf = load_stage("fundamentals_national").iloc[0]
     df = uni.merge(fund, on="race_id").merge(polls, on="race_id", how="left")
+    # Two different things, and conflating them cost real accuracy.
+    #
+    # weak_lean: the district is on a new map, so past results there say less
+    # about the new lines even when a good lean exists. This drives the extra
+    # shrinkage, and it stays true once a per-district lean is supplied.
+    #
+    # lean_state_fallback: the district has NO per-district lean at all, so its
+    # "fundamentals" are simply its state's average and carry no district-level
+    # information. This is what should move blend weight to the race rating.
+    # Keying that reweighting off weak_lean instead applied it to every
+    # redistricted district even after The Downballot's per-district leans were
+    # loaded, discarding the very data that had just fixed them.
     df["weak_lean"] = df["new_map"].astype(bool) | (df["lean_source"] == "state_fallback_new_map")
+    df["lean_state_fallback"] = df["lean_source"] == "state_fallback_new_map"
     df["shrink_mult"] = np.where(df["weak_lean"], config.NEW_MAP_SHRINK_MULTIPLIER, 1.0)
     df["state_idx"] = pd.Categorical(df["state"], categories=config.STATES).codes
     df["polled"] = df["poll_margin"].notna()
@@ -218,7 +231,8 @@ def main():
     poll_bias = post["poll_bias"].values.ravel()
     alpha = post["alpha_state"].stack(sample=("chain", "draw")).values.T
     delta = post["delta"].stack(sample=("chain", "draw")).values.T
-    out = df[["race_id", "office", "state", "polled", "n_polls", "weak_lean"]].copy()
+    out = df[["race_id", "office", "state", "polled", "n_polls", "weak_lean",
+              "lean_state_fallback"]].copy()
     out["hier_margin"] = theta.mean(0)
     out["hier_sd"] = theta.std(0)
     idio = alpha[:, df["state_idx"].values] + delta

@@ -133,7 +133,7 @@ def fit_stacks() -> pd.DataFrame:
 
 
 def weights_for_2026(stack: pd.DataFrame, horizon: int, polled: np.ndarray, has_rating: np.ndarray,
-                     weak_lean: np.ndarray | None = None) -> pd.DataFrame:
+                     lean_state_fallback: np.ndarray | None = None) -> pd.DataFrame:
     def curve(subset, comp):
         s = stack[(stack.subset == subset) & (stack.component == comp)].sort_values("horizon_days")
         if s.empty:
@@ -171,8 +171,8 @@ def weights_for_2026(stack: pd.DataFrame, horizon: int, polled: np.ndarray, has_
     # weights are fitted on cycles where the fundamentals did carry
     # district-level information, so they cannot know about this case.
     # See config.WEAK_LEAN_FUND_TO_RATING.
-    if weak_lean is not None:
-        move = np.asarray(weak_lean, dtype=bool) & np.asarray(has_rating, dtype=bool)
+    if lean_state_fallback is not None:
+        move = np.asarray(lean_state_fallback, dtype=bool) & np.asarray(has_rating, dtype=bool)
         if move.any():
             frac = float(config.WEAK_LEAN_FUND_TO_RATING)
             out.loc[move, "w_rating"] += out.loc[move, "w_fund"] * frac
@@ -214,7 +214,8 @@ def main(refit: bool = False):
     df["nat_fund_sd"] = float(natf.nat_fund_sd_pred)
     h = config.DAYS_TO_ELECTION
     w = weights_for_2026(stack, h, df.polled.values, df.rating_margin.notna().values,
-                         weak_lean=df.weak_lean.values if "weak_lean" in df else None)
+                         lean_state_fallback=(df.lean_state_fallback.values
+                                              if "lean_state_fallback" in df else None))
     df = pd.concat([df.reset_index(drop=True), w], axis=1)
     df = blend_rows(df)
     df["p_dem_marginal"] = marginal_win_prob(df, poll_shock_sd=float(nat.poll_shock_sd))
@@ -222,7 +223,8 @@ def main(refit: bool = False):
              h, *df[df.polled][["w_hier", "w_fund", "w_rating"]].mean(), *df[~df.polled][["w_hier", "w_fund", "w_rating"]].mean())
     prov = worst_provenance(*[load_meta(n).get("provenance", "unknown") for n in
                               ["hierarchical_estimates_2026", "fundamentals_estimates_2026", "ratings_estimates_2026"]])
-    keep = ["race_id", "office", "state", "polled", "n_polls", "weak_lean", "hier_margin", "hier_sd", "hier_sd_idio",
+    keep = ["race_id", "office", "state", "polled", "n_polls", "weak_lean",
+            "lean_state_fallback", "hier_margin", "hier_sd", "hier_sd_idio",
             "poll_weight_in_hier", "fund_margin", "fund_sd_idio", "fund_nat_loading", "nat_fund_sd", "rating",
             "rating_margin", "rating_sd", "rating_pwin", "w_hier", "w_fund", "w_rating", "blend_margin",
             "blend_sd_idio", "p_dem_marginal", "exp_edge_pts", "main_party", "three_way",
