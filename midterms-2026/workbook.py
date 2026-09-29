@@ -418,12 +418,89 @@ def load_ratings(path: Path | None = None) -> pd.DataFrame | None:
     return out.reset_index(drop=True)
 
 
+# --------------------------------------------------------------------------
+# Race metadata: redistricting status and partisan lean
+# --------------------------------------------------------------------------
+def parse_pvi(v) -> float:
+    """'R+15' -> -15.0, 'D+6' -> +6.0, 'EVEN' -> 0.0, anything else -> NaN.
+
+    Returned on the model's convention throughout: Democratic minus Republican,
+    in percentage points, so a positive number favours the Democrat.
+    """
+    t = str(v or "").strip().upper().replace(" ", "")
+    if not t or t in ("NAN", "NONE", "-"):
+        return float("nan")
+    if t in ("EVEN", "EV", "E", "0", "D+0", "R+0"):
+        return 0.0
+    m = re.fullmatch(r"([DR])\+?(-?\d+(?:\.\d+)?)", t)
+    if not m:
+        return float("nan")
+    val = float(m.group(2))
+    return val if m.group(1) == "D" else -val
+
+
+def load_race_meta(path: Path | None = None) -> pd.DataFrame | None:
+    """Per-race redistricting status and partisan lean from the Races sheet.
+
+    Two columns the model cannot get anywhere else as well.
+
+    `map_version` is a more complete redistricting tracker than the hand-written
+    table in config. Compared on the 2026 House, the workbook marks 173
+    districts as being on a new map against config's 123, and the disagreement
+    is one-directional: every district config flags, the workbook flags too. The
+    50 it adds are Florida (28), Tennessee (9), Alabama (7) and Louisiana (6).
+    Getting this wrong is not cosmetic. Tennessee's 9th, a Memphis seat that
+    every rater in the workbook now calls Solid R on the new map, was being
+    modelled on its old-map lean of D+42.6.
+
+    `pvi` is the per-district partisan lean. It is populated for Senate and
+    governor races and empty for the House at the time of writing, which is
+    exactly the gap that forces 123 redistricted districts onto their state's
+    lean: every California seat, safe and competitive alike, is modelled at
+    D+25.7. Filling the House rows of this column is the single highest-value
+    edit available to the workbook, and it is read here so that doing so needs
+    no code change.
+    """
+    path = path or find_workbook()
+    if path is None:
+        return None
+    races = _read(path, SHEET_RACES, REQUIRED_RACE_COLS)
+    mapping = race_id_map(races)
+    races = races.copy()
+    races["model_race_id"] = races["race_id"].astype(str).str.strip().map(mapping)
+    races = races[races["model_race_id"].notna()]
+    races = races[~races["model_race_id"].isin([APPROVAL_ID, "GENERIC"])]
+
+    mv = races.get("map_version", pd.Series("", index=races.index)).astype(str)
+    out = pd.DataFrame({
+        "race_id": races["model_race_id"].values,
+        # "New 2026 map" means redrawn. A note that the 2022 map stands while
+        # litigation continues is NOT a new map, though it is a reason the
+        # status could change, which is why the text is carried through.
+        "new_map": mv.str.contains(r"new\s*2026", case=False, regex=True).values,
+        "map_version": mv.values,
+        "pvi_lean": [parse_pvi(v) for v in races.get("pvi", pd.Series(np.nan, index=races.index))],
+    }).drop_duplicates("race_id")
+
+    n_new = int(out.new_map.sum())
+    n_pvi = int(out.pvi_lean.notna().sum())
+    n_pvi_house = int(out[out.race_id.str.startswith("H-")].pvi_lean.notna().sum())
+    log.info("workbook race metadata: %d races, %d on a new 2026 map, %d with a partisan lean "
+             "(%d of them House)", len(out), n_new, n_pvi, n_pvi_house)
+    if n_pvi_house == 0:
+        log.warning("    the Races sheet has no House partisan lean (pvi). Every redistricted "
+                    "district therefore falls back to its STATE lean, which cannot tell a safe "
+                    "seat from a competitive one. Filling the House rows of that column is the "
+                    "highest-value edit available to the workbook.")
+    return out
+
+
 if __name__ == "__main__":       # quick check: python3 workbook.py
     p = find_workbook()
     print(f"workbook: {p}")
     if p:
         import datetime as _dt
         print(f"last modified: {_dt.datetime.fromtimestamp(p.stat().st_mtime):%Y-%m-%d %H:%M}")
-        for fn in (load_polls, load_approval, load_ratings):
+        for fn in (load_polls, load_approval, load_ratings, load_race_meta):
             d = fn(p)
             print(f"{fn.__name__}: {0 if d is None else len(d)} rows")

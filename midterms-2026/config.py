@@ -419,6 +419,21 @@ RACE_NOISE_FLOOR_SD = 4.0
 # Extra shrinkage for districts on new maps (multiplier on district-offset sd)
 NEW_MAP_SHRINK_MULTIPLIER = 1.75
 
+# For a district on a brand-new map with no per-district partisan lean, the
+# "fundamentals" estimate is just its STATE's lean, which carries no
+# district-level information at all: every California seat, safe and marginal
+# alike, comes out at D+25.7. The blend nevertheless gave the fundamentals 0.91
+# of the weight against 0.02 for the race rating, so California's 22nd, which
+# every rater calls a Toss-up, was forecast at D+26.9 and 99% Democratic.
+#
+# That ordering is backwards for these races specifically. The rating is the
+# only input that knows where the new lines fall, so this moves most of the
+# fundamentals weight to the rating wherever the lean is a state fallback AND a
+# rating exists. It is a mitigation, not a fix: the real repair is a
+# per-district lean for the new maps, from the workbook's Races.pvi column or
+# pvi_manual.csv, after which no race takes this path at all.
+WEAK_LEAN_FUND_TO_RATING = float(os.environ.get("WEAK_LEAN_FUND_TO_RATING", 0.75))
+
 # Stacking-weight horizon curve. FiveThirtyEight's poll archive holds only the
 # final three weeks before each election, so weights are *estimated* for
 # horizons <= 21 days and *extrapolated* beyond that with an exponential decay

@@ -132,7 +132,8 @@ def fit_stacks() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def weights_for_2026(stack: pd.DataFrame, horizon: int, polled: np.ndarray, has_rating: np.ndarray) -> pd.DataFrame:
+def weights_for_2026(stack: pd.DataFrame, horizon: int, polled: np.ndarray, has_rating: np.ndarray,
+                     weak_lean: np.ndarray | None = None) -> pd.DataFrame:
     def curve(subset, comp):
         s = stack[(stack.subset == subset) & (stack.component == comp)].sort_values("horizon_days")
         if s.empty:
@@ -165,6 +166,19 @@ def weights_for_2026(stack: pd.DataFrame, horizon: int, polled: np.ndarray, has_
     # no rating -> its weight goes to fundamentals
     out.loc[~has_rating, "w_fund"] += out.loc[~has_rating, "w_rating"]
     out.loc[~has_rating, "w_rating"] = 0.0
+    # A state-fallback lean makes the fundamentals component district-blind, so
+    # most of its weight belongs to the rating, which is not. The stacking
+    # weights are fitted on cycles where the fundamentals did carry
+    # district-level information, so they cannot know about this case.
+    # See config.WEAK_LEAN_FUND_TO_RATING.
+    if weak_lean is not None:
+        move = np.asarray(weak_lean, dtype=bool) & np.asarray(has_rating, dtype=bool)
+        if move.any():
+            frac = float(config.WEAK_LEAN_FUND_TO_RATING)
+            out.loc[move, "w_rating"] += out.loc[move, "w_fund"] * frac
+            out.loc[move, "w_fund"] *= (1.0 - frac)
+            log.info("weak-lean reweighting: %d race(s) move %.0f%% of the fundamentals weight "
+                     "to their rating", int(move.sum()), 100 * frac)
     tot = out[["w_hier", "w_fund", "w_rating"]].sum(1)
     out[["w_hier", "w_fund", "w_rating"]] = out[["w_hier", "w_fund", "w_rating"]].div(tot, axis=0)
     return out
@@ -199,7 +213,8 @@ def main(refit: bool = False):
     df = hier.merge(fund.drop(columns=["office"]), on="race_id").merge(rat, on="race_id", how="left")
     df["nat_fund_sd"] = float(natf.nat_fund_sd_pred)
     h = config.DAYS_TO_ELECTION
-    w = weights_for_2026(stack, h, df.polled.values, df.rating_margin.notna().values)
+    w = weights_for_2026(stack, h, df.polled.values, df.rating_margin.notna().values,
+                         weak_lean=df.weak_lean.values if "weak_lean" in df else None)
     df = pd.concat([df.reset_index(drop=True), w], axis=1)
     df = blend_rows(df)
     df["p_dem_marginal"] = marginal_win_prob(df, poll_shock_sd=float(nat.poll_shock_sd))

@@ -94,10 +94,50 @@ def partisan_lean(uni: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     uni = uni.copy()
     uni["lean"] = [lean.get(k, np.nan) for k in key]
     uni["lean_source"] = "538_2022"
+
+    # The workbook's Races sheet tracks redistricting more completely than the
+    # hand-written table in config: 173 House districts on a new 2026 map against
+    # config's 123, one-directionally (it flags every district config does, plus
+    # Florida 28, Tennessee 9, Alabama 7, Louisiana 6). Missing one is not
+    # cosmetic. Tennessee's 9th, a Memphis seat every rater in the workbook now
+    # calls Solid R on the new map, was being modelled on its old-map D+42.6.
+    wb_meta = None
+    try:
+        sys.path.insert(0, str(_ROOT))
+        import workbook as _wb
+        if _wb.find_workbook(quiet=True) is not None:
+            wb_meta = _wb.load_race_meta()
+    except Exception as e:  # noqa: BLE001
+        log.warning("workbook race metadata unavailable (%s: %s)", type(e).__name__, e)
+    if wb_meta is not None and len(wb_meta):
+        extra = wb_meta.set_index("race_id")["new_map"].reindex(uni.race_id).fillna(False).values
+        added = int((extra.astype(bool) & ~uni.new_map.astype(bool)).sum())
+        uni["new_map"] = uni.new_map.astype(bool) | extra.astype(bool)
+        if added:
+            log.info("workbook map_version flagged %d further race(s) as redistricted", added)
+
     st_lean = uni.state.map(lean)
     newmap = uni.new_map.astype(bool)
     uni.loc[newmap, "lean"] = st_lean[newmap]
     uni.loc[newmap, "lean_source"] = "state_fallback_new_map"
+
+    # A per-race lean from the workbook beats the state fallback, and beats a
+    # stale old-map district lean. It is still overridable by pvi_manual.csv
+    # below, which stays the most specific source.
+    if wb_meta is not None and len(wb_meta):
+        wp = wb_meta.dropna(subset=["pvi_lean"]).set_index("race_id")["pvi_lean"]
+        hit = uni.race_id.isin(wp.index)
+        if hit.any():
+            uni.loc[hit, "lean"] = uni.loc[hit, "race_id"].map(wp)
+            uni.loc[hit, "lean_source"] = "workbook_pvi"
+            n_h = int(hit[uni.office == "House"].sum())
+            log.info("workbook PVI applied to %d race(s) (%d House)", int(hit.sum()), n_h)
+        still = int((uni.lean_source == "state_fallback_new_map").sum())
+        if still:
+            log.warning("%d redistricted race(s) still use their STATE lean, which cannot tell a "
+                        "safe seat from a competitive one. Fill the House rows of the workbook's "
+                        "Races.pvi column (or pvi_manual.csv) to fix this.", still)
+
     if MANUAL_PVI.exists():
         m = pd.read_csv(MANUAL_PVI, comment="#").dropna(subset=["pvi"]).set_index("race_id")["pvi"]
         hit = uni.race_id.isin(m.index)
