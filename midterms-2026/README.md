@@ -468,10 +468,36 @@ and must not be treated as final.
 
 ## Known limitations and what to fix first
 
-1. **Fixture inputs.** See the provenance section. The 2026 poll, approval,
-   rating and FEC pulls could not be exercised against live endpoints from
-   the build environment; the parsers are written defensively but untested
-   against current markup. The manual CSV path is the reliable fallback.
+1. **The shared polling error is the biggest single lever, and the default
+   setting has a known cost.** `config.POLL_BIAS_MODE` is `symmetric`: the
+   model makes no claim about which direction polls will miss, which is the
+   defensible reading of the record (the last three midterms missed by +3.9,
+   -0.2 and +0.1, while the big misses of +4.3 in 2016 and +6.9 in 2020 both
+   came with Trump on the ballot). The cost is that pinning the shared term to
+   zero also removes the *correlation* between polls, so the fit treats 58
+   correlated statewide polls as 58 independent readings of the national mood
+   and over-determines it. National uncertainty comes out at sd 1.96, below
+   the 4.03-point polling miss the model itself measures, and the House
+   probability prints as ~100%. Read that as ">99% under this specification",
+   not as certainty, and note the same over-determination makes the Senate and
+   Governor figures more confident than the evidence strictly supports.
+
+   The alternative, `POLL_BIAS_MODE=estimated`, fixes the correlation but then
+   infers a polling correction from the gap between polls and fundamentals,
+   which is confounded because the fundamentals are badly wrong in several
+   polled races for unrelated reasons (they cannot see independent
+   candidates). Sensitivity, 35 days out:
+
+   | Setting | House | Senate | Governor |
+   | --- | --- | --- | --- |
+   | `symmetric` (default) | ~100% | 62% | 56% |
+   | `estimated`, midterm drift prior | 97% | 38% | 31% |
+   | `estimated`, pooled drift prior | 87% | 24% | 20% |
+
+   The backtest does not settle this: its calibration table is unchanged
+   across all three, because it scores the blend components at historical
+   cycles and never re-fits this cycle's shared polling error. Quote the
+   assumption with the number.
 2. **Long-horizon stacking weights are extrapolated.** The public poll
    archive covers the final 21 days of each cycle only. Two months out, the
    polls-vs-fundamentals split comes from `config.STACK_EXTRAPOLATION`, not

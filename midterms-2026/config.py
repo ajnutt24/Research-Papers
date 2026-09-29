@@ -518,8 +518,8 @@ MCMC_TARGET_ACCEPT = 0.9
 # Its job is not only to shift the polls. It is what makes the polls
 # CORRELATED with each other, and that second role turns out to matter more.
 #
-#   "estimated"  poll_bias ~ N(0, poll_shock_sd), free, prior centred on zero.
-#                The default, and the structurally correct specification.
+#   "estimated"  poll_bias ~ N(0, poll_bias_prior_sd), free, prior centred on
+#                zero. Not the default; see the note under "symmetric".
 #                Because the polls share a term, 58 statewide polls count as
 #                strong but not independent evidence about the national
 #                environment. On 2026 data the posterior lands near +3.0,
@@ -541,32 +541,47 @@ MCMC_TARGET_ACCEPT = 0.9
 #
 #   "symmetric"  poll_bias pinned to 0 in the fit, with the correlated polling
 #                error entering only as a zero-mean shared shock in the
-#                simulation. Available as a sensitivity check, NOT recommended,
-#                because it is broken in a way that is easy to miss. Removing
-#                the parameter removes the correlation between polls, so the
-#                fit treats 58 correlated statewide polls as 58 independent
+#                simulation. THIS IS THE DEFAULT, chosen deliberately by the
+#                project owner: it makes no claim about the direction of a
+#                polling miss, which is the position modellib's own
+#                historical_polling_error documents ("the sign of the miss is
+#                unknowable in advance, so we do not centre it"), and it is
+#                closest to how the published forecasters treat the question.
+#
+#                Its cost is real and must be quoted with its output. Removing
+#                the parameter also removes the CORRELATION between polls, so
+#                the fit treats 58 correlated statewide polls as 58 independent
 #                readings of the national environment and over-determines it.
-#                Measured: nat_dev posterior sd falls to 1.96 under "symmetric"
-#                against 2.77 under "estimated", i.e. pinning a parameter made
-#                the model MORE confident, and tightened national uncertainty
-#                below the 4.03-point polling miss the model itself estimates.
-#                The visible symptom is a 100% House probability.
+#                Measured: nat_dev posterior sd falls to 1.96 here against 2.20
+#                under "estimated", i.e. pinning a parameter made the model MORE
+#                confident, and pushed national uncertainty below the 4.03-point
+#                polling miss the model itself estimates. The visible symptom is
+#                a House probability that prints as 100%.
+#
+#                That 100% is a statement about the model, not about the world.
+#                No forecast 36 days out should be read as certainty. Treat it
+#                as ">99% under this specification" and note that the same
+#                over-determination makes the Senate and Governor figures more
+#                confident than the evidence strictly supports.
 #
 # Sensitivity on the workbook data, 36 days out (all with the shared simulation
 # shock in place):
 #                                          House   Senate   Governor  poll_bias
-#   estimated, drift prior 2.27 (default)    97%      38%       31%      +1.96
-#   estimated, drift prior 4.03 (pooled)     87%      24%       20%      +3.08
-#   symmetric                               100%      62%       56%       0 (fixed)
+#   symmetric (default)                     100%      62%       56%       0 (fixed)
+#   estimated, drift prior 2.27               97%      38%       31%      +1.96
+#   estimated, drift prior 4.03 (pooled)      87%      24%       20%      +3.08
 #
-# The first two differ only in POLL_BIAS_PRIOR_CYCLES. Calibrating the drift
-# prior on midterms rather than on all five cycles moves the Senate from 24% to
-# 38%, and the fitted poll_bias lands at +1.96 against a historical midterm mean
-# of +1.29, so the prior is informing the estimate rather than dictating it.
+# The last two differ only in POLL_BIAS_PRIOR_CYCLES. Calibrating the drift prior
+# on midterms rather than on all five cycles moves the Senate from 24% to 38%,
+# and the fitted poll_bias lands at +1.96 against a historical midterm mean of
+# +1.29, so the prior informs the estimate rather than dictating it. That middle
+# row is the closest thing to a compromise if the default's 100% House ever
+# becomes a problem to publish.
 #
-# Note that "symmetric" still returns a 100% House probability even now that 87
-# House districts have their own polls. Its over-determination is a property of
-# the specification, not a symptom of thin House data.
+# Note that "symmetric" returns a 100% House probability even now that 87 House
+# districts have their own polls. Its over-determination is a property of the
+# specification, not a symptom of thin House data, so more district polling will
+# not fix it.
 #
 # The backtest does not settle the choice between these: its calibration table is
 # unchanged across all three, because it scores the blend components at historical
@@ -577,7 +592,7 @@ MCMC_TARGET_ACCEPT = 0.9
 # Neither is close to a published forecaster's Senate number, and this
 # parameter is why. Anyone quoting the Senate figure should quote the
 # assumption with it.
-POLL_BIAS_MODE = os.environ.get("POLL_BIAS_MODE", "estimated")
+POLL_BIAS_MODE = os.environ.get("POLL_BIAS_MODE", "symmetric")
 if POLL_BIAS_MODE not in ("estimated", "symmetric"):
     raise ValueError(f"POLL_BIAS_MODE must be 'estimated' or 'symmetric', got {POLL_BIAS_MODE!r}")
 

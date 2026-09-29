@@ -179,11 +179,17 @@ def main() -> None:
     add("## The short version")
     add("")
     h, s, g = d["House"], d["Senate"], d["Governor"]
+    house_caveat = ""
+    if h["p_dem_control"] >= 0.995:
+        house_caveat = (" Treat that as \"as close to certain as this model gets\" rather than "
+                        "literal certainty. No honest forecast is certain this far out, and a "
+                        "model that prints 100% is reporting the limit of its own assumptions, "
+                        "not a guarantee. See the last section.")
     add(f"**House of Representatives.** {favor_phrase(h['p_dem_control'])}. "
         f"{odds_sentence(h['p_dem_control'])} The most likely result is about "
         f"{h['dem_seats_median']:.0f} Democratic seats out of 435, and the model would not "
         f"be surprised by anything between {h['dem_seats_p10']:.0f} and {h['dem_seats_p90']:.0f}. "
-        f"A party needs {h['majority_threshold']} for control.")
+        f"A party needs {h['majority_threshold']} for control.{house_caveat}")
     add("")
     tie = s.get("p_dem_50_seats_tie")
     tie_note = ""
@@ -315,32 +321,46 @@ def main() -> None:
             f"unevenly distributed. {unpolled_close} competitive races currently have no poll at "
             f"all, so their forecast comes from district partisanship and the national "
             f"environment rather than from anyone asking voters there.")
-        add("- **Polls have been wrong in the same direction twice recently.** 2016 and 2020 both "
-            "understated Republican support in similar states. The model builds in a correlated "
-            "polling error for exactly this, which is why its ranges are wide, but a third miss "
-            "of that kind would still push results toward the Republican end of every range.")
+        add("- **Polls have been wrong in the same direction before.** 2016 and 2020 both "
+            "understated Republican support, by more than 4 points on average. The simulation "
+            "does draw a shared polling error sized on that history, so the ranges above already "
+            "allow for it; a repeat would land results toward the Republican end of every range "
+            "rather than outside them. The narrower point is that the shared error enters when "
+            "the simulation runs but not when the model fits the races, so the widening is "
+            "partial. The next bullet is the same issue from the other side.")
         add("- **Redistricting is unsettled.** Several states are litigating their maps. Where a "
             "district is new or redrawn, the model deliberately widens its uncertainty, because "
             "past results in the old district say less about the new one.")
-        add(f"- **One assumption drives the Senate number.** The model estimates that polls "
-            f"currently overstate Democratic support by about 2 points, from the gap between "
-            f"what polls say and what the economic and approval fundamentals predict. How large "
-            f"that correction should be is the single biggest lever on the Senate figure, and it "
-            f"is genuinely uncertain. Polling misses split sharply by the kind of election: in "
-            f"the last three midterms polls overstated Democrats by 3.9 points, then 0.2 the "
-            f"other way, then 0.1, averaging about 1 point, while in 2016 and 2020, with Trump "
-            f"himself on the ballot, they overstated Democrats by 4.3 and 6.9 points. 2026 is a "
-            f"midterm without Trump on the ballot, so the model calibrates the correction on "
-            f"midterms. Calibrate it on all five cycles instead and the Senate falls from "
-            f"{s['p_dem_control']:.0%} to about 24%; remove the correction entirely and it rises "
-            f"to about 62%. Each of those settings has a documented drawback, at "
-            f"`config.POLL_BIAS_PRIOR_CYCLES` and `config.POLL_BIAS_MODE`, so none of the three "
-            f"should be read as simply the answer.")
-        add("- **The correction is not cleanly measured.** It is inferred from polls disagreeing "
-            "with the fundamentals, and the fundamentals are also badly wrong in several polled "
-            "races for reasons that have nothing to do with polling, chiefly that they cannot see "
-            "independent candidates. Some of the correction is therefore fundamentals error "
-            "wearing a polling-error label.")
+        import config as _cfg
+        if getattr(_cfg, "POLL_BIAS_MODE", "symmetric") == "symmetric":
+            add("- **The model makes no call on which way polls will miss, and that cuts both "
+                "ways.** It assumes polls are as likely to understate Republicans as Democrats, "
+                "which is the defensible position given the record: in the last three midterms "
+                "polls overstated Democrats by 3.9 points, then 0.2 the other way, then 0.1. "
+                "(The big misses, 4.3 in 2016 and 6.9 in 2020, both came with Trump himself on "
+                "the ballot, which is not the case in a midterm.) The cost of that choice is "
+                "that the model treats each state's polls as independent evidence about the "
+                "national mood, when in reality they share whatever error is in the industry's "
+                "methods. It is therefore more confident than the evidence strictly supports, "
+                "across every chamber, and that is the main reason the House figure prints as "
+                "certainty. Switching the assumption on moves the Senate from "
+                f"{s['p_dem_control']:.0%} to about 38%, and the House off 100%. Both settings "
+                "are documented at `config.POLL_BIAS_MODE`.")
+        else:
+            add(f"- **One assumption drives the Senate number.** The model estimates that polls "
+                f"currently overstate Democratic support by about 2 points, inferred from the gap "
+                f"between what polls say and what the economic and approval fundamentals predict. "
+                f"Polling misses split sharply by kind of election: about 1 point on average "
+                f"across the last three midterms, against 4.3 in 2016 and 6.9 in 2020 with Trump "
+                f"on the ballot. 2026 is a midterm, so the correction is calibrated on midterms. "
+                f"Calibrate it on all five cycles and the Senate falls from "
+                f"{s['p_dem_control']:.0%} to about 24%; remove it entirely and it rises to about "
+                f"62%. See `config.POLL_BIAS_PRIOR_CYCLES` and `config.POLL_BIAS_MODE`.")
+            add("- **That correction is not cleanly measured.** It is inferred from polls "
+                "disagreeing with the fundamentals, and the fundamentals are also badly wrong in "
+                "several polled races for reasons unrelated to polling, chiefly that they cannot "
+                "see independent candidates. Some of it is fundamentals error wearing a "
+                "polling-error label.")
         n_h_polled = int(hr.polled.sum())
         if n_h_polled == 0:
             add("- **No House district has its own poll.** Every one of the 435 House forecasts "
