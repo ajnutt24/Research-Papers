@@ -422,7 +422,8 @@ def discover_race_articles() -> dict[str, str]:
     return found
 
 
-def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
+def fetch_wikipedia(limit: int | None = None,
+                    only: set[str] | None = None) -> pd.DataFrame | None:
     """Fetch and parse polling tables for every 2026 race.
 
     Two passes: the hub articles are crawled for real links to race articles,
@@ -441,6 +442,16 @@ def fetch_wikipedia(limit: int | None = None) -> pd.DataFrame | None:
     for rid, title in discovered.items():
         targets.setdefault(rid, title)                     # adds House state pages
     items = list(targets.items())
+    if only:
+        # A House district lives on its state's article, so a watchlist entry
+        # like H-TX-35 has to be matched against the "H-TX-*" page.
+        want = set(only)
+        for rid in only:
+            if rid.startswith("H-") and len(rid.split("-")) == 3:
+                want.add(f"H-{rid.split('-')[1]}-*")
+        items = [(r, t) for r, t in items if r in want]
+        log.info("top-up scope: %d of %d articles (%d race ids requested)",
+                 len(items), len(targets), len(only))
     if limit:
         items = items[:limit]
 
@@ -692,6 +703,83 @@ def filter_to_nominees(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def topup_scope() -> set[str] | None:
+    """Which races the top-up scrape covers, or None for every race.
+
+    Defaults to the watchlist plus the generic ballot. A full crawl is 116
+    articles, and Wikipedia's REST endpoint serves these 1-4MB pages slowly
+    enough that the whole set can take over an hour, which is too slow to run
+    before every forecast. The watchlist plus the national number is around a
+    dozen articles, covers the races the forecast actually turns on, and leaves
+    the rest to the weekly workbook refresh. Every fetched article is cached, so
+    a later full crawl only pays for what it has not already seen.
+
+    Set WORKBOOK_TOPUP_RACES=all for the full crawl.
+    """
+    scope = str(getattr(config, "WORKBOOK_TOPUP_RACES", "watchlist")).strip().lower()
+    if scope in ("all", "*", ""):
+        return None
+    ids = {"GENERIC"}
+    wl = config.DATA_MANUAL / "watchlist.csv"
+    if wl.exists():
+        ids |= set(pd.read_csv(wl, comment="#").race_id.astype(str))
+    return ids
+
+
+def topup_from_scrape(workbook_df: pd.DataFrame) -> pd.DataFrame | None:
+    """Scraped polls that field-closed after the newest one the workbook holds.
+
+    The cutoff is per race, taken from the workbook itself, which is what keeps
+    this from undoing the workbook's curation: every row a human excluded is
+    older than that race's newest included row, so none of them can return. For
+    a race the workbook has no polls for at all, everything scraped is new
+    information and is kept, subject to the same hypothetical and nominee
+    filters the scraped path always applies.
+
+    A one-day grace period is deliberately NOT applied. A poll sharing its field
+    end date with the workbook's newest is far more likely to be that same poll
+    arriving through the other source than a genuinely new one, and a duplicate
+    is worse than a miss: the aggregator treats each row as independent
+    evidence, so a double-counted poll shrinks the uncertainty it should widen.
+    """
+    try:
+        scraped = fetch_wikipedia(only=topup_scope())
+    except Exception as e:  # noqa: BLE001
+        log.warning("top-up scrape failed (%s: %s); keeping the workbook alone",
+                    type(e).__name__, e)
+        return None
+    if scraped is None or not len(scraped):
+        return None
+
+    wb = workbook_df.copy()
+    wb["_end"] = pd.to_datetime(wb["end_date"], errors="coerce")
+    cutoff = wb.groupby("race_id")["_end"].max()
+
+    sc = scraped.copy()
+    sc["_end"] = pd.to_datetime(sc["end_date"], errors="coerce")
+    sc = sc[sc["_end"].notna()]
+    sc["_cut"] = sc["race_id"].map(cutoff)
+    keep = sc["_cut"].isna() | (sc["_end"] > sc["_cut"])
+    out = sc[keep].drop(columns=["_end", "_cut"])
+
+    # Guard against the same poll appearing twice within the scrape itself.
+    out = out.drop_duplicates(subset=["race_id", "pollster", "end_date", "dem_pct", "rep_pct"])
+    if not len(out):
+        log.info("top-up: nothing newer than the workbook")
+        return out
+
+    n_newrace = int(sc.loc[keep, "_cut"].isna().sum())
+    log.info("top-up: %d scraped poll(s) are newer than the workbook (%d in races the workbook "
+             "does not cover)", len(out), n_newrace)
+    by = out.assign(_e=pd.to_datetime(out.end_date)).groupby("race_id").agg(
+        n=("poll_id", "size"), newest=("_e", "max"))
+    for rid, row in by.sort_values("n", ascending=False).head(15).iterrows():
+        log.info("    %-14s +%d poll(s), newest %s", rid, int(row.n), row.newest.date())
+    if len(by) > 15:
+        log.info("    ... and %d more race(s)", len(by) - 15)
+    return out
+
+
 def main(force_fixture: bool = False):
     frames, provs = [], []
     report = []
@@ -716,13 +804,37 @@ def main(force_fixture: bool = False):
                 frames.append(df)
                 provs.append("live" if "live" in df["source"].iloc[0] else ("cache" if "cache" in df["source"].iloc[0] else prov))
                 if fn is fetch_workbook:
-                    # The workbook is curated and already includes what the
-                    # scrapers would fetch. Running them on top would restore
-                    # the rows it deliberately excluded and double-count the
-                    # rest, since the same poll carries a different identifier
-                    # in each source.
-                    for skipped, _, _ in sources[1:]:
-                        report.append((skipped, "not tried (workbook supplied the polls)"))
+                    workbook_df = df
+                    if config.WORKBOOK_TOPUP_SCRAPE:
+                        # Top-up mode. The workbook stays authoritative for
+                        # everything it covers; the scraper is allowed to add
+                        # only polls that field-closed AFTER the newest poll the
+                        # workbook holds for that race. That cutoff is what makes
+                        # this safe: every row the workbook deliberately excluded
+                        # is older than its own newest included row, so none can
+                        # come back, and no poll can be counted twice from the
+                        # two sources. It exists because the workbook is updated
+                        # weekly by hand while polls drop daily, and the last few
+                        # days are exactly the period a trend question is about.
+                        topup = topup_from_scrape(workbook_df)
+                        if topup is not None and len(topup):
+                            report.append(("Wikipedia top-up (polls newer than the workbook)",
+                                           f"{len(topup)} polls"))
+                            frames.append(topup)
+                            provs.append("live")
+                        else:
+                            report.append(("Wikipedia top-up (polls newer than the workbook)",
+                                           "no polls newer than the workbook"))
+                        for skipped, _, _ in sources[2:]:
+                            report.append((skipped, "not tried (workbook supplied the polls)"))
+                    else:
+                        # The workbook is curated and already includes what the
+                        # scrapers would fetch. Running them on top would restore
+                        # the rows it deliberately excluded and double-count the
+                        # rest, since the same poll carries a different identifier
+                        # in each source.
+                        for skipped, _, _ in sources[1:]:
+                            report.append((skipped, "not tried (workbook supplied the polls)"))
                     break
 
     log.info("poll sources tried:")

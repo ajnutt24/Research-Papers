@@ -497,6 +497,23 @@ WORKBOOK_INCLUDE_REVIEW = os.environ.get("WORKBOOK_INCLUDE_REVIEW", "0") not in 
 # expert ratings (stage 05). Both live in the same file, and both are otherwise
 # weak spots: approval is scraped, and ratings fall back to partisan lean for
 # every race a hand-written CSV does not cover.
+# Let the Wikipedia scraper add polls that field-closed AFTER the newest poll
+# the workbook holds for that race, leaving everything else to the workbook.
+# The workbook is updated by hand once a week while polls drop daily, so without
+# this the model is always a few days stale in exactly the window a "how are the
+# races trending" question is about. The per-race cutoff is what makes it safe:
+# every row the workbook deliberately excluded is older than its own newest
+# included row, so none can be restored, and no poll is counted from both
+# sources. Set to False to use the workbook alone.
+WORKBOOK_TOPUP_SCRAPE = os.environ.get("WORKBOOK_TOPUP_SCRAPE", "1") not in ("0", "", "false", "False")
+
+# Which races the top-up scrape covers: "watchlist" (the watchlist plus the
+# generic ballot, about a dozen articles) or "all" (116 articles). Wikipedia
+# serves these 1-4MB pages slowly enough that a full crawl can exceed an hour,
+# so the default covers the races the forecast turns on and leaves the rest to
+# the weekly workbook refresh. Articles are cached either way.
+WORKBOOK_TOPUP_RACES = os.environ.get("WORKBOOK_TOPUP_RACES", "watchlist")
+
 WORKBOOK_FEEDS_APPROVAL = True
 WORKBOOK_FEEDS_RATINGS = True
 
