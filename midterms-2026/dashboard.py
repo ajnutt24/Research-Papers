@@ -90,6 +90,9 @@ def load() -> dict:
     polls = pd.read_parquet(PROC / "polls_2026.parquet")
     polls["end_date"] = pd.to_datetime(polls["end_date"])
 
+    appr = pd.read_parquet(PROC / "approval_2026.parquet")
+    appr["date"] = pd.to_datetime(appr["date"])
+
     seats = {}
     for ch in ("house", "senate", "governor"):
         f = OUT / f"seat_distribution_{ch}.csv"
@@ -97,7 +100,8 @@ def load() -> dict:
             s = pd.read_csv(f)
             s["p"] = s["count"] / s["count"].sum()
             seats[ch] = s
-    return dict(cc=d, races=races, watch=watch, gb=gb, est=est, nat=nat, polls=polls, seats=seats)
+    return dict(cc=d, races=races, watch=watch, gb=gb, est=est, nat=nat, polls=polls,
+                seats=seats, appr=appr)
 
 
 # --------------------------------------------------------------------------
@@ -246,6 +250,116 @@ def svg_seats(s: pd.DataFrame, threshold: int, label: str) -> str:
     return "".join(parts)
 
 
+def svg_approval(appr: pd.DataFrame) -> str:
+    """Net presidential approval over the cycle.
+
+    Shown because it is the largest single input to the fundamentals model and
+    is otherwise invisible on this page: the seat forecast for the 348 districts
+    with no poll of their own rests substantially on it. Net approval rather
+    than the two separate lines, so the chart carries one series against a zero
+    reference and reads at a glance.
+    """
+    a = appr.dropna(subset=["date", "net"]).sort_values("date")
+    if len(a) < 5:
+        return ""
+    # Daily median, then a 21-day centred rolling median: resistant to the house
+    # effects that make individual approval polls range 20 points apart.
+    daily = a.set_index("date")["net"].resample("D").median()
+    trend = daily.rolling(21, center=True, min_periods=4).median().dropna()
+    if len(trend) < 5:
+        return ""
+
+    W, H = 760, 230
+    L, R, T, B = 46, 16, 14, 32
+    x0, x1 = trend.index.min().value, trend.index.max().value
+    lo = float(min(a.net.quantile(0.02), trend.min())) - 2
+    hi = float(max(a.net.quantile(0.98), trend.max())) + 2
+
+    def X(v): return L + (v - x0) / max(x1 - x0, 1) * (W - L - R)
+    def Y(v): return T + (hi - v) / max(hi - lo, 1e-9) * (H - T - B)
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="chart" role="img" aria-label="Net presidential '
+             f'approval, approve minus disapprove, in percentage points">']
+    v = int(np.floor(lo / 10) * 10)
+    while v <= hi:
+        y = Y(v)
+        if T <= y <= H - B:
+            parts.append(f'<line x1="{L}" y1="{y:.1f}" x2="{W-R}" y2="{y:.1f}" class="grid"/>')
+            parts.append(f'<text x="{L-8}" y="{y+4:.1f}" class="ytick">{v:+d}</text>')
+        v += 10
+    if lo < 0 < hi:
+        parts.append(f'<line x1="{L}" y1="{Y(0):.1f}" x2="{W-R}" y2="{Y(0):.1f}" class="zero"/>')
+    for d in pd.date_range(trend.index.min(), trend.index.max(), freq="MS"):
+        x = X(d.value)
+        parts.append(f'<text x="{x:.1f}" y="{H-B+18}" class="xtick">{d:%b}</text>')
+    for _, row in a.iterrows():
+        xx, yy = X(row.date.value), Y(row.net)
+        if T <= yy <= H - B:
+            parts.append(f'<circle cx="{xx:.1f}" cy="{yy:.1f}" r="2.3" class="dot"/>')
+    line = " ".join(f"{X(i.value):.1f},{Y(v):.1f}" for i, v in trend.items())
+    parts.append(f'<polyline points="{line}" class="trend-r"/>')
+    lx, ly = X(trend.index[-1].value), Y(trend.iloc[-1])
+    parts.append(f'<circle cx="{lx:.1f}" cy="{ly:.1f}" r="5" class="endpoint-r"/>')
+    parts.append(f'<text x="{lx-10:.1f}" y="{ly-12:.1f}" class="endlabel">{trend.iloc[-1]:+.0f}</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def svg_cumulative(s: pd.DataFrame, threshold: int, label: str) -> str:
+    """Probability of winning AT LEAST N seats.
+
+    The histogram shows the shape of the distribution; this answers the question
+    a reader actually asks of it, which is the chance of reaching a given
+    number. The majority threshold is marked, and the value there is the
+    headline control probability.
+    """
+    if s is None or not len(s):
+        return ""
+    s = s.sort_values("dem_seats").copy()
+    s["cum"] = s["count"][::-1].cumsum()[::-1] / s["count"].sum()
+    s = s[(s.cum > 0.002) & (s.cum < 0.998)]
+    if len(s) < 3:
+        return ""
+    W, H = 760, 200
+    L, R, T, B = 44, 16, 14, 32
+    lo, hi = int(s.dem_seats.min()), int(s.dem_seats.max())
+
+    def X(v): return L + (v - lo) / max(hi - lo, 1) * (W - L - R)
+    def Y(p): return T + (1 - p) * (H - T - B)
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" class="chart" role="img" aria-label="Probability of '
+             f'winning at least a given number of {E(label)} seats">']
+    for pv in (0, 0.25, 0.5, 0.75, 1.0):
+        y = Y(pv)
+        parts.append(f'<line x1="{L}" y1="{y:.1f}" x2="{W-R}" y2="{y:.1f}" class="grid"/>')
+        parts.append(f'<text x="{L-8}" y="{y+4:.1f}" class="ytick">{pv*100:.0f}%</text>')
+    area = (f"{X(lo):.1f},{Y(0):.1f} "
+            + " ".join(f"{X(r.dem_seats):.1f},{Y(r.cum):.1f}" for r in s.itertuples())
+            + f" {X(hi):.1f},{Y(0):.1f}")
+    parts.append(f'<polygon points="{area}" class="cum-fill"/>')
+    line = " ".join(f"{X(r.dem_seats):.1f},{Y(r.cum):.1f}" for r in s.itertuples())
+    parts.append(f'<polyline points="{line}" class="trend"/>')
+    if lo <= threshold <= hi:
+        tx = X(threshold)
+        row = s[s.dem_seats == threshold]
+        pv = float(row.cum.iloc[0]) if len(row) else float("nan")
+        parts.append(f'<line x1="{tx:.1f}" y1="{T}" x2="{tx:.1f}" y2="{H-B}" class="thresh"/>')
+        if pv == pv:
+            parts.append(f'<circle cx="{tx:.1f}" cy="{Y(pv):.1f}" r="5" class="endpoint"/>')
+            txt = f"{pv*100:.0f}% chance of a majority"
+            flip = tx > (W - R) - 170
+            px = tx - 8 - len(txt) * 5.4 if flip else tx + 8
+            parts.append(f'<rect x="{px-3:.1f}" y="{Y(pv)-18:.1f}" width="{len(txt)*5.4+6:.1f}" '
+                         f'height="14" rx="3" class="plate"/>')
+            parts.append(f'<text x="{px:.1f}" y="{Y(pv)-7:.1f}" class="threshlabel">{txt}</text>')
+    for v in (lo, threshold, hi):
+        if lo <= v <= hi:
+            parts.append(f'<text x="{X(v):.1f}" y="{H-B+18}" class="xtick">{v}</text>')
+    parts.append(f'<text x="{(L+W-R)/2:.1f}" y="{H-4}" class="axislabel">Democratic seats</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
 def bar_cell(margin: float, scale: float = 22.0) -> str:
     """A small diverging bar for one race's margin, centred on zero."""
     frac = max(-1.0, min(1.0, margin / scale))
@@ -313,6 +427,7 @@ def race_table(df: pd.DataFrame, office: str, pcol: str) -> str:
 def build(d: dict) -> str:
     cc, races, watch = d["cc"], d["races"], d["watch"]
     gb, est, nat, polls, seats = d["gb"], d["est"], d["nat"], d["polls"], d["seats"]
+    appr = d["appr"]
 
     gbrow = est[est.race_id == "GENERIC"]
     gb_now = float(gbrow.poll_margin.iloc[0]) if len(gbrow) else float("nan")
@@ -350,11 +465,32 @@ def build(d: dict) -> str:
                     f'{pct(tip.p_dem_caucus)}. Democrats hold {held} seats that are not on the '
                     f'ballot this year.</p>')
 
+    ap = appr.dropna(subset=["date", "net"]).sort_values("date")
+    # Same 21-day window the chart's trend line uses, so the headline figures and
+    # the line's endpoint cannot disagree on the page.
+    win = ap[ap.date >= ap.date.max() - pd.Timedelta(days=21)] if len(ap) else ap
+    ap_now = float(win.approve.median()) if len(win) else float("nan")
+    ap_net = float(win.net.median()) if len(win) else float("nan")
+
     n_h_polled = int((races[races.office == "House"].n_polls.fillna(0) > 0).sum())
     fresh = polls.end_date.max()
     prov = cc["provenance"]
     prov_word = {"live": "live sources", "cache": "cached live sources",
                  "manual": "the curated workbook", "fixture": "PLACEHOLDERS"}.get(prov, prov)
+
+    try:
+        natf = pd.read_parquet(PROC / "fundamentals_national.parquet").iloc[0]
+        nat_fund = f"D+{float(natf.nat_fund_mean):.1f}"
+    except Exception:
+        nat_fund = "n/a"
+    n_unpolled = 435 - n_h_polled
+    n_appr = len(ap)
+    approval_chart = svg_approval(appr)
+    held_not_up = config.SENATE_SEATS_NOT_UP["D"]
+    n_contested = int((races.office == "Senate").sum())
+    need_contested = config.SENATE_MAJORITY - held_not_up
+    cum_chart = svg_cumulative(seats.get("senate"), int(cc["Senate"]["majority_threshold"]),
+                               "Senate")
 
     warn = ""
     if prov == "fixture":
@@ -444,12 +580,16 @@ section{{margin-top:38px}}
 .dot{{fill:var(--ink-3);opacity:.34}}
 .band{{fill:var(--dem);opacity:.15;stroke:none}}
 .trend{{fill:none;stroke:var(--dem);stroke-width:2;stroke-linejoin:round}}
+.trend-r{{fill:none;stroke:var(--rep);stroke-width:2;stroke-linejoin:round}}
+.endpoint-r{{fill:var(--rep);stroke:var(--surface);stroke-width:2}}
+.cum-fill{{fill:var(--dem);opacity:.13;stroke:none}}
 .endpoint{{fill:var(--dem);stroke:var(--surface);stroke-width:2}}
 .endlabel{{fill:var(--ink);font-family:var(--ff-mono);font-size:12px;font-weight:500;text-anchor:end}}
 .bar-d{{fill:var(--dem)}} .bar-r{{fill:var(--rep)}}
 .thresh{{stroke:var(--ink);stroke-width:1.5}}
 .plate{{fill:var(--surface);opacity:.92}}
 .threshlabel{{fill:var(--ink);font-family:var(--ff-mono);font-size:10px;font-weight:500}}
+.axislabel{{fill:var(--ink-3);font-family:var(--ff-body);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;text-anchor:middle}}
 .twrap{{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}}
 table{{width:100%;border-collapse:collapse;font-size:13.5px}}
 th,td{{padding:8px 12px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:middle}}
@@ -509,10 +649,10 @@ footer{{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);
 
 <section>
   <h2>Where control stands</h2>
-  <p class="lead">Each figure is the share of simulated elections that chamber ends up
-  under Democratic control. The bars below each one show the full distribution of seat
-  counts, with the majority line marked, so the mass to the right of that line is the
-  headline number.</p>
+  <p class="lead">Each figure is the share of simulated elections in which that chamber
+  ends under Democratic control. The histogram beneath it shows the full distribution of
+  seat counts, with the majority threshold marked; the share of the distribution lying to
+  the right of that line is the headline figure.</p>
   <div class="grid3">
     {chamber_card("House", cc["House"], 435, seats.get("house"))}
     {chamber_card("Senate", cc["Senate"], 100, seats.get("senate"))}
@@ -522,10 +662,10 @@ footer{{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);
 
 <section>
   <h2>The national environment</h2>
-  <p class="lead">The generic congressional ballot asks which party a voter would back
-  without naming candidates. It is the single most important national input, and the
-  line is a Kalman-filtered estimate rather than a poll average, so it can move between
-  polls and carries its own error band.</p>
+  <p class="lead">The generic congressional ballot asks voters which party they would
+  support without naming candidates. It is the model's largest national input. The line
+  is a filtered estimate rather than a running average, so it continues to move between
+  releases and carries an explicit error band.</p>
   <div class="statrow">
     <div class="stat"><span class="v">D+{gb_now:.1f}</span><span class="l">Generic ballot</span>{delta}</div>
     <div class="stat"><span class="v">D+{float(nat.seat_implied_mean):.1f}</span><span class="l">Implied by district polls</span></div>
@@ -533,11 +673,36 @@ footer{{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);
     <div class="stat"><span class="v">{n_h_polled}</span><span class="l">House seats with a poll</span></div>
   </div>
   {svg_trend(gb, polls)}
-  <p class="note">Dots are individual polls; the shaded band is the filter's 95% interval
-  for the underlying trend. The model deliberately uses the generic ballot alone for the
-  national environment: the district-poll figure beside it is shown for comparison, but
-  feeding it in as well would count those polls twice, since they already inform their
-  own races.</p>
+  <p class="note">Dots are individual polls; the shaded band is the 95% interval for the
+  underlying trend. The national environment is taken from the generic ballot alone. The
+  district-poll figure is reported alongside it for comparison only: those polls already
+  inform their own races, and admitting them here as well would count them twice.</p>
+</section>
+
+<section>
+  <h2>Presidential approval</h2>
+  <p class="lead">Approval of the sitting president is the strongest historical predictor
+  of midterm seat change and the largest term in the model's fundamentals. It carries most
+  of the weight in the {n_unpolled} districts with no poll of their own.</p>
+  <div class="statrow">
+    <div class="stat"><span class="v">{ap_now:.0f}%</span><span class="l">Approve</span></div>
+    <div class="stat"><span class="v">{ap_net:+.0f}</span><span class="l">Net approval</span></div>
+    <div class="stat"><span class="v">{n_appr}</span><span class="l">Approval polls</span></div>
+    <div class="stat"><span class="v">{nat_fund}</span><span class="l">Fundamentals imply</span></div>
+  </div>
+  {approval_chart}
+  <p class="note">Dots are individual polls; the line is a 21-day rolling median. Individual
+  approval readings differ by as much as 20 points depending on house methods, so the trend
+  is taken from medians rather than means.</p>
+</section>
+
+<section>
+  <h2>The Senate, threshold by threshold</h2>
+  <p class="lead">The chance of reaching at least a given number of Senate seats. The value
+  at the majority line is the chamber control figure reported above.</p>
+  {cum_chart}
+  <p class="note">Democrats hold {held_not_up} seats that are not on the ballot this year,
+  so {need_contested} of the {n_contested} contested seats are required for a majority.</p>
 </section>
 
 <section>
@@ -559,27 +724,32 @@ footer{{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);
 </section>
 
 <section>
-  <h2>How to read this</h2>
+  <h2>Reading the forecast</h2>
   <div class="caveats">
     <ul>
-      <li><strong>A probability is not a prediction.</strong> A race at 70% is one the
-      trailing side wins about 3 times in 10. If that happens, the forecast was not wrong.</li>
-      <li><strong>Read the range, not the point.</strong> The median seat count is the middle
-      of a distribution; the 80% range is the forecast.</li>
-      <li><strong>The model makes no call on which way polls will miss.</strong> It treats an
-      error favouring either party as equally likely, which the midterm record supports: the
-      last three missed by +3.9, &minus;0.2 and +0.1 points. The cost is that it treats each
-      state's polls as independent evidence about the national mood when they share whatever
-      error is in the industry's methods, so it is more confident than the evidence strictly
-      supports, in every chamber.</li>
-      <li><strong>Most House districts have no poll of their own.</strong> {n_h_polled} of 435
-      do; the rest are forecast from district partisanship, the race rating and the national
-      environment.</li>
-      <li><strong>Redistricting is unsettled.</strong> Ten states redrew their maps for 2026.
-      Those districts are tagged &ldquo;new map&rdquo; above and carry wider uncertainty,
-      because past results on the old lines say less about the new ones.</li>
-      <li><strong>Late-breaking events are not forecastable.</strong> A scandal or an economic
-      shock in October is not in these numbers and cannot be.</li>
+      <li><strong>Probabilities are not predictions.</strong> A contest forecast at 70%
+      is expected to break the other way in roughly three elections out of ten. Such a
+      result is consistent with the model rather than evidence against it.</li>
+      <li><strong>The range is the forecast.</strong> A median seat count is the centre of
+      a distribution, not a projection. The 80% range describes how precisely the outcome
+      is actually known.</li>
+      <li><strong>The direction of any polling error is treated as unknown.</strong> The
+      model assumes an error favouring either party is equally likely, which the midterm
+      record supports: the last three cycles missed by +3.9, &minus;0.2 and +0.1 points,
+      while the larger misses of 2016 and 2020 both occurred with the president on the
+      ballot. The cost of that assumption is that polls from different states are treated
+      as independent readings of national opinion when in practice they share whatever
+      error is common to the industry's methods. The forecast is therefore somewhat more
+      confident than the evidence strictly supports, in every chamber.</li>
+      <li><strong>Most House districts have no poll of their own.</strong> {n_h_polled} of
+      435 carry at least one district-level survey. The remainder are estimated from
+      district partisanship, the published race ratings and the national environment.</li>
+      <li><strong>Ten states redrew their congressional maps for 2026.</strong> Those
+      districts are marked &ldquo;new map&rdquo; in the tables and carry wider uncertainty,
+      since results on the previous lines say less about the new ones.</li>
+      <li><strong>Late-breaking events are outside the model.</strong> A scandal, an
+      economic shock or an external crisis in the final month is not represented and
+      cannot be.</li>
     </ul>
   </div>
 </section>

@@ -249,17 +249,31 @@ def iter_tables_with_sections(html: str):
 
     soup = BeautifulSoup(html, "lxml")
     for tbl in soup.find_all("table"):
-        heading = ""
+        # Walk backwards collecting the heading TRAIL, not just the nearest
+        # heading, keeping the first one seen at each level.
+        #
+        # On a statewide House article the structure is
+        #     h2  1st congressional district
+        #       h3  Polling
+        #         <table>
+        # so the nearest heading is "Polling" and the district is one level up.
+        # Taking only the nearest meant district_from_heading saw "Polling",
+        # returned None, and every row was dropped: that is why Wikipedia
+        # yielded no House district polls in any state, including the 8-row
+        # Nebraska table that prompted this fix. Joining the trail from
+        # outermost to innermost gives "1st congressional district > Polling",
+        # which identifies the seat and still carries the subsection name for
+        # the primary and hypothetical filters to match on.
+        trail: dict[str, str] = {}
         node = tbl
-        # walk backwards through the document for the nearest heading
-        while node is not None:
+        while True:
             node = node.find_previous(HEADING_TAGS)
             if node is None:
                 break
             text = node.get_text(" ", strip=True)
-            if text:
-                heading = text
-                break
+            if text and node.name not in trail:
+                trail[node.name] = text
+        heading = " > ".join(trail[k] for k in sorted(trail) if trail.get(k))
         try:
             # Wikipedia puts header <th> cells inside <tbody>, which pandas does
             # not always recognise; without header=0 every column comes back as
