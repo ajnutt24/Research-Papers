@@ -716,14 +716,23 @@ def topup_scope() -> set[str] | None:
 
     Set WORKBOOK_TOPUP_RACES=all for the full crawl.
     """
-    scope = str(getattr(config, "WORKBOOK_TOPUP_RACES", "watchlist")).strip().lower()
-    if scope in ("all", "*", ""):
+    scope = str(getattr(config, "WORKBOOK_TOPUP_RACES", "watchlist")).strip()
+    low = scope.lower()
+    if low in ("all", "*", ""):
         return None
     ids = {"GENERIC"}
     wl = config.DATA_MANUAL / "watchlist.csv"
-    if wl.exists():
-        ids |= set(pd.read_csv(wl, comment="#").race_id.astype(str))
-    return ids
+    watch = (set(pd.read_csv(wl, comment="#").race_id.astype(str)) if wl.exists() else set())
+    if low == "watchlist":
+        return ids | watch
+    if low == "senate":
+        # Statewide articles only. Every top-up poll found so far has been a
+        # Senate or generic-ballot poll: Wikipedia's per-state House articles
+        # are the largest files on the site and have yielded nothing, so this
+        # scope costs about a quarter of the time for the same result.
+        return ids | {r for r in watch if r.startswith(("S-", "G-"))}
+    # Anything else is read as an explicit comma-separated list of race ids.
+    return ids | {x.strip() for x in scope.split(",") if x.strip()}
 
 
 def topup_from_scrape(workbook_df: pd.DataFrame) -> pd.DataFrame | None:
@@ -762,8 +771,24 @@ def topup_from_scrape(workbook_df: pd.DataFrame) -> pd.DataFrame | None:
     keep = sc["_cut"].isna() | (sc["_end"] > sc["_cut"])
     out = sc[keep].drop(columns=["_end", "_cut"])
 
-    # Guard against the same poll appearing twice within the scrape itself.
-    out = out.drop_duplicates(subset=["race_id", "pollster", "end_date", "dem_pct", "rep_pct"])
+    # One row per survey, not one per published version.
+    #
+    # Pollsters routinely publish several versions of the same fieldwork: the
+    # base question, a version with leaners pushed, a forced two-way, sometimes
+    # registered and likely voters side by side. Wikipedia lists them as
+    # separate table rows, and keying de-duplication on the percentages as well
+    # as the pollster treats each as an independent poll. It is not: the same
+    # respondents answered once. The aggregator weights by variance and counts
+    # each row as fresh evidence, so a survey published in three versions gets
+    # three times the weight and shrinks the uncertainty it ought to leave
+    # alone. On the 2026-09-30 scrape this was 8 of 28 rows, including three
+    # versions each of one Angus Reid and one Strength In Numbers release.
+    #
+    # Keying on race, pollster and field end date keeps exactly one. Wikipedia
+    # lists the base question first, which is also the version the workbook
+    # marks version 1 and includes, so the two sources stay consistent.
+    out = out.sort_values("end_date").drop_duplicates(
+        subset=["race_id", "pollster", "end_date"], keep="first")
     if not len(out):
         log.info("top-up: nothing newer than the workbook")
         return out

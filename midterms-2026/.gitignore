@@ -15,3 +15,4 @@ outputs/
 # and commit the file. Consider Git LFS if you do.
 data_store/manual/MidtermPolls2026.xlsx
 data_store/manual/*.xlsx
+data_store/manual/new_polls_*.csv
