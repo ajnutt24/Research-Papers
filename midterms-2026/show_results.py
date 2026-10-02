@@ -75,8 +75,24 @@ if rp.exists():
     cols = ["race_id", "office", "polled", "rating", "blend_margin", "p_dem"]
     fmt = {"blend_margin": "{:+.1f}".format, "p_dem": "{:.0%}".format}
 
-    watch_file = PROJECT / "data_store" / "manual" / "watchlist.csv"
+    # --watchlist uses watchlist.csv; --watchlist <name> uses
+    # watchlist_<name>.csv, so a state or theme can have its own list without
+    # disturbing the main one.
+    manual = PROJECT / "data_store" / "manual"
+    name = None
+    for flag in ("--watchlist", "--watch"):
+        if flag in sys.argv:
+            i = sys.argv.index(flag)
+            if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith("-"):
+                name = sys.argv[i + 1].strip().lower()
+            break
+    watch_file = manual / (f"watchlist_{name}.csv" if name else "watchlist.csv")
     use_watch = "--watchlist" in sys.argv or "--watch" in sys.argv
+    if use_watch and name and not watch_file.exists():
+        avail = sorted(f.stem.replace("watchlist_", "") for f in manual.glob("watchlist_*.csv"))
+        print(f"\nNo watchlist named {name!r} ({watch_file} not found).")
+        print(f"Available: {', '.join(avail) if avail else '(none)'}; omit the name for the main list.")
+        raise SystemExit(1)
     if use_watch and not watch_file.exists():
         print(f"\nNo watchlist at {watch_file}")
         use_watch = False
@@ -92,7 +108,10 @@ if rp.exists():
         for office, v in exp.items():
             n = int((sub.office == office).sum())
             print(f"   {office:9s} {v:5.1f} of {n}")
-        for office in ["Senate", "House"]:
+        # Governor was being counted in the expected-seats block but never
+        # printed, which matters for a state-specific list where the
+        # governorship is half the point.
+        for office in ["Senate", "Governor", "House"]:
             part = sub[sub.office == office].sort_values("p_dem")
             if not len(part):
                 continue

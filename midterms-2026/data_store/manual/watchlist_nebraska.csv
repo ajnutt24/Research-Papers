@@ -1,0 +1,11 @@
+# Nebraska, every federal and statewide race on the 2026 ballot.
+# Nebraska splits its electoral votes and its three House seats run very
+# differently from one another, so the state is worth tracking as a unit:
+# NE-02 (Omaha) is competitive, NE-01 (Lincoln) is reachable in a wave, and
+# NE-03 is among the most Republican districts in the country.
+race_id,office,rating_at_entry,note
+S-NE,Senate,Likely R,Dan Osborn (I) vs Pete Ricketts (R); no Democrat on the ballot
+G-NE,Governor,Safe R,
+H-NE-01,House,Safe R,Lincoln and eastern Nebraska
+H-NE-02,House,Lean D,Omaha; the state's one genuinely competitive district
+H-NE-03,House,Safe R,western Nebraska; among the most Republican seats in the country
