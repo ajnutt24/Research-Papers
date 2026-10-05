@@ -466,6 +466,131 @@ appeal to the U.S. Supreme Court, and Virginia and Florida have unresolved
 litigation, so this table should be re-verified before every published run
 and must not be treated as final.
 
+## The economic variables: a specification test, and a null result
+
+`validation/15_state_economy_test.py`, output in `outputs/state_economy_test.txt`
+
+The model carries one economic regressor: year-over-year CPI inflation at
+October, entering the national fundamentals model signed by the president's
+party. It does not earn its place, and this section records the evidence
+because a null result that took work is worth as much as a finding.
+
+### The national model cannot identify an economic term
+
+The national model trains on 19 midterms (1950-2022). On that sample the
+minimum detectable effect for the inflation coefficient, at 80% power and 5%
+two-sided, is **1.21 points of House margin per point of CPI**. Across the
+observed range of signed inflation in the training data (a span of 20.8 points)
+that implies a **25-point swing in the national House vote**. No real economic
+effect is that large. The design can only detect effects too big to exist, so
+the fitted coefficient (-0.198, standard error 0.432, t = -0.46) is what noise
+looks like.
+
+Leave-one-out cross-validation agrees. Root mean squared error across the 19
+cycles, lower is better:
+
+| Specification | LOO RMSE |
+| --- | --- |
+| no economic term | **3.80** |
+| unemployment, change | 3.88 |
+| CPI, change | 4.13 |
+| unemployment, level | 4.15 |
+| CPI, level (what the model runs) | 4.68 |
+
+A Hibbs-style real disposable income growth term (FRED `A229RX0`, available for
+16 of the cycles) scores 4.28 against 4.06 for the null **with the wrong sign**.
+No specification produces |t| above 1.
+
+The term was also confounded until recently. The raw correlation between signed
+CPI and House margin is -0.557, which looks like signal; the partial correlation,
+holding approval and the presidential-party sign constant, is **+0.065**. The
+cause is structural: `corr(s x CPI, s x midterm) = +0.763`, because CPI is almost
+always positive, so `s x CPI` is nearly `s x constant`, which *is* the midterm
+penalty regressor. Centering CPI on its training mean breaks that (correlation
+-0.002) and tightens the midterm penalty `b_mid` by 17%, from +/-1.33 to +/-1.11.
+Centering does not change `b_cpi`, because it is a linear reparameterization, and
+it does not move the 2026 forecast.
+
+### The seat model has the power, and still finds nothing
+
+The seat model is the only place in the project with enough degrees of freedom
+to adjudicate, so the local-economy hypothesis was tested there: after
+conditioning on a race's partisan lean, its incumbency and the national
+environment of its cycle, does a state whose unemployment is unusually high (or
+deteriorating unusually fast) relative to the nation swing against the party
+held responsible?
+
+* **Data.** State unemployment rates for all 50 states, monthly from January
+  1976, from FRED (`CAUR`, `IAUR`, ...), read at October of each election year
+  alongside the 12- and 24-month changes, as deviations from the national
+  reading. Levels alone are structural (West Virginia runs above the nation in
+  good years and bad) and the partisan lean already encodes that.
+* **Sample.** 966 contested Senate and Governor races, 22 even-year cycles,
+  1982-2024.
+* **Referents.** Two, tested separately: the president's party (the referendum
+  story) and the party holding the seat (the accountability story). Both signed
+  so the predicted coefficient is **negative**.
+* **Specifications.** Cycle fixed effects; cycle plus state fixed effects
+  (within-state movement only, the strictest design); and the national margin as
+  a regressor, which is the shape `modellib.fit_seat_model` actually uses.
+* **Criterion.** Leave-one-cycle-out prediction, not in-sample fit. Races in one
+  election share a national environment, so leaving out a single race would leak
+  that cycle into its own prediction. Standard errors are clustered by cycle for
+  the same reason.
+
+Nothing clears the bar. 24 terms were tested, at which point roughly 1.2 false
+positives at |t| >= 2 are expected by chance, so the family-wise threshold is
+|t| >= 3.08. The largest |t| anywhere is 2.08, and no term improves
+leave-one-cycle-out error by more than 0.04 points of RMSE on a baseline of 16.
+
+One pattern looked real: `seat_dev_lv`, the state's unemployment level relative
+to the nation signed by the party holding the seat, is correctly signed and
+almost identical in size in all three specifications (-0.70, -0.79, -0.71),
+about -1.0 points of margin per standard deviation. That is what a small true
+effect looks like, and also what three correlated views of the same noise look
+like.
+
+The way to tell them apart is a sample that did not choose the term. House races
+are that sample: 4,027 contested races, 12 cycles 1978-2024, a much stronger
+lean (the same district two years earlier rather than the same state six years
+earlier), and the same state-level economic reading. Pre-specifying the term
+makes it a single test with no multiple-comparison penalty:
+
+| Specification | n | coef | se | t | minimum detectable effect |
+| --- | --- | --- | --- | --- | --- |
+| cycle FE | 4,027 | -0.045 | 0.134 | -0.34 | 0.44 pts/sd |
+| cycle + state FE | 4,027 | +0.054 | 0.133 | +0.41 | 0.44 pts/sd |
+| national margin | 4,027 | -0.085 | 0.260 | -0.33 | 0.85 pts/sd |
+
+This is an **informative** null, not an underpowered one. The House sample can
+detect an effect of 0.44 points per standard deviation at 80% power, less than
+half the -1.0 the Senate and Governor sample suggested, and finds -0.05. The
+earlier pattern was noise. Restricting to midterm cycles only (551 state races,
+1,355 House races) changes nothing.
+
+### What this does and does not establish
+
+It rules out **state unemployment** as a seat-level regressor. It does not rule
+out the local economy. Unemployment is the least elastic indicator available: it
+moves slowly and is measured for a state, not for the people who vote in a given
+race. Three things would make the hypothesis testable again rather than merely
+unproven:
+
+1. **District-level conditions.** A county-to-district crosswalk would let the
+   economic reading match the electorate instead of averaging a whole state.
+   That is the only extension with a real prospect of finding what this test
+   could not.
+2. **A faster indicator.** Gas prices, grocery prices or local house prices move
+   on an election timescale in a way unemployment does not.
+3. **Perceptions rather than conditions.** The economic-voting literature finds
+   that *perceived* conditions predict votes far better than measured ones, and
+   perceptions are increasingly partisan rather than local.
+
+Until one of those is in the data, the supported position is that the model's
+economic content is already carried by presidential approval, which voters
+report *after* they have formed a view of the economy, and that a separate
+economic regressor adds confounding rather than information.
+
 ## Known limitations and what to fix first
 
 1. **The shared polling error is the biggest single lever, and the default
@@ -517,6 +642,14 @@ and must not be treated as final.
 7. **War salience** for 2026 is a placeholder (0.5) until
    `war_salience_2026.csv` carries a measured series (e.g. news-attention
    volume, weeks since escalation).
+8. **The CPI term is retained but unsupported.** See the section above: on
+   leave-one-out cross-validation the national model predicts better with no
+   economic term (RMSE 3.80) than with the CPI level it currently carries
+   (4.68), and a seat-level local-economy term does not survive testing either.
+   The term is centered, so it no longer confounds the midterm penalty, and it
+   barely moves the 2026 forecast because approval absorbs most of the economy's
+   political effect. But it is there on the strength of the literature, not of
+   this model's own evidence, and a write-up should say so.
 
 ## Backtest results (election-eve, leave-one-cycle-out weights)
 

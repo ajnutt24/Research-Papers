@@ -26,6 +26,7 @@ Outputs (data_store/processed/)
 -------------------------------
 economic_monthly.parquet          date, cpi, cpi_yoy, unrate, gasregw
 economic_cycle_features.parquet   cycle, cpi_yoy_oct, unrate_oct  (1946..2026)
+state_unemployment.parquet        state, date, unrate  (50 states, monthly, 1976..)
 """
 from __future__ import annotations
 
@@ -171,6 +172,62 @@ def state_income_growth(force: bool = False) -> tuple[pd.DataFrame, str]:
     return out, "live"
 
 
+
+# --------------------------------------------------------------------------
+# State unemployment (the local-economy regressor for the seat model)
+# --------------------------------------------------------------------------
+# FRED's state unemployment-rate series id is the two-letter code plus "UR"
+# (CAUR, IAUR, ...), seasonally adjusted, monthly, from January 1976. That start
+# date matters: it is the first cycle the race-level results mirror covers, so
+# every historical Senate and Governor race in the training universe can be
+# matched to a local economic reading.
+#
+# Why a LEVEL is not the interesting quantity: state unemployment levels are
+# structural. West Virginia runs above the nation in good years and bad, and a
+# level regressor would mostly be picking up that fixed character of a state,
+# which the partisan lean already encodes. The quantity that could carry
+# information a lean does not is the DEVIATION, both in level (how unusual is
+# this state right now relative to the nation) and in change (did it deteriorate
+# faster than the nation over the cycle). Both are built downstream, in the
+# analysis that decides whether the term belongs; this function only fetches.
+STATE_UNRATE_PATTERN = "{st}UR"
+
+
+def state_unemployment(force: bool = False) -> tuple[pd.DataFrame, str]:
+    """Monthly unemployment rate per state. Returns (long frame, provenance).
+
+    Unlike state personal income this is not behind an opt-in flag: 50 series
+    cache cleanly, and the local-economy test reads it directly. A state that
+    fails is logged and skipped rather than failing the stage, so a partial
+    fetch still produces a usable panel.
+    """
+    import time as _time
+    started = _time.monotonic()
+    budget_s = float(os.environ.get("STATE_UNRATE_BUDGET_S", 300))
+    frames, provs, missing = [], [], []
+    for st in config.STATES:
+        if _time.monotonic() - started > budget_s:
+            log.warning("state unemployment: %.0fs budget reached after %d states; "
+                        "continuing with what was fetched", budget_s, len(frames))
+            break
+        ser, prov = fred_series(STATE_UNRATE_PATTERN.format(st=st), force=force)
+        if ser.empty:
+            missing.append(st)
+            continue
+        provs.append(prov)
+        frames.append(pd.DataFrame({"state": st, "date": ser.index, "unrate": ser.values}))
+    if not frames:
+        log.warning("state unemployment unavailable from FRED; the local-economy term "
+                    "cannot be tested")
+        return pd.DataFrame(), "missing"
+    out = pd.concat(frames, ignore_index=True).sort_values(["state", "date"])
+    if missing:
+        log.warning("state unemployment: %d state(s) missing: %s", len(missing), ", ".join(missing))
+    log.info("state unemployment: %d states, %s to %s",
+             out.state.nunique(), out.date.min().date(), out.date.max().date())
+    return out.reset_index(drop=True), worst_provenance(*provs)
+
+
 def main(force: bool = False):
     provs = []
     series = {}
@@ -231,6 +288,19 @@ def main(force: bool = False):
                    {"n_states": int(inc.state.nunique())})
     else:
         log.info("no state income data; the state-economy term will be absent")
+
+    # State unemployment: the panel the local-economy specification test reads.
+    # Skippable for a fast refresh (STATE_UNRATE=0), but on by default because
+    # it is cached and no other stage has to wait for it.
+    if os.environ.get("STATE_UNRATE", "1") == "1":
+        sun, sun_prov = state_unemployment(force=force)
+        if len(sun):
+            save_stage(sun, "state_unemployment", sun_prov,
+                       {"n_states": int(sun.state.nunique()),
+                        "first": str(sun.date.min().date()), "last": str(sun.date.max().date()),
+                        "series_pattern": STATE_UNRATE_PATTERN})
+    else:
+        log.info("state unemployment: skipped (STATE_UNRATE=0)")
 
     save_stage(feats, "economic_cycle_features", prov,
                {"cpi_unrate_corr": corr,
