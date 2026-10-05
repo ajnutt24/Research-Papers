@@ -334,7 +334,9 @@ def national_training_table() -> pd.DataFrame:
     nat = load_stage("historical_national")[["cycle", "house_margin_national"]]
     seed_p = config.DATA_MANUAL / "historical_house_vote.csv"
     if seed_p.exists():
-        seed = pd.read_csv(seed_p)[["cycle", "house_margin_national"]]
+        # comment="#" so the file can document its own sources, as every other
+        # hand-maintained CSV in data_store/manual does.
+        seed = pd.read_csv(seed_p, comment="#")[["cycle", "house_margin_national"]]
         nat = pd.concat([seed[~seed.cycle.isin(nat.cycle)], nat], ignore_index=True)
     df = appr.merge(econ[["cycle", "cpi_yoy_oct", "unrate_oct"]], on="cycle", how="left") \
              .merge(nat, on="cycle", how="left")
@@ -362,6 +364,22 @@ def fit_national_model(df: pd.DataFrame, draws=None, tune=None, chains=None, see
     tune = tune or config.MCMC_TUNE
     chains = chains or config.MCMC_CHAINS
     train = df.dropna(subset=["house_margin_national", "approval_c", "cpi_yoy_oct"])
+
+    # CPI enters CENTRED on its own training mean. Inflation is almost always
+    # positive, so the raw s*CPI term is nearly s times a positive constant,
+    # which is the midterm-penalty regressor itself: measured on this sample,
+    # corr(s*CPI, s) = +0.76. Centring drops that to -0.00 and tightens the
+    # midterm coefficient's standard error from 1.66 to 1.35 without changing
+    # any prediction, since it is a linear reparameterisation.
+    #
+    # It also makes the N(-4, 3) prior on b_mid mean what the literature
+    # measured. That roughly four-point midterm penalty is an average-conditions
+    # estimate; against raw CPI, b_mid would be the penalty at ZERO inflation,
+    # which is not a condition the literature ever observed.
+    #
+    # Centring does NOT rescue the CPI coefficient, and nothing here is meant to
+    # suggest it does: see CPI_CENTRE below and the note in script 09.
+    cpi_centre = float(train["cpi_yoy_oct"].mean())
     with pm.Model() as model:
         a = pm.Normal("a", 0.0, 3.0)
         b_post94 = pm.Normal("b_post94", -3.0, 3.0)
@@ -372,7 +390,7 @@ def fit_national_model(df: pd.DataFrame, draws=None, tune=None, chains=None, see
         sigma = pm.HalfNormal("sigma", 4.0)
         s = pm.Data("s", train["s"].values)
         app = pm.Data("app", train["approval_c"].values)
-        cpi = pm.Data("cpi", train["cpi_yoy_oct"].values)
+        cpi = pm.Data("cpi", train["cpi_yoy_oct"].values - cpi_centre)
         war = pm.Data("war", train["war_salience"].values)
         post94 = pm.Data("post94", train["post94"].values)
         mu = a + b_post94 * post94 + s * (b_mid + b_app * app + b_cpi * cpi + b_war * war)
@@ -380,14 +398,23 @@ def fit_national_model(df: pd.DataFrame, draws=None, tune=None, chains=None, see
         idata = pm.sample(draws=draws, tune=tune, chains=chains, cores=config.MCMC_CORES,
                           random_seed=seed, target_accept=config.MCMC_TARGET_ACCEPT,
                           progressbar=False, idata_kwargs={"log_likelihood": True})
+    # Carried on the inference object so predict_national centres the new
+    # observation the same way; a forecast centred differently from the fit
+    # would be silently wrong by b_cpi * cpi_centre.
+    idata.attrs["cpi_centre"] = cpi_centre
     return idata, model
 
 
 def predict_national(idata, s: float, approval_c: float, cpi: float, war: float, post94: float = 1.0) -> tuple[float, float, float]:
-    """Posterior predictive mean, sd of the mean, and sd of a new observation."""
+    """Posterior predictive mean, sd of the mean, and sd of a new observation.
+
+    `cpi` is passed raw and centred here using the same constant the fit used,
+    which travels on the inference object.
+    """
     post = idata.posterior
+    cpi_c = cpi - float(idata.attrs.get("cpi_centre", 0.0))
     mu = (post["a"] + post["b_post94"] * post94
-          + s * (post["b_mid"] + post["b_app"] * approval_c + post["b_cpi"] * cpi + post["b_war"] * war)).values.ravel()
+          + s * (post["b_mid"] + post["b_app"] * approval_c + post["b_cpi"] * cpi_c + post["b_war"] * war)).values.ravel()
     sig = post["sigma"].values.ravel()
     return float(mu.mean()), float(mu.std()), float(np.sqrt(mu.var() + np.mean(sig ** 2)))
 

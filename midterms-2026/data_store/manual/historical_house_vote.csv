@@ -1,14 +1,27 @@
+# National House popular-vote margin (D minus R, percentage points) for the
+# midterm cycles the race-level mirror does not cover (it holds 1976-2024 with
+# 1982 partial and 1986-1996 absent). Script 09 reads this through
+# modellib.national_table(); without it the national model would train on 8
+# observations instead of 19.
+#
+# Verified 2026-10-05 against the results table of each per-year Wikipedia
+# article, '<year> United States House of Representatives elections'. The margin
+# is computed from the published raw vote totals over the total implied by the
+# published percentages, so third-party votes sit in the denominator exactly as
+# they do in the mirror-derived cycles. Both routes (raw votes, percentages)
+# agree to within 0.18 points on every cycle.
+#
+# 1978 is omitted: the mirror covers it from race-level returns.
 cycle,house_margin_national,verify,note
-1946,-9.2,True,"approx. D 44.3 / R 53.5 - verify against Clerk of the House statistics"
-1950,-0.1,True,"approx. D 48.9 / R 49.0"
-1954,5.4,True,"approx. D 52.5 / R 47.1"
-1958,12.6,True,"approx. D 56.2 / R 43.6"
-1962,5.4,True,"approx. D 52.5 / R 47.1"
-1966,2.6,True,"approx. D 50.9 / R 48.3"
-1970,8.3,True,"approx. D 53.4 / R 45.1"
-1974,17.1,True,"approx. D 57.6 / R 40.5"
-1978,9.0,True,"approx. D 53.7 / R 44.7"
-1982,11.9,True,"approx. D 55.2 / R 43.3"
-1986,9.9,True,"approx. D 54.5 / R 44.6"
-1990,7.9,True,"approx. D 52.9 / R 45.0"
-1994,-7.0,True,"approx. D 45.4 / R 52.4"
+1946,-8.51,False,"D 45.0 / R 53.5; verified against the 1946 Wikipedia results table 2026-10-05"
+1950,0.64,False,"D 49.6 / R 48.9; verified against the 1950 Wikipedia results table 2026-10-05"
+1954,5.52,False,"D 52.5 / R 47.0; verified against the 1954 Wikipedia results table 2026-10-05"
+1958,12.41,False,"D 56.0 / R 43.6; verified against the 1958 Wikipedia results table 2026-10-05"
+1962,5.27,False,"D 52.4 / R 47.1; verified against the 1962 Wikipedia results table 2026-10-05"
+1966,2.67,False,"D 50.9 / R 48.2; verified against the 1966 Wikipedia results table 2026-10-05"
+1970,8.71,False,"D 53.6 / R 44.9; verified against the 1970 Wikipedia results table 2026-10-05"
+1974,16.8,False,"D 57.5 / R 40.7; verified against the 1974 Wikipedia results table 2026-10-05"
+1982,11.98,False,"D 55.2 / R 43.4; verified against the 1982 Wikipedia results table 2026-10-05"
+1986,9.9,False,"D 54.3 / R 44.4; verified against the 1986 Wikipedia results table 2026-10-05"
+1990,7.81,False,"D 52.1 / R 44.3; verified against the 1990 Wikipedia results table 2026-10-05"
+1994,-6.78,False,"D 44.7 / R 51.5; verified against the 1994 Wikipedia results table 2026-10-05"
