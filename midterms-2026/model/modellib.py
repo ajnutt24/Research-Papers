@@ -196,6 +196,42 @@ def house_effects(polls: pd.DataFrame, prior_bias: dict[str, float] | None = Non
     return h, g
 
 
+def poll_age_weight(age_days, ref_days: float | None = None,
+                    weight_at_ref: float | None = None,
+                    floor: float | None = None):
+    """Multiplicative weight for a poll `age_days` old, in [floor, 1].
+
+    Exponential decay calibrated to pass through a chosen anchor:
+
+        tau = ref_days / ln(1 / weight_at_ref)
+        w   = exp(-age / tau),  clipped below at `floor`
+
+    With the defaults (1/3 of full weight at 90 days) tau is 81.9 days. A poll's
+    weight in the Kalman filter is its inverse observation variance, so callers
+    divide the variance by this number rather than multiplying anything.
+
+    Negative ages (a poll dated after the as-of date) are clamped to zero rather
+    than rewarded, which keeps a mis-parsed future date from outweighing every
+    real poll in the race.
+    """
+    ref = float(config.POLL_AGE_REF_DAYS if ref_days is None else ref_days)
+    w_ref = float(config.POLL_AGE_WEIGHT_AT_REF if weight_at_ref is None else weight_at_ref)
+    lo = float(config.POLL_AGE_MIN_WEIGHT if floor is None else floor)
+    if not (0.0 < w_ref < 1.0) or ref <= 0:
+        raise ValueError(f"poll age anchor must have 0 < weight_at_ref < 1 and ref_days > 0, "
+                         f"got weight_at_ref={w_ref}, ref_days={ref}")
+    tau = ref / np.log(1.0 / w_ref)
+    age = np.clip(np.asarray(age_days, dtype=float), 0.0, None)
+    return np.clip(np.exp(-age / tau), lo, 1.0)
+
+
+def age_adjusted_var(var, end_dates, asof: date, **kw):
+    """Observation variances inflated for poll age. See poll_age_weight."""
+    ages = np.array([(asof - d).days for d in pd.to_datetime(pd.Series(end_dates)).dt.date],
+                    dtype=float)
+    return np.asarray(var, dtype=float) / poll_age_weight(ages, **kw), ages
+
+
 def aggregate_polls(polls: pd.DataFrame, asof: date, election: date,
                     prior_bias: dict[str, float] | None = None) -> tuple[pd.DataFrame, pd.Series, pd.Series]:
     """House-effect-adjusted Kalman estimate for each race_id in `polls`.
@@ -203,18 +239,42 @@ def aggregate_polls(polls: pd.DataFrame, asof: date, election: date,
     df = polls.copy()
     df = df[pd.to_datetime(df["end_date"]).dt.date <= asof]
     if df.empty:
-        return pd.DataFrame(columns=["race_id", "poll_margin", "poll_sd", "poll_sd_election", "n_polls", "last_poll_date"]), pd.Series(dtype=float), pd.Series(dtype=float)
+        return (pd.DataFrame(columns=["race_id", "poll_margin", "poll_sd", "poll_sd_election",
+                                      "n_polls", "effective_polls", "mean_poll_age_days",
+                                      "last_poll_date", "days_since_last_poll"]),
+                pd.Series(dtype=float), pd.Series(dtype=float))
     df["var"] = [poll_margin_variance(n, d) for n, d in zip(df["sample_size"], df["dem_pct"])]
     df["population"] = df["population"].fillna("unknown")
-    h, g = house_effects(df, prior_bias=prior_bias)
+    # House effects first, and deliberately on the UNAGED variances: see
+    # config.POLL_AGE_APPLIES_TO_HOUSE_EFFECTS. A pollster's lean is a property
+    # of the pollster, so an old poll is just as informative about it.
+    if getattr(config, "POLL_AGE_APPLIES_TO_HOUSE_EFFECTS", False):
+        he_in = df.assign(var=age_adjusted_var(df["var"].values, df["end_date"], asof)[0])
+    else:
+        he_in = df
+    h, g = house_effects(he_in, prior_bias=prior_bias)
     df["margin_adj"] = df["margin"] - df["pollster"].map(h) - df["population"].map(g)
+
+    # Age-inflated variances for the race-level filter. A poll's weight there is
+    # its inverse variance, so dividing by the age weight is exactly "an older
+    # poll counts less".
+    df["var_aged"], df["age_days"] = age_adjusted_var(df["var"].values, df["end_date"], asof)
+    df["age_weight"] = df["var"] / df["var_aged"]
+
     rows = []
     for rid, grp in df.groupby("race_id"):
         kind = "generic" if rid == "GENERIC" else "race"
         d = pd.to_datetime(grp["end_date"]).dt.date.values
-        k = kalman_margin(d, grp["margin_adj"].values, grp["var"].values, asof, election, kind=kind)
+        k = kalman_margin(d, grp["margin_adj"].values, grp["var_aged"].values, asof, election, kind=kind)
+        # n_polls counts surveys; effective_polls counts them in units of a
+        # fresh poll, which is the honest number when a race's only evidence is
+        # old. A race with n_polls=1 and effective_polls=0.05 is unpolled in
+        # everything but name.
         rows.append({"race_id": rid, "poll_margin": k["mean"], "poll_sd": k["sd_asof"],
-                     "poll_sd_election": k["sd_election"], "n_polls": k["n"], "last_poll_date": k["last_date"],
+                     "poll_sd_election": k["sd_election"], "n_polls": k["n"],
+                     "effective_polls": float(grp["age_weight"].sum()),
+                     "mean_poll_age_days": float(grp["age_days"].mean()),
+                     "last_poll_date": k["last_date"],
                      "days_since_last_poll": (asof - k["last_date"]).days})
     return pd.DataFrame(rows), h, g
 

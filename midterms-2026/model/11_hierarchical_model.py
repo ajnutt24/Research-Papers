@@ -125,7 +125,8 @@ log = get_logger("11_hier")
 def build_frame() -> tuple[pd.DataFrame, dict]:
     uni = load_stage("fundamentals_2026")[["race_id", "office", "state", "district", "new_map", "lean_source"]]
     fund = load_stage("fundamentals_estimates_2026")[["race_id", "fund_margin", "fund_sd_idio", "fund_nat_loading"]]
-    polls = load_stage("poll_estimates_2026")[["race_id", "poll_margin", "poll_sd_election", "n_polls"]]
+    polls = load_stage("poll_estimates_2026")[["race_id", "poll_margin", "poll_sd_election",
+                                              "n_polls", "effective_polls", "mean_poll_age_days"]]
     nat = load_stage("national_environment").iloc[0]
     natf = load_stage("fundamentals_national").iloc[0]
     df = uni.merge(fund, on="race_id").merge(polls, on="race_id", how="left")
@@ -231,7 +232,8 @@ def main():
     poll_bias = post["poll_bias"].values.ravel()
     alpha = post["alpha_state"].stack(sample=("chain", "draw")).values.T
     delta = post["delta"].stack(sample=("chain", "draw")).values.T
-    out = df[["race_id", "office", "state", "polled", "n_polls", "weak_lean",
+    out = df[["race_id", "office", "state", "polled", "n_polls", "effective_polls",
+              "mean_poll_age_days", "weak_lean",
               "lean_state_fallback"]].copy()
     out["hier_margin"] = theta.mean(0)
     out["hier_sd"] = theta.std(0)

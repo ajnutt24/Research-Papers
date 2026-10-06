@@ -446,6 +446,48 @@ WEAK_LEAN_FUND_TO_RATING = float(os.environ.get("WEAK_LEAN_FUND_TO_RATING", 0.75
 # toward a fundamentals-heavy floor:  w(h) = floor + (w21 - floor) * exp(-(h-21)/tau).
 # Replace with estimated values once a long-horizon poll archive is available.
 STACK_HORIZONS_ESTIMATED = [1, 3, 7, 14, 21]
+# --------------------------------------------------------------------------
+# Poll recency
+# --------------------------------------------------------------------------
+# A poll's weight in the Kalman filter is its inverse observation variance, so
+# "an old poll should count less" is implemented by inflating that variance with
+# the poll's age. The weight below is multiplicative on the weight, i.e. the
+# variance is divided by it.
+#
+# Why this is needed on top of the filter. The filter already discounts old
+# polls through the latent random walk: the state has drifted since an old
+# observation, so it pins today's value less tightly. But the drift is scaled at
+# RANDOM_WALK_SD_PER_DAY["race"] = 0.18 points per day, and a random walk
+# accumulates as the square root of time, so that implies a race margin moves
+# only 0.18 * sqrt(243) = 2.8 points over eight months. Real race margins move
+# far more than that, so the filter was letting stale polls hold their ground.
+# H-WA-04 was the symptom: one poll from 5 February 2026, showing D+18 in a
+# district at R+24.6, still carried 48% of the weight in October.
+#
+# Exponential, not a step. A cliff at 90 days would give a poll at 89 days three
+# times the influence of one at 91, make a forecast jump as the calendar
+# advances rather than as evidence arrives, and treat a 10-day-old poll and an
+# 89-day-old one as equals. The decay is calibrated to pass through the chosen
+# anchor exactly: tau = REF_DAYS / ln(1 / WEIGHT_AT_REF).
+#
+# At the default anchor (1/3 of full weight at 90 days, tau = 81.98 days):
+#     14 days  0.84      90 days  0.33
+#     30 days  0.69     180 days  0.11
+#     60 days  0.48     243 days  0.05
+#
+# The floor stops the variance multiplier running away on a very old poll and
+# keeps one from being discarded outright, which matters for a race whose only
+# poll is old: better a 2%-weight poll than none.
+POLL_AGE_REF_DAYS = 90.0
+POLL_AGE_WEIGHT_AT_REF = 1.0 / 3.0
+POLL_AGE_MIN_WEIGHT = 0.02
+# House effects are estimated from the FULL weight of every poll, not the aged
+# weight. The decay answers "how much does this poll tell me about the race
+# today", which decays; a pollster's lean is a property of the pollster and an
+# old poll is just as informative about that, so ageing it would throw away the
+# evidence that makes the house-effect estimate usable at all.
+POLL_AGE_APPLIES_TO_HOUSE_EFFECTS = False
+
 STACK_EXTRAPOLATION = {"tau_days": 60.0, "floor_hier": 0.35}
 
 # Minimum historical races per FITTED WEIGHT before a horizon's stack is

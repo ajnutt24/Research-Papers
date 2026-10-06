@@ -83,7 +83,8 @@ sys.path.insert(0, str(_ROOT / "model"))
 import config  # noqa: E402
 from utils import get_logger, load_meta, load_stage, save_stage, worst_provenance  # noqa: E402
 from modellib import (aggregate_polls, historical_polling_error, kalman_daily_path,  # noqa: E402
-                      load_raw_polls_history, poll_margin_variance, pollster_bias_prior)
+                      load_raw_polls_history, poll_margin_variance, pollster_bias_prior,
+                      age_adjusted_var)
 
 log = get_logger("08_polls")
 INCUMBENCY_PTS = 3.0   # rough incumbency effect used only to back out the national swing
@@ -135,7 +136,10 @@ def main():
     if len(gb):
         gb["var"] = [poll_margin_variance(n, d) for n, d in zip(gb.sample_size, gb.dem_pct)]
         gb["adj"] = gb.margin - gb.pollster.map(h).fillna(0) - gb.population.map(g).fillna(0)
-        trend = kalman_daily_path(pd.to_datetime(gb.end_date).dt.date.values, gb.adj.values, gb["var"].values,
+        # Same age discount the race-level filter uses, so the published trend
+        # line and the race estimates are reading the polls the same way.
+        gb_var_aged, _ = age_adjusted_var(gb["var"].values, gb.end_date, asof)
+        trend = kalman_daily_path(pd.to_datetime(gb.end_date).dt.date.values, gb.adj.values, gb_var_aged,
                                   asof - timedelta(days=200), asof, kind="generic")
         gb_mean, gb_sd = float(gb_row.poll_margin.iloc[0]), float(gb_row.poll_sd.iloc[0])
         # poll_sd is how precisely we know TODAY'S average; poll_sd_election adds

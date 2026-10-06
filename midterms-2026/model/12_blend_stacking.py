@@ -275,7 +275,8 @@ def main(refit: bool = False):
              h, *df[df.polled][["w_hier", "w_fund", "w_rating"]].mean(), *df[~df.polled][["w_hier", "w_fund", "w_rating"]].mean())
     prov = worst_provenance(*[load_meta(n).get("provenance", "unknown") for n in
                               ["hierarchical_estimates_2026", "fundamentals_estimates_2026", "ratings_estimates_2026"]])
-    keep = ["race_id", "office", "state", "polled", "n_polls", "weak_lean",
+    keep = ["race_id", "office", "state", "polled", "n_polls", "effective_polls",
+            "mean_poll_age_days", "weak_lean",
             "lean_state_fallback", "hier_margin", "hier_sd", "hier_sd_idio",
             "poll_weight_in_hier", "fund_margin", "fund_sd_idio", "fund_nat_loading", "nat_fund_sd", "rating",
             "rating_margin", "rating_sd", "rating_pwin", "w_hier", "w_fund", "w_rating", "blend_margin",
@@ -286,13 +287,15 @@ def main(refit: bool = False):
             # contributing anything at all.
             "rating_margin_raw", "rating_sd_raw", "rating_redundant", "rating_lo", "rating_hi"]
     for c in ["exp_edge_pts", "main_party", "three_way", "caucus_prob_dem",
-              "rating_margin_raw", "rating_sd_raw", "rating_redundant", "rating_lo", "rating_hi"]:
+              "rating_margin_raw", "rating_sd_raw", "rating_redundant", "rating_lo", "rating_hi",
+              "effective_polls", "mean_poll_age_days"]:
         if c not in df:
             df[c] = {"exp_edge_pts": 0.0, "main_party": "D",
                      "three_way": False, "caucus_prob_dem": 1.0,
                      "rating_margin_raw": np.nan, "rating_sd_raw": np.nan,
                      "rating_redundant": False,
-                     "rating_lo": np.nan, "rating_hi": np.nan}[c]
+                     "rating_lo": np.nan, "rating_hi": np.nan,
+                     "effective_polls": np.nan, "mean_poll_age_days": np.nan}[c]
     save_stage(df[keep], "blend_2026", prov, {"horizon_days": h})
 
     import matplotlib

@@ -885,6 +885,76 @@ one case this cannot settle. Either Missouri's lines changed after the sheet was
 published on 2026-07-09, which would make the sheet stale for Missouri and the
 raters right, or the rating is in error. It is flagged rather than guessed at.
 
+## Poll recency: old polls now count less
+
+`config.POLL_AGE_REF_DAYS`, `POLL_AGE_WEIGHT_AT_REF`, `POLL_AGE_MIN_WEIGHT`
+
+A poll's weight in the Kalman filter is its inverse observation variance, so
+"an old poll should count less" is implemented by inflating that variance with
+the poll's age. Nothing else about the filter changes.
+
+### Why the filter did not already handle it
+
+It partly did. The latent random walk means the state has drifted since an old
+observation, so an old poll pins today's value less tightly. But the drift is
+scaled at `RANDOM_WALK_SD_PER_DAY["race"] = 0.18` points per day, and a random
+walk accumulates as the square root of time, so that implies a race margin moves
+only `0.18 * sqrt(243) = 2.8` points over eight months. Real race margins move
+much more than that, so stale polls held their ground.
+
+`H-WA-04` was the symptom. Its only poll was from **5 February 2026**, showing
+**D+18 in a district at R+24.6**, and in October it still carried 48% of the
+weight, which put a safe Republican seat at a coin flip.
+
+**That 0.18 figure is the deeper problem and this change does not fix it.** The
+decay is calibrated to produce sensible weights at the ages that actually occur;
+recalibrating the random walk against historical within-cycle margin movement
+would be the principled fix and is a separate piece of work.
+
+### Exponential, not a cliff
+
+The anchor is "a poll 90 days old counts one third as much", and the curve is
+calibrated to pass through it exactly:
+
+    tau = REF_DAYS / ln(1 / WEIGHT_AT_REF) = 90 / ln 3 = 81.98 days
+    weight = clip(exp(-age / tau), MIN_WEIGHT, 1)
+
+| age | weight | variance multiplier |
+| --- | --- | --- |
+| 14 days | 0.84 | 1.2 |
+| 30 days | 0.69 | 1.4 |
+| 60 days | 0.48 | 2.1 |
+| **90 days** | **0.33** | **3.0** |
+| 180 days | 0.11 | 9.0 |
+| 243 days | 0.05 | 19.4 |
+
+A step function at 90 days was considered and rejected: it would give a poll at
+89 days three times the influence of one at 91, make the forecast jump as the
+calendar advances rather than as evidence arrives, and treat a 10-day-old poll
+and an 89-day-old one as equals. The exponential form keeps the ordering inside
+every bucket and still hits the chosen anchor.
+
+The 2% floor stops the multiplier running away and keeps an old poll from being
+discarded outright, which matters for a race whose only evidence is old: better
+a 2%-weight poll than none. Negative ages, from a mis-parsed future date, are
+clamped to zero rather than rewarded.
+
+### Two deliberate scope limits
+
+**House effects are estimated on the UNAGED variances.** The decay answers "how
+much does this poll tell me about the race today", which decays. A pollster's
+lean is a property of the pollster, and an old poll is just as informative about
+that, so ageing it would discard the evidence that makes house effects usable.
+`config.POLL_AGE_APPLIES_TO_HOUSE_EFFECTS` flips this if you disagree.
+
+**The `polled` flag is unchanged.** A race routes to the polled stacking weights
+on whether it has any poll at all, not on whether that poll still counts. The
+new `effective_polls` column counts polls in units of a fresh one, so a race
+with `n_polls = 1` and `effective_polls = 0.05` is unpolled in everything but
+name. It is surfaced in `poll_estimates_2026`, `hierarchical_estimates_2026` and
+`blend_2026` rather than acted on, because routing those races as unpolled is a
+separate modelling decision.
+
 ## Known limitations and what to fix first
 
 1. **The shared polling error is the biggest single lever, and the default
@@ -969,10 +1039,9 @@ raters right, or the rating is in error. It is flagged rather than guessed at.
    a university's. The deeper problem is publication bias rather than house
    effects: campaigns release internals where the numbers are good, which a
    house-effect term cannot correct. Polls also linger: 45 of 183 are more than
-   120 days old and the oldest is from January, yet `H-WA-04` gives 48% weight
-   to a single February poll showing D+18 in a district at R+24.6, which is
-   almost certainly bad data. This is the biggest open problem in the House
-   model. The Senate and Governor are not affected: they run 51% and 64%
+   120 days old and the oldest is from January. The age half of this is now
+   addressed (see the poll-recency section above); the sponsorship half is not,
+   and remains the biggest open problem in the House model. The Senate and Governor are not affected: they run 51% and 64%
    non-partisan with roughly balanced sponsorship, and only three and one race
    respectively rely on one side's internals.
 9. **The CPI term is retained but unsupported.** See the section above: on
