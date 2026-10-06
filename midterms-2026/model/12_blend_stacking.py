@@ -99,7 +99,8 @@ sys.path.insert(0, str(_ROOT))
 sys.path.insert(0, str(_ROOT / "model"))
 import config  # noqa: E402
 from utils import get_logger, load_meta, load_stage, save_stage, worst_provenance  # noqa: E402
-from modellib import BacktestContext, blend_rows, marginal_win_prob, stacking_weights  # noqa: E402
+from modellib import (BacktestContext, blend_rows, marginal_win_prob,  # noqa: E402
+                      project_rating_onto_band, stacking_weights)
 
 log = get_logger("12_blend")
 HORIZONS = config.STACK_HORIZONS_ESTIMATED
@@ -114,21 +115,34 @@ def fit_stacks() -> pd.DataFrame:
         frames = [ctx.components(c, h) for c in config.BACKTEST_CYCLES]
         df = pd.concat(frames, ignore_index=True)
         comps_all[h] = df
-        polled = df[df.poll_margin.notna()]
-        w, tab = stacking_weights(polled, {"hier": ("hier_margin", "hier_sd"), "fund": ("fund_margin", "fund_sd_total")})
-        log.info("h=%3d polled (n=%d): %s", h, len(polled), {k: round(v, 3) for k, v in w.items()})
-        for k, v in w.items():
-            rows.append({"horizon_days": h, "subset": "polled_all_cycles", "component": k, "weight": v, "n_rows": len(polled)})
+        # A stack is only recorded when the horizon has enough races to support
+        # the number of weights it is fitting. See
+        # config.STACK_MIN_ROWS_PER_COMPONENT: the archive thins out sharply with
+        # the horizon, and a simplex fitted on too few races lands on its
+        # boundary, which then becomes the anchor for the beyond-archive
+        # extrapolation. A dropped horizon simply ends the curve earlier.
+        min_per = int(getattr(config, "STACK_MIN_ROWS_PER_COMPONENT", 50))
+
+        def record(name, sub, comps):
+            need = min_per * len(comps)
+            if len(sub) < need:
+                log.info("h=%3d %s: %d race(s), below the %d needed for %d weight(s); "
+                         "this horizon is left out of the curve",
+                         h, name, len(sub), need, len(comps))
+                return
+            ww, _ = stacking_weights(sub, comps)
+            log.info("h=%3d %s (n=%d): %s", h, name, len(sub),
+                     {k: round(v, 3) for k, v in ww.items()})
+            for k, v in ww.items():
+                rows.append({"horizon_days": h, "subset": name, "component": k,
+                             "weight": v, "n_rows": len(sub)})
+
+        two = {"hier": ("hier_margin", "hier_sd"), "fund": ("fund_margin", "fund_sd_total")}
+        three = {**two, "rating": ("rating_margin", "rating_sd")}
+        record("polled_all_cycles", df[df.poll_margin.notna()], two)
         rated = df[df.rating_margin.notna()]
-        if len(rated) >= 40:
-            for name, sub in [("polled_rated", rated[rated.poll_margin.notna()]), ("unpolled_rated", rated[rated.poll_margin.isna()])]:
-                comps = {"hier": ("hier_margin", "hier_sd"), "fund": ("fund_margin", "fund_sd_total"), "rating": ("rating_margin", "rating_sd")}
-                if len(sub) < 40:
-                    continue
-                w3, _ = stacking_weights(sub, comps)
-                log.info("h=%3d %s (n=%d): %s", h, name, len(sub), {k: round(v, 3) for k, v in w3.items()})
-                for k, v in w3.items():
-                    rows.append({"horizon_days": h, "subset": name, "component": k, "weight": v, "n_rows": len(sub)})
+        record("polled_rated", rated[rated.poll_margin.notna()], three)
+        record("unpolled_rated", rated[rated.poll_margin.isna()], three)
     return pd.DataFrame(rows)
 
 
@@ -149,20 +163,52 @@ def weights_for_2026(stack: pd.DataFrame, horizon: int, polled: np.ndarray, has_
         return w_last   # non-poll components keep their ratio; renormalised later
     w_hier_polled = curve("polled_all_cycles", "hier")
     w_hier_polled = 0.7 if w_hier_polled is None else w_hier_polled
-    # ratio fund:rating from the 2018 three-way stack (horizon-invariant)
     f3, r3 = curve("polled_rated", "fund"), curve("polled_rated", "rating")
-    if f3 is None or r3 is None or (f3 + r3) == 0:
-        rating_share_polled = 0.5
+    h3 = curve("polled_rated", "hier")
+    mode = getattr(config, "POLLED_RATING_SHARE_MODE", "stack")
+
+    # How the non-poll slice on polled races is split between fundamentals and
+    # ratings. The old construction took the slice's SIZE from the two-way
+    # polled_all_cycles stack and only its RATIO from the three-way one, as
+    # r/(f+r). The three-way fit pins the fundamentals at exactly 0.000 on
+    # polled races at every horizon, so that expression returns exactly 1.0 and
+    # says nothing about how well determined it is; before archived ratings
+    # existed the rating weight was the pinned one and it returned exactly 0.0.
+    # The whole slice therefore flipped from one component to the other, worth
+    # 1.7 points of Senate probability, on which of two boundary-clipped weights
+    # happened to be the zero. See config.POLLED_RATING_SHARE_MODE.
+    if mode == "stack" and None not in (h3, f3, r3) and (h3 + f3 + r3) > 0:
+        # Use the three-way stack as fitted. Internally consistent: the size and
+        # the split come from the same fit, on the same races.
+        tot3 = h3 + f3 + r3
+        wh_p, wf_p, wr_p = h3 / tot3, f3 / tot3, r3 / tot3
+        log.info("polled weights from the three-way polled_rated stack: "
+                 "hier/fund/rating = %.3f/%.3f/%.3f", wh_p, wf_p, wr_p)
     else:
-        rating_share_polled = r3 / (f3 + r3)
+        if None in (f3, r3) or (f3 + r3) == 0:
+            share = 0.5
+        else:
+            share = r3 / (f3 + r3)
+            n3 = stack.loc[(stack.subset == "polled_rated") & (stack.component == "rating"),
+                           "n_rows"]
+            n3 = float(n3.iloc[-1]) if len(n3) else 0.0
+            k = float(getattr(config, "POLLED_RATING_SHARE_PRIOR_ROWS", 100))
+            # Shrink the proportion toward an even split, Beta-style, so a ratio
+            # pinned at a boundary cannot swing the answer on its own.
+            share = (share * n3 + 0.5 * k) / (n3 + k)
+            log.info("fund:rating split on polled races shrunk toward 0.5: "
+                     "raw %.2f, n=%.0f, prior %.0f rows -> %.3f",
+                     r3 / (f3 + r3), n3, k, share)
+        wh_p = w_hier_polled
+        wr_p = (1 - wh_p) * share
+        wf_p = (1 - wh_p) * (1 - share)
     uh, uf, ur = curve("unpolled_rated", "hier"), curve("unpolled_rated", "fund"), curve("unpolled_rated", "rating")
     if uh is None:
         uh, uf, ur = 0.3, 0.3, 0.4
     out = pd.DataFrame(index=range(len(polled)))
-    out["w_hier"] = np.where(polled, w_hier_polled, uh)
-    rest = 1 - out["w_hier"]
-    out["w_rating"] = np.where(polled, rest * rating_share_polled, ur)
-    out["w_fund"] = np.where(polled, rest * (1 - rating_share_polled), uf)
+    out["w_hier"] = np.where(polled, wh_p, uh)
+    out["w_rating"] = np.where(polled, wr_p, ur)
+    out["w_fund"] = np.where(polled, wf_p, uf)
     # no rating -> its weight goes to fundamentals
     out.loc[~has_rating, "w_fund"] += out.loc[~has_rating, "w_rating"]
     out.loc[~has_rating, "w_rating"] = 0.0
@@ -217,6 +263,12 @@ def main(refit: bool = False):
                          lean_state_fallback=(df.lean_state_fallback.values
                                               if "lean_state_fallback" in df else None))
     df = pd.concat([df.reset_index(drop=True), w], axis=1)
+    df = project_rating_onto_band(df)
+    if "rating_redundant" in df:
+        log.info("rating band projection: %d of %d rated race(s) are redundant (the other "
+                 "components already sit inside the rating's tier band, so the component "
+                 "contributes nothing)", int(df.rating_redundant.sum()),
+                 int(df.rating_margin.notna().sum()))
     df = blend_rows(df)
     df["p_dem_marginal"] = marginal_win_prob(df, poll_shock_sd=float(nat.poll_shock_sd))
     log.info("horizon %d days: mean weights polled hier/fund/rating = %.2f/%.2f/%.2f; unpolled = %.2f/%.2f/%.2f",
@@ -228,11 +280,19 @@ def main(refit: bool = False):
             "poll_weight_in_hier", "fund_margin", "fund_sd_idio", "fund_nat_loading", "nat_fund_sd", "rating",
             "rating_margin", "rating_sd", "rating_pwin", "w_hier", "w_fund", "w_rating", "blend_margin",
             "blend_sd_idio", "p_dem_marginal", "exp_edge_pts", "main_party", "three_way",
-            "caucus_prob_dem"]
-    for c in ["exp_edge_pts", "main_party", "three_way", "caucus_prob_dem"]:
+            "caucus_prob_dem",
+            # Kept so the band projection is auditable from the output alone:
+            # what the rating said before projection, and whether it ended up
+            # contributing anything at all.
+            "rating_margin_raw", "rating_sd_raw", "rating_redundant", "rating_lo", "rating_hi"]
+    for c in ["exp_edge_pts", "main_party", "three_way", "caucus_prob_dem",
+              "rating_margin_raw", "rating_sd_raw", "rating_redundant", "rating_lo", "rating_hi"]:
         if c not in df:
             df[c] = {"exp_edge_pts": 0.0, "main_party": "D",
-                     "three_way": False, "caucus_prob_dem": 1.0}[c]
+                     "three_way": False, "caucus_prob_dem": 1.0,
+                     "rating_margin_raw": np.nan, "rating_sd_raw": np.nan,
+                     "rating_redundant": False,
+                     "rating_lo": np.nan, "rating_hi": np.nan}[c]
     save_stage(df[keep], "blend_2026", prov, {"horizon_days": h})
 
     import matplotlib

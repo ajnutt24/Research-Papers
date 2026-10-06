@@ -599,6 +599,15 @@ class BacktestContext:
         r["rating_sd"] = lvl.map(cal["margin_sd"])
         p = lvl.map(cal["p_fav_win"])
         r["rating_pwin"] = np.where(side > 0, p, np.where(side < 0, 1 - p, 0.5))
+        # The tier band and the sign, so the backtest can apply the same band
+        # projection the forecast does. Without these the backtest would score a
+        # different blend from the one being shipped, which is the one way to
+        # make a backtest actively misleading.
+        r["tier_code"] = side * lvl.map({"Safe": 3, "Likely": 2, "Lean": 1, "Toss-up": 0})
+        if {"margin_band_lo", "margin_band_hi"}.issubset(cal.columns):
+            blo, bhi = lvl.map(cal["margin_band_lo"]), lvl.map(cal["margin_band_hi"])
+            r["rating_lo"] = np.where(side >= 0, blo, -bhi)
+            r["rating_hi"] = np.where(side >= 0, bhi, -blo)
         return r
 
     def components(self, cycle: int, horizon_days: int) -> pd.DataFrame:
@@ -671,6 +680,86 @@ def marginal_win_prob(df: pd.DataFrame, poll_shock_sd: float, state_sd: float = 
     var = (df["blend_sd_idio"] ** 2 + (w_nat * df["fund_nat_loading"] * df["nat_fund_sd"]) ** 2
            + (w_poll * poll_shock_sd) ** 2 + state_sd ** 2 + noise_floor ** 2)
     return stats.norm.cdf(df["blend_margin"] / np.sqrt(var))
+
+
+def project_rating_onto_band(df: pd.DataFrame) -> pd.DataFrame:
+    """Replace the rating component's tier-mean margin with its tier BAND.
+
+    The problem. A rating is a bucket, not a measurement. The calibration maps
+    "Safe" to the mean margin of historically safe races, about 35 points, but
+    safe races run from roughly 14 to 64 points at the 10th and 90th percentiles.
+    The blend is a mixture, so its variance carries a (component - mean)^2 term,
+    and mixing a 35-point constant into a race the polls put at R+12 manufactures
+    a 18-point standard deviation out of nothing but the gap between the two
+    numbers. That is how the Oklahoma governor's race came to carry a 26%
+    Democratic win probability.
+
+    The fix. Read the rating as the claim it actually makes, that the race lies
+    somewhere in its tier's band, and project the component's mean onto that
+    band from wherever the other components put the race:
+
+      * other components already AT OR BEYOND the band -> the rating is
+        redundant. Its mean and its sd are both set to theirs, so the mixture
+        returns them unchanged and the component contributes neither a shift nor
+        any width. "Safe R" tells you nothing you did not already know about a
+        race at R+18.
+      * other components SHORT OF the band -> the rating shifts the estimate to
+        the band's inner edge, and keeps its tier sd. Polls at R+2 against a
+        Safe R rating is real disagreement and still registers, but as "at least
+        R+14" rather than "R+35".
+
+    The projection is ONE-SIDED for a rating with a favoured party, because that
+    is what the rating claims. "Safe D" means at least D+14, not between D+14
+    and D+64: a seat the other components put at D+83 is in agreement with a
+    Safe D rating, not in conflict with it, and clipping it down to the band's
+    far edge would invent a 12-point standard deviation out of two components
+    that agree. A Toss-up rating is the exception and is clipped on both sides,
+    since it genuinely asserts the race is near zero, so a Toss-up rating
+    against a component saying D+21 is a real disagreement.
+
+    This cannot be done inside blend_rows, because it needs the mean the OTHER
+    components produce on their own, which is a blend of its own.
+    """
+    d = df.copy()
+    if not getattr(config, "RATING_BAND_PROJECTION", True):
+        return d
+    if not {"rating_lo", "rating_hi"}.issubset(d.columns):
+        # An older ratings stage without the band columns: leave the component
+        # alone rather than guess a band, and say so.
+        import warnings
+        warnings.warn("ratings_estimates_2026 carries no tier band; skipping the band "
+                      "projection. Re-run stage 10.", RuntimeWarning, stacklevel=2)
+        return d
+
+    # The no-rating blend: what hier and fund say between themselves.
+    base = d.copy()
+    base["w_rating"] = 0.0
+    tot = base[["w_hier", "w_fund"]].sum(axis=1).replace(0.0, np.nan)
+    base["w_hier"] = base["w_hier"] / tot
+    base["w_fund"] = base["w_fund"] / tot
+    base = blend_rows(base)
+    m0, s0 = base["blend_margin"], base["blend_sd_idio"]
+
+    lo = d["rating_lo"].astype(float)
+    hi = d["rating_hi"].astype(float)
+    have = d["rating_margin"].notna() & lo.notna() & hi.notna()
+    # One-sided for a rating with a favoured party, two-sided for a Toss-up.
+    # tier_code carries the sign; 0 is a Toss-up.
+    side = np.sign(pd.to_numeric(d.get("tier_code"), errors="coerce").fillna(0.0).values)
+    clip_lo = np.where(side > 0, lo, np.where(side < 0, -np.inf, lo))
+    clip_hi = np.where(side < 0, hi, np.where(side > 0, np.inf, hi))
+    projected = m0.clip(lower=pd.Series(clip_lo, index=d.index),
+                        upper=pd.Series(clip_hi, index=d.index))
+    inside = have & np.isclose(projected, m0, atol=1e-9)
+
+    d["rating_margin_raw"] = d["rating_margin"]
+    d["rating_sd_raw"] = d["rating_sd"]
+    d.loc[have, "rating_margin"] = projected[have]
+    # Redundant where the other components already sit in the band: match their
+    # sd too, so the mixture is an exact no-op rather than merely unshifted.
+    d.loc[inside, "rating_sd"] = s0[inside]
+    d["rating_redundant"] = inside
+    return d
 
 
 def blend_rows(df: pd.DataFrame) -> pd.DataFrame:

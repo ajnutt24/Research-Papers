@@ -448,6 +448,64 @@ WEAK_LEAN_FUND_TO_RATING = float(os.environ.get("WEAK_LEAN_FUND_TO_RATING", 0.75
 STACK_HORIZONS_ESTIMATED = [1, 3, 7, 14, 21]
 STACK_EXTRAPOLATION = {"tau_days": 60.0, "floor_hier": 0.35}
 
+# Minimum historical races per FITTED WEIGHT before a horizon's stack is
+# trusted. A three-component stack therefore needs 3x this many races.
+#
+# Why this exists. The public poll archive thins out fast as the horizon grows:
+# at 21 days only 65 rated polled races remain, against 238 at 14 days. A
+# three-weight simplex fitted on 65 races lands on the boundary, and because the
+# forecast horizon (28 days) is beyond the archive, the extrapolation anchors on
+# exactly that noisiest point. The symptom was a weight of 0.171 at 21 days
+# against 0.061 at 14, and a 2-component w_hier of exactly 1.000 on 82 races
+# where 364 races gave 0.982. Neither is a finding about the world.
+#
+# With this rule a horizon that cannot support its stack is dropped from the
+# curve and the extrapolation anchors on the last horizon that can. 50 is not
+# a tuned number: it is the order of magnitude at which a weight on the unit
+# simplex stops being dominated by its boundary, and the file previously used a
+# flat 40 for a 3-way stack, which is the same idea applied too loosely.
+STACK_MIN_ROWS_PER_COMPONENT = 50
+
+# Where the fund:rating split on polled races comes from.
+#
+# "stack" uses the three-way polled_rated fit directly, which is the internally
+# consistent choice. The alternative, and what the code used to do, was to take
+# the MAGNITUDE of the non-poll slice from the two-way polled_all_cycles stack
+# and only the RATIO from the three-way one. That ratio is computed as
+# r/(f+r), and the three-way fit puts the fundamentals at exactly 0.000 on
+# polled races at every horizon, so the ratio evaluates to exactly 1.0 with no
+# information about how well determined it is. Before archived ratings existed
+# the rating weight was the one pinned at 0.000 and the same expression returned
+# exactly 0.0. A 7% slice of weight therefore flipped wholesale from one
+# component to the other, moving the Senate probability by 1.7 points, on the
+# strength of which of two boundary-clipped weights happened to be the zero.
+#
+# "ratio_shrunk" keeps the old two-stack construction but shrinks the ratio
+# toward an even split, as a Beta-style prior on a proportion, with the weight
+# below. Use it to reproduce the old behaviour's shape without its brittleness.
+POLLED_RATING_SHARE_MODE = "stack"      # "stack" | "ratio_shrunk"
+POLLED_RATING_SHARE_PRIOR_ROWS = 100    # only read when mode is "ratio_shrunk"
+
+# Project a rating's margin onto its tier's empirical band instead of using the
+# tier mean.
+#
+# A "Safe" rating historically spans +14 to +64 points at the 10th and 90th
+# percentiles, with a mean of +35.6. Feeding +35.6 into the blend as a point
+# estimate for a specific safe race is the error: the blend is a mixture, so its
+# variance carries a (component - mean)^2 term, and mixing a 35-point constant
+# with a tight race estimate manufactures uncertainty that is not there. It put
+# the Oklahoma governor's race at a 26% Democratic chance with a 18.3-point band,
+# and Colorado at 69%.
+#
+# What a rating actually says is "this race is somewhere in this band", not
+# "this race is at the band's mean". So the component's mean is projected onto
+# the band: if the other components already place the race inside it, the rating
+# is redundant and contributes nothing; if they place it outside, the rating
+# shifts the estimate to the nearest edge of its band, which preserves genuine
+# disagreement (polls at R+2 against a Safe R rating) without overstating it.
+RATING_BAND_PROJECTION = True
+RATING_BAND_QUANTILES = (10.0, 90.0)
+
 # --------------------------------------------------------------------------
 # Simulation
 # --------------------------------------------------------------------------

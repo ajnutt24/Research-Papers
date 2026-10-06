@@ -85,7 +85,8 @@ sys.path.insert(0, str(_ROOT))
 sys.path.insert(0, str(_ROOT / "model"))
 import config  # noqa: E402
 from utils import get_logger, load_stage  # noqa: E402
-from modellib import BacktestContext, blend_rows, marginal_win_prob, stacking_weights, win_prob  # noqa: E402
+from modellib import (BacktestContext, blend_rows, marginal_win_prob,  # noqa: E402
+                      project_rating_onto_band, stacking_weights, win_prob)
 
 log = get_logger("14_backtest")
 EVE = 1
@@ -142,7 +143,9 @@ def main():
     scored = []
     for c, df in comps.items():
         w = loo_weights(comps, c)
-        d = blend_rows(apply_weights(df, w))
+        # Same band projection the forecast applies, so the backtest scores
+        # the blend that actually ships rather than a different one.
+        d = blend_rows(project_rating_onto_band(apply_weights(df, w)))
         d["p_blend"] = marginal_win_prob(d, poll_shock_sd=poll_shock)
         # component-only probabilities with the same variance budget
         d["p_fund"] = win_prob(d.fund_margin, np.sqrt(d.fund_sd_total ** 2 + config.STATE_SHOCK_SD ** 2 + config.RACE_NOISE_FLOOR_SD ** 2))

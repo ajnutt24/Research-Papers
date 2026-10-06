@@ -711,6 +711,126 @@ less confident, which is the expected direction: 359 unpolled races now take
 15% of their estimate from a component with a five-cycle track record instead of
 almost entirely from fundamentals.
 
+## Three defects in the blend, found by asking why a number moved
+
+`config.STACK_MIN_ROWS_PER_COMPONENT`, `config.POLLED_RATING_SHARE_MODE`, `config.RATING_BAND_PROJECTION`
+
+Adding archived ratings moved the Senate from 67.4% to 65.7% at a moment when the
+polls were moving the other way (the generic ballot went from D+5.9 in August to
+D+7.1). The seat medians did not move at all, which was the clue: a probability
+that falls while the central estimate holds is a dispersion or weighting story,
+not a polling story. Tracing it found three defects, none of which was the
+ratings data itself. Removing the ratings component entirely gave 65.5%, lower
+than keeping it, so it was never the culprit.
+
+### 1. A 7% slice of weight flipping on a boundary solution
+
+Weights for polled races were assembled from two different stacks: the SIZE of
+the non-poll slice from the two-way `polled_all_cycles` fit, and only its
+fund-versus-rating RATIO from the three-way `polled_rated` fit, as `r / (f + r)`.
+
+The three-way fit puts the fundamentals at exactly 0.000 on polled races at every
+horizon, so that expression returns exactly 1.0, and it carries no information
+about how well determined it is. Before archived ratings existed, the rating
+weight was the one pinned at 0.000 and the same expression returned exactly 0.0.
+So the entire slice flipped from one component to the other because of which of
+two boundary-clipped weights happened to be the zero. Sweeping that one number
+reproduces the whole move:
+
+| fund:rating split on polled races | House | Senate | Governor |
+| --- | --- | --- | --- |
+| all to fundamentals (old) | 98.0% | 67.4% | 61.8% |
+| even split | 97.9% | 66.6% | 61.6% |
+| all to ratings (new) | 97.9% | 65.7% | 61.3% |
+
+The fix is to stop mixing two stacks. `POLLED_RATING_SHARE_MODE="stack"` takes
+the three-way fit's weights as fitted, so the size and the split come from the
+same regression on the same races. A `"ratio_shrunk"` mode keeps the old
+construction but shrinks the proportion toward an even split, Beta-style, so a
+pinned ratio cannot swing the answer by itself.
+
+### 2. A tier mean used as a point estimate
+
+The calibration maps "Safe" to the mean margin of historically safe races, 35.6
+points. But safe races run from +14 to +64 at the 10th and 90th percentiles. The
+blend is a mixture, so its variance carries a `(component - mean)^2` term, and
+mixing a 35-point constant into a race the fundamentals put at R+12 manufactures
+an 18-point standard deviation out of nothing but the gap between two numbers.
+That is how the Oklahoma governor's race came to show a 26% Democratic win
+probability and Colorado 69%.
+
+What a rating claims is that the race lies in its tier's band, not that it sits
+at the band's mean. `RATING_BAND_PROJECTION` projects the component's mean onto
+that band from wherever the other components put the race:
+
+* already at or beyond the band, so the rating is redundant: its mean and its sd
+  are both set to the other components', and the mixture returns them unchanged.
+  "Safe R" tells you nothing you did not already know about a race at R+18.
+* short of the band: the rating shifts the estimate to the band's inner edge and
+  keeps its tier sd. Polls at R+2 against a Safe R rating is real disagreement
+  and still registers, but as "at least R+14" rather than "R+35".
+
+The projection is **one-sided** for any rating with a favoured party, which was
+a bug in the first version of this fix. "Safe D" means at least D+14, not between
+D+14 and D+64, so a district the components put at D+83 agrees with a Safe D
+rating rather than conflicting with it. Clipping it down to the band's far edge
+invented a 12-point standard deviation from two components that agreed, and
+dropped six safe Democratic House seats from 100% to 88%. A Toss-up is the
+exception and is clipped on both sides, since it does assert the race is near
+zero.
+
+Effect: 399 of 506 rated races are now redundant and contribute nothing. Mean
+idiosyncratic sd in the Senate falls from 8.09 to 5.26.
+
+### 3. Extrapolating from the thinnest point in the archive
+
+The poll archive stops at 21 days and the forecast horizon is 28, so the weights
+extrapolate past the end of the curve. That end is where the archive is
+thinnest: 65 rated polled races at 21 days against 238 at 14. A simplex fitted
+on 65 races lands on its boundary, and the `polled_all_cycles` `hier` weight was
+exactly 1.000 on 82 races where 364 races gave 0.982. Both became the anchor for
+the extrapolation.
+
+`STACK_MIN_ROWS_PER_COMPONENT` (50) requires that many races per fitted weight,
+so a three-way stack needs 150 and a two-way needs 100. Horizons that cannot
+support their stack are dropped from the curve and the extrapolation anchors on
+the last one that can. Here that drops the 21-day `polled_all_cycles` (82) and
+`polled_rated` (65) rows, and keeps 21-day `unpolled_rated` (592 races), where
+the rising rating weight is real: the further out, the sparser the polling and
+the more a rating is worth. The file previously used a flat minimum of 40 for a
+three-way stack, which is the same idea applied too loosely.
+
+### What the three fixes did
+
+| | House | Senate (median) | Governor |
+| --- | --- | --- | --- |
+| before archived ratings | 97.9% | 67.4% (52) | 61.8% |
+| archived ratings, with these defects | 96.8% | 65.7% (52) | 61.1% |
+| archived ratings, fixed | **98.3%** | **67.7% (53)** | **62.7%** |
+
+The backtest is unchanged, which is the point: these removed artifacts rather
+than bought a score. Mean blend Brier 0.04768 to 0.04773 (+0.1%, inside noise),
+log loss improved in three of the four cycles, and the Senate improved in three.
+The backtest now applies the same band projection the forecast does, which it
+did not before; a backtest scoring a different blend from the one that ships is
+the one way to make it actively misleading.
+
+### A diagnostic that came free
+
+With the band projection in place, a race whose other components fall well short
+of their rating's band is a flag. Twenty do by more than 10 points, and the worst
+are unmistakable: `H-MO-05` (components D+29, rated Safe R), `H-UT-01` (D+26,
+Safe R), `H-CA-41` and `H-CA-03` (D+16, Lean R), `H-NC-06` (R+14, Likely D),
+`H-LA-06`. Those are all states with new or contested 2026 lines, so the ratings
+describe the new map and the lean still describes the old one. The ratings are
+right and the lean is stale. See the redistricting section; this is a concrete
+to-do list rather than a general warning.
+
+A second pattern in that list is worth a different kind of attention: ten House
+districts rated Safe R where thin district polling says only R+2 or R+3. There
+the raters are more likely to be right than one or two low-quality district
+polls, and the model currently splits the difference.
+
 ## Known limitations and what to fix first
 
 1. **The shared polling error is the biggest single lever, and the default
@@ -765,6 +885,9 @@ almost entirely from fundamentals.
    polls-vs-fundamentals split comes from `config.STACK_EXTRAPOLATION`, not
    from data. Supplying a long-horizon archive (or accumulating this cycle's
    polls) lets `12` estimate the full curve.
+   `config.STACK_MIN_ROWS_PER_COMPONENT` now stops the extrapolation anchoring
+   on a horizon too thin to fit its own stack, which is a guard rather than a
+   cure: the forecast at 28 days is still outside the archive.
 3. **Ratings are still calibrated in-sample in the backtest**, though the
    sample is now five cycles rather than one (see the ratings section above).
    The leak was measured by refitting the tier mapping without each cycle and

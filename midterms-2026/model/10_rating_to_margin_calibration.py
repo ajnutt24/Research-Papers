@@ -113,9 +113,19 @@ def calibrate(hist: pd.DataFrame, results: pd.DataFrame) -> pd.DataFrame:
         emp_sd = g.fav_margin.std() if n > 2 else np.nan
         m = (MARGIN_PRIOR[lvl] * W + (emp_mean * n if n else 0)) / (W + n)
         sd = max(SD_FLOOR[lvl], emp_sd if emp_sd == emp_sd else 0)
+        # The BAND, not just the mean. A Safe rating spans roughly +14 to +64
+        # points on the favoured side; the mean of +35.6 is a fine summary of
+        # safe races in general and a poor estimate of any particular one.
+        # Stage 12 projects the rating component onto this band so that a rating
+        # which merely agrees with the other components adds no shift and no
+        # spurious variance. See config.RATING_BAND_PROJECTION.
+        qlo, qhi = config.RATING_BAND_QUANTILES
+        band_lo = float(np.percentile(g.fav_margin, qlo)) if n >= 10 else np.nan
+        band_hi = float(np.percentile(g.fav_margin, qhi)) if n >= 10 else np.nan
         rows.append({"level": lvl, "n": n, "fav_wins": wins, "p_fav_win": p, "p_lo": lo, "p_hi": hi,
                      "empirical_win_rate": wins / n if n else np.nan, "empirical_margin_mean": emp_mean,
-                     "empirical_margin_sd": emp_sd, "margin_mean": m, "margin_sd": sd})
+                     "empirical_margin_sd": emp_sd, "margin_mean": m, "margin_sd": sd,
+                     "margin_band_lo": band_lo, "margin_band_hi": band_hi})
     cal = pd.DataFrame(rows)
     # Toss-up must be symmetric
     cal.loc[cal.level == "Toss-up", ["margin_mean", "p_fav_win"]] = [0.0, 0.5]
@@ -132,14 +142,22 @@ def main():
     cons = ratings[ratings.source == "consensus"][["race_id", "rating", "tier_code"]].copy()
     cons["level"] = cons.rating.map(LEVEL)
     cons["side"] = cons.rating.map(SIDE)
-    cons = cons.merge(cal[["level", "p_fav_win", "margin_mean", "margin_sd"]], on="level", how="left")
+    cons = cons.merge(cal[["level", "p_fav_win", "margin_mean", "margin_sd",
+                           "margin_band_lo", "margin_band_hi"]], on="level", how="left")
     cons["rating_margin"] = cons.side * cons.margin_mean
     cons["rating_sd"] = cons.margin_sd
     cons["rating_pwin"] = np.where(cons.side > 0, cons.p_fav_win, np.where(cons.side < 0, 1 - cons.p_fav_win, 0.5))
+    # The tier band in signed (Democrat-minus-Republican) terms. The calibration
+    # stores it on the favoured side, so an R-favoured rating mirrors it: a
+    # "Safe D" band of [+14, +64] becomes [-64, -14] for "Safe R". A Toss-up has
+    # no favoured side and its band is already signed.
+    cons["rating_lo"] = np.where(cons.side >= 0, cons.margin_band_lo, -cons.margin_band_hi)
+    cons["rating_hi"] = np.where(cons.side >= 0, cons.margin_band_hi, -cons.margin_band_lo)
     prov = load_meta("race_ratings_2026").get("provenance", "unknown")
     save_stage(cal, "rating_calibration", load_meta("race_ratings_historical").get("provenance", "unknown"),
                {"cycles": sorted(hist.cycle.unique().tolist())})
-    save_stage(cons[["race_id", "rating", "tier_code", "rating_margin", "rating_sd", "rating_pwin"]],
+    save_stage(cons[["race_id", "rating", "tier_code", "rating_margin", "rating_sd", "rating_pwin",
+                     "rating_lo", "rating_hi"]],
                "ratings_estimates_2026", prov)
 
     import matplotlib
