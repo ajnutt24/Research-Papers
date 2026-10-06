@@ -591,6 +591,126 @@ economic content is already carried by presidential approval, which voters
 report *after* they have formed a view of the economy, and that a separate
 economic regressor adds confounding rather than information.
 
+## Expert race ratings: where they come from and what they are worth
+
+`fetch_historical_ratings.py` -> `data_store/manual/historical_ratings.csv` -> stages 05, 10, 12
+
+Qualitative ratings ("Lean R", "Toss-up") are the only usable signal for the
+roughly 350 of 506 races that no pollster will touch. Stage 10 turns a rating
+into a win probability and a margin band from the raters' empirical track
+record, so that mapping is only as good as the record behind it.
+
+### The problem
+
+That record used to be a single cycle: FiveThirtyEight's 2018 forecast-review
+categories. Because 435 of its 506 races are House districts, it was
+overwhelmingly safe seats, and the tiers that decide a forecast were thin:
+
+| tier | before | after |
+| --- | --- | --- |
+| Safe | 376 | 511 |
+| Likely | 82 | 136 |
+| Lean | 33 | **97** |
+| Toss-up | 15 | **43** |
+
+With 15 Toss-ups the Beta-binomial posterior sat on its prior, so the model was
+not learning the raters' accuracy at all where it mattered most.
+
+### The source
+
+Wikipedia's per-cycle election articles carry a final pre-election predictions
+table listing every major rater's last call with its as-of date. Cook's and
+Inside Elections' own archives are paywalled and Sabato's are spread across
+individual newsletter posts, so this is the only public source covering several
+cycles in one consistent shape. Four midterms were parsed (2006, 2010, 2014,
+2022), giving 283 consensus races, 281 of which have a result on file.
+
+Three decisions worth knowing about:
+
+* **Only Cook, Sabato's Crystal Ball and Inside Elections.** The tables also
+  carry RealClearPolitics, FiveThirtyEight, the New York Times, Daily Kos, CQ,
+  Politico, Fox and others, but those are poll-driven models rather than expert
+  ratings and none of them is in the 2026 feed. A calibration is only
+  meaningful for the raters it will be applied to. Inside Elections is treated
+  as the continuation of the Rothenberg Political Report, which it is.
+* **One consensus row per race, not three rater rows.** Three raters looking at
+  one race are three correlated judgements, not three observations. Counting
+  them separately would inflate the sample threefold and understate the
+  uncertainty. The per-rater rows are kept in the file for provenance and for
+  anyone who wants to score raters against each other; stage 10 reads only the
+  consensus.
+* **Races where any rater named an independent are excluded entirely.** Rhode
+  Island 2010 is why. Two of three raters said "Lean I" and Lincoln Chafee duly
+  won, but an "I" rating has no place on a D-positive tier axis, so taking the
+  median of the surviving raters left Cook's lone "Toss-up" and the race would
+  have entered the calibration as a toss-up the Democrat lost. The raters were
+  right and the record would have said they were wrong. Alaska 2014 is the same
+  case.
+
+**The House is not available this way.** Those articles have an "Election
+ratings" heading but it carries prose about the number of competitive seats, not
+a district-by-district table. District ratings for past cycles would need Daily
+Kos Elections' spreadsheets or a Cook subscription, so the added cycles are
+Senate and Governor only.
+
+### Does pooling offices still hold?
+
+Stage 10 pools tiers across offices, on the stated grounds that rating
+vocabularies are shared and per-office samples are thin. That was an assumption
+rather than a finding, and with 281 more races it became testable.
+
+It holds, for the win probability. Adding an office term to a logistic model of
+"did the favourite win" on tier gives a likelihood ratio of **0.03 on 1 degree
+of freedom, p = 0.87**: no improvement whatsoever. Within the expert data alone,
+Senate and Governor are indistinguishable at every tier (all p >= 0.52).
+
+An earlier reading of the same data looked like evidence against pooling: in
+2018, statewide "Lean" races went to the favourite 63.6% of the time (n=11)
+against 95.5% for House districts (n=22), p = 0.033. That is confounded with
+source, not office. Holding office fixed and varying only the source, statewide
+Lean races are 63.6% under FiveThirtyEight's 2018 categories and **96.9%**
+(n=64) under expert ratings. The difference is the rating system, not the
+chamber.
+
+The **margin spread** does differ by office: at Lean, House sd 2.5 against
+statewide 6.7 (Levene p = 0.012), and similarly at Likely and Safe. This is not
+acted on, for two reasons. It is confounded with source the same way, and House
+is represented by one cycle so the two cannot be separated. And it is mostly
+moot in practice: the sd floors (8 points at Lean and Toss-up, 10 at Likely)
+bind at exactly the tiers where the gap appears, so the pooled number is never
+used there. Where the empirical sd is used, at Safe and Toss-up, pooling errs
+toward wider bands, which is the safe direction.
+
+### What it changed
+
+The tier mapping moved most where the old sample was thinnest:
+
+| tier | P(favourite wins) before | after | 90% interval after |
+| --- | --- | --- | --- |
+| Safe | 0.9997 | 1.000 | 0.999 to 1.000 |
+| Likely | 0.937 | 0.959 | 0.930 to 0.981 |
+| Lean | **0.823** | **0.903** | 0.854 to 0.943 |
+| Toss-up | 0.500 (pinned) | 0.500 (pinned) | 0.436 to 0.642 |
+
+Toss-up stays pinned at 0.500 by design, since a toss-up with a favoured side
+would not be a toss-up, but its margin sd rose from the 8-point floor to an
+empirical 9.07, so toss-up races now get a wider band.
+
+In the backtest the ratings component is, by itself, the **strongest single
+component** in most statewide cells: Brier 0.027 against 0.050 for the blend in
+the 2010 Senate, 0.027 against 0.039 in 2014, 0.024 against 0.041 in 2022.
+Read that with care. These are final pre-election ratings, so they already
+contain the polls; the raters are not an independent source so much as a
+well-calibrated human blend, which is why stacking gives them a minority weight
+rather than a majority one.
+
+Every cycle's blend Brier improved, slightly: 2010 0.0562 -> 0.0559,
+2014 0.03319 -> 0.03317, 2018 0.0460 -> 0.0458, 2022 0.0561 -> 0.0558. The
+2026 forecast moved from 97.9 / 67.4 / 61.8 to **96.8 / 65.7 / 61.1**, slightly
+less confident, which is the expected direction: 359 unpolled races now take
+15% of their estimate from a component with a five-cycle track record instead of
+almost entirely from fundamentals.
+
 ## Known limitations and what to fix first
 
 1. **The shared polling error is the biggest single lever, and the default
@@ -645,8 +765,13 @@ economic regressor adds confounding rather than information.
    polls-vs-fundamentals split comes from `config.STACK_EXTRAPOLATION`, not
    from data. Supplying a long-horizon archive (or accumulating this cycle's
    polls) lets `12` estimate the full curve.
-3. **Ratings are calibrated on one cycle (2018)** and in-sample in the
-   backtest. Add archived Cook/Sabato/Inside ratings for 2010, 2014 and 2022.
+3. **Ratings are still calibrated in-sample in the backtest**, though the
+   sample is now five cycles rather than one (see the ratings section above).
+   The leak was measured by refitting the tier mapping without each cycle and
+   re-scoring it: +0.0005 Brier, 1.5% of the in-sample score. It is small
+   because the mapping is stable across held-out cycles (Lean ranges 0.886 to
+   0.924), which it could not have been on one cycle. The remaining gap is
+   House ratings, which exist for 2018 only.
 4. **2010/2014 leans are lagged-result proxies**; FiveThirtyEight leans start
    in 2018. MIT Election Lab data would extend the seat model's training set.
 5. **Incumbency overrides must be maintained.** Without
@@ -675,10 +800,10 @@ inputs; the backtest does not use any fixture):
 
 | cycle | races | Brier | log loss | accuracy | expected D seats (all offices) | actual |
 |---|---|---|---|---|---|---|
-| 2010 | 421 | 0.056 | 0.178 | 93.1% | 188 | 178 |
-| 2014 | 392 | 0.033 | 0.109 | 95.7% | 163 | 157 |
-| 2018 | 457 | 0.046 | 0.154 | 93.4% | 225 | 234 |
-| 2022 | 464 | 0.060 | 0.189 | 90.3% | 194 | 232 |
+| 2010 | 421 | 0.056 | 0.178 | 93.1% | 189 | 178 |
+| 2014 | 392 | 0.033 | 0.108 | 95.7% | 163 | 157 |
+| 2018 | 457 | 0.046 | 0.155 | 93.4% | 224 | 234 |
+| 2022 | 464 | 0.056 | 0.176 | 92.0% | 198 | 232 |
 
 A coin flip scores Brier 0.25. The blend beats fundamentals alone in every
 cycle and office (e.g. 2022 Senate: 0.043 vs 0.110) and matches the pooled
@@ -691,13 +816,16 @@ biggest miss is 2022, where approval of 40 and 7.7% inflation made the
 fundamentals predict a Republican wave that did not arrive; that is the
 historical-fundamentals error the national shock term is there to represent.
 
-Two stacking findings worth knowing: (1) the rating component receives
-roughly zero weight against the pooled estimate, but the only historical
-ratings available here are FiveThirtyEight's 2018 categories, which are
-themselves model output; archived Cook/Sabato/Inside ratings may change that;
-(2) for unpolled races the plain fundamentals beat the state-pooled estimate,
-so the state random effect mostly matters through the PyMC model's shared
-terms rather than as a point-estimate shift.
+Two stacking findings worth knowing: (1) the rating component used to receive
+roughly zero weight, and the suspicion recorded here was that this reflected
+the only available historical ratings being FiveThirtyEight's 2018 categories,
+which are themselves model output. That suspicion was right. With archived
+Cook / Sabato / Inside Elections ratings for 2006, 2010, 2014 and 2022 the
+component earns 7% of the weight on polled races and 15% on unpolled ones at
+a 28-day horizon, and 17% on both at 21 days; (2) for unpolled races the plain
+fundamentals still beat the state-pooled estimate, so the state random effect
+mostly matters through the PyMC model's shared terms rather than as a
+point-estimate shift.
 
 ## Outputs
 

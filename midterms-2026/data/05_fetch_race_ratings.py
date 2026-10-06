@@ -70,7 +70,8 @@ def _find_project_root() -> Path:
 _ROOT = _find_project_root()
 sys.path.insert(0, str(_ROOT))
 import config  # noqa: E402
-from utils import GH, fetch_text, get_logger, load_partisan_lean, save_stage, tier_from_lean  # noqa: E402
+from utils import (GH, fetch_text, get_logger, load_partisan_lean, save_stage,  # noqa: E402
+                   tier_from_lean, worst_provenance)
 
 log = get_logger("05_ratings")
 
@@ -194,26 +195,52 @@ def consensus(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def historical() -> tuple[pd.DataFrame, str]:
+    """The ratings-with-outcomes table stage 10 calibrates on.
+
+    The 2018 FiveThirtyEight forecast-review categories and the archived
+    Cook / Sabato / Inside Elections ratings in `historical_ratings.csv` are
+    ADDITIVE, not alternatives. An earlier version of this function treated the
+    manual file as a replacement, which silently discarded 2018 (and with it
+    every House district in the sample) the moment the file appeared.
+
+    Every row carries a `source`. Stage 10 reads only `source == "consensus"`,
+    because three raters looking at one race are three correlated judgements
+    rather than three observations, and counting them separately would inflate
+    the sample threefold while understating the uncertainty. The manual file
+    brings its own consensus rows (see fetch_historical_ratings.py); 2018 has a
+    single rating per race, so it is emitted twice, once under its own source
+    label for provenance and once as the consensus for that cycle.
+    """
+    txt, prov = fetch_text(FR2018, "fivethirtyeight_forecast_results_2018.csv", max_age_hours=24 * 30)
+    fr = pd.read_csv(io.StringIO(txt))
+    fr = fr[fr["version"] == "deluxe"]   # deluxe = the version that folds in expert ratings
+    def rid(row):
+        st, seat = row["race"].split("-")
+        if row["branch"] == "House":
+            return f"H-{st}-{int(seat):02d}"
+        if row["branch"] == "Senate":
+            return f"S-{st}-special" if seat.endswith("2") else f"S-{st}"
+        return f"G-{st}"
+    h = pd.DataFrame({"cycle": 2018, "race_id": fr.apply(rid, axis=1),
+                      "source": "fivethirtyeight_category",
+                      "rating": fr["category"].map(normalise_rating),
+                      "dem_won": fr["Democrat_Won"].astype(float)})
+    frames = [h, h.assign(source="consensus")]
+
     if MANUAL_HIST.exists():
-        h = pd.read_csv(MANUAL_HIST, comment="#")
-        h["rating"] = h["rating"].map(normalise_rating)
-        prov = "manual"
-    else:
-        txt, prov = fetch_text(FR2018, "fivethirtyeight_forecast_results_2018.csv", max_age_hours=24 * 30)
-        fr = pd.read_csv(io.StringIO(txt))
-        fr = fr[fr["version"] == "deluxe"]   # deluxe = the version that folds in expert ratings
-        def rid(row):
-            st, seat = row["race"].split("-")
-            if row["branch"] == "House":
-                return f"H-{st}-{int(seat):02d}"
-            if row["branch"] == "Senate":
-                return f"S-{st}-special" if seat.endswith("2") else f"S-{st}"
-            return f"G-{st}"
-        h = pd.DataFrame({"cycle": 2018, "race_id": fr.apply(rid, axis=1),
-                          "source": "fivethirtyeight_category",
-                          "rating": fr["category"].map(normalise_rating),
-                          "dem_won": fr["Democrat_Won"].astype(float)})
-        prov = "mirror"
+        m = pd.read_csv(MANUAL_HIST, comment="#")
+        m["rating"] = m["rating"].map(normalise_rating)
+        m = m[[c for c in ("cycle", "race_id", "office", "source", "rating") if c in m]]
+        n_cons = int((m.source == "consensus").sum())
+        if n_cons == 0:
+            log.warning("%s has no consensus rows, so stage 10 will ignore it. Regenerate "
+                        "it with fetch_historical_ratings.py.", MANUAL_HIST.name)
+        log.info("archived ratings: %d row(s) from %s covering cycles %s (%d consensus races)",
+                 len(m), MANUAL_HIST.name, sorted(m.cycle.unique().tolist()), n_cons)
+        frames.append(m)
+        prov = worst_provenance(prov, "manual")
+
+    h = pd.concat(frames, ignore_index=True)
     h["tier_code"] = h["rating"].map(tier_code)
     h = h.dropna(subset=["tier_code"])
     h["rating"] = h["tier_code"].map(code_to_tier)

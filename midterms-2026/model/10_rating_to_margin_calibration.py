@@ -80,6 +80,15 @@ SD_FLOOR = {"Safe": 12.0, "Likely": 10.0, "Lean": 8.0, "Toss-up": 8.0}
 
 
 def calibrate(hist: pd.DataFrame, results: pd.DataFrame) -> pd.DataFrame:
+    # Consensus rows only. The historical table also carries each individual
+    # rater's call, which is there for provenance and for anyone who wants to
+    # score raters against each other; feeding all of them to the calibration
+    # would count one race three times and claim three times the evidence.
+    if "source" in hist and (hist.source == "consensus").any():
+        n0 = len(hist)
+        hist = hist[hist.source == "consensus"]
+        log.info("calibrating on %d consensus rating(s) of %d row(s) in the historical "
+                 "table", len(hist), n0)
     df = hist.merge(results[["cycle", "race_key", "margin", "winner_party"]].rename(columns={"race_key": "race_id"}),
                     on=["cycle", "race_id"], how="left")
     if "dem_won" not in df or df["dem_won"].isna().all():
