@@ -831,6 +831,60 @@ districts rated Safe R where thin district polling says only R+2 or R+3. There
 the raters are more likely to be right than one or two low-quality district
 polls, and the model currently splits the difference.
 
+## Fixture ratings were built from the old maps
+
+`data/05_fetch_race_ratings.py`, `fixture_ratings()`
+
+Only 204 of 506 races carry a real Cook / Inside Elections / Sabato rating. The
+other 302 get a rating derived from their partisan lean and labelled
+`fixture_pvi_derived`. That derivation read FiveThirtyEight's **2022** lean and
+nothing else, so for the 173 districts on new 2026 maps it rated a district that
+no longer exists. 117 of those 173 have no real rater rating, so the fixture was
+the only one they had.
+
+Where redistricting flipped a seat, the fixture pointed the wrong way:
+
+| District | 2022 lean | 2026 lean | fixture rating was | now |
+| --- | --- | --- | --- | --- |
+| H-UT-01 | R+24.5 | **D+23.8** | Safe R | Safe D |
+| H-NC-06 | D+9.2 | **R+17.9** | Likely D | Safe R |
+| H-CA-41 | R+3 | **D+14.2** | Lean R | Likely D |
+| H-CA-03 | R+6 | **D+10.0** | Lean R | Likely D |
+
+The function now reads `pvi_manual.csv` first, exactly as stage 06 does, with the
+2022 lean as the fallback for the 262 districts whose lines did not change. It is
+read directly rather than from `fundamentals_2026`, because stage 06 runs after
+stage 05. 18 consensus ratings changed, all of them on new maps, including those
+four sign flips. The House moved from 98.3% to 98.4%; the Senate and Governor did
+not move, since neither has a fixture-rated competitive race.
+
+The same function also silently turned a missing lean into 0.0, which
+`tier_from_lean` reads as a Toss-up: the most consequential rating in the table,
+invented from an absent lean. It now warns and names the races. Currently none.
+
+Note how this interacts with the band projection. A fixture rating carries no
+information the fundamentals do not already have, because both are the same lean.
+The projection recognises that and marks the rating redundant, so it contributes
+nothing instead of double-counting the lean. That only works when the two agree,
+which is exactly what this fix restores: all four races above now show
+`rating_redundant = True`.
+
+### Validating the lean file itself
+
+Before concluding the ratings were at fault, the leans were checked, because the
+opposite diagnosis was equally plausible. The Downballot sheet carries 2020
+results only for districts whose lines did NOT change, which makes it
+self-auditing: the states it reports as redrawn are exactly the nine the model
+flags `new_map`, 173 districts, with no mismatch in either direction. Missouri is
+NOT among them; `fetch_pvi.py` lists ten states in its docstring and should say
+nine. The sheet gives Missouri's 5th as D+23 with Cleaver still its incumbent and
+2020 numbers present, consistent with the model's D+19.8.
+
+So the leans are right and MO-05's unanimous Safe R from all three raters is the
+one case this cannot settle. Either Missouri's lines changed after the sheet was
+published on 2026-07-09, which would make the sheet stale for Missouri and the
+raters right, or the rating is in error. It is flagged rather than guessed at.
+
 ## Known limitations and what to fix first
 
 1. **The shared polling error is the biggest single lever, and the default
@@ -907,7 +961,21 @@ polls, and the model currently splits the difference.
 7. **War salience** for 2026 is a placeholder (0.5) until
    `war_salience_2026.csv` carries a measured series (e.g. news-attention
    volume, weeks since escalation).
-8. **The CPI term is retained but unsupported.** See the section above: on
+8. **House district polling is dominated by Democratic internals, and the
+   model makes no adjustment for sponsorship.** 56% of the 183 House district
+   polls are Democratic internals against 13% Republican, and **36 of the 90
+   polled districts have nothing but Democratic internals**. Nothing in stage 08
+   or 11 reads the `partisan` column, so a campaign's own poll is weighted like
+   a university's. The deeper problem is publication bias rather than house
+   effects: campaigns release internals where the numbers are good, which a
+   house-effect term cannot correct. Polls also linger: 45 of 183 are more than
+   120 days old and the oldest is from January, yet `H-WA-04` gives 48% weight
+   to a single February poll showing D+18 in a district at R+24.6, which is
+   almost certainly bad data. This is the biggest open problem in the House
+   model. The Senate and Governor are not affected: they run 51% and 64%
+   non-partisan with roughly balanced sponsorship, and only three and one race
+   respectively rely on one side's internals.
+9. **The CPI term is retained but unsupported.** See the section above: on
    leave-one-out cross-validation the national model predicts better with no
    economic term (RMSE 3.80) than with the CPI level it currently carries
    (4.68), and a seat-level local-economy term does not survive testing either.

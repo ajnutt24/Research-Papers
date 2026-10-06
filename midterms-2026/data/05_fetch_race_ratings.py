@@ -170,11 +170,61 @@ def scrape_all() -> pd.DataFrame | None:
 
 
 def fixture_ratings() -> pd.DataFrame:
-    lean, _ = load_partisan_lean("2022")
-    lean = lean.set_index("race_key")["lean"]
+    """Derive a rating from the partisan lean, for races no rater covers.
+
+    The lean has to be the CURRENT one. This function used to read
+    FiveThirtyEight's 2022 lean and nothing else, which describes the old lines,
+    so for the 173 districts on new 2026 maps it produced a "rating" for a
+    district that no longer exists. 117 of those districts have no real rater
+    rating, so the fixture was the only one they had, and where redistricting
+    flipped a seat the fixture pointed the wrong way: North Carolina's 6th came
+    out "Likely D" on a seat now at R+18, and Utah's 1st "Safe R" on a seat now
+    at D+24, because the 2022 leans were +9.2 and -24.5 respectively.
+
+    `pvi_manual.csv` is read first, exactly as stage 06 reads it, with the 2022
+    lean as the fallback for the 262 districts whose lines did not change. It is
+    read directly rather than taken from `fundamentals_2026`, because stage 06
+    runs AFTER this one and that file would be a cycle old or absent.
+
+    Note what this means for the blend: a fixture rating carries no information
+    the fundamentals component does not already have, since both are the same
+    lean. The band projection in stage 12 recognises that and makes such a
+    rating redundant, so it contributes nothing rather than double-counting.
+    That only works if the two agree, which is precisely what this fix restores.
+    """
+    lean22, _ = load_partisan_lean("2022")
+    lean22 = lean22.set_index("race_key")["lean"]
     uni = config.race_universe()
     key = np.where(uni.office == "House", uni.state + "-" + uni.district.map("{:02d}".format), uni.state)
-    uni["lean"] = [lean.get(k, 0.0) for k in key]
+    uni["lean"] = [lean22.get(k, np.nan) for k in key]
+    n_from_2022 = int(uni["lean"].notna().sum())
+
+    pvi_path = config.DATA_MANUAL / "pvi_manual.csv"
+    n_pvi = 0
+    if pvi_path.exists():
+        pvi = pd.read_csv(pvi_path, comment="#").dropna(subset=["pvi"])
+        cur = dict(zip(pvi.race_id, pvi.pvi))
+        hit = uni.race_id.isin(cur)
+        uni.loc[hit, "lean"] = [cur[r] for r in uni.loc[hit, "race_id"]]
+        n_pvi = int(hit.sum())
+    else:
+        log.warning("pvi_manual.csv missing, so the fixture ratings fall back to the 2022 "
+                    "lean for every race, including districts on new maps where it is "
+                    "simply wrong. Run  python3 fetch_pvi.py  first.")
+
+    missing = uni["lean"].isna()
+    if missing.any():
+        # Previously these silently became 0.0, which tier_from_lean reads as a
+        # Toss-up: the most consequential rating in the table, invented from an
+        # absent lean. Say so, and keep the Toss-up only because something has
+        # to be emitted.
+        log.warning("%d race(s) have no lean from either source and are being given a "
+                    "Toss-up fixture rating on no evidence: %s", int(missing.sum()),
+                    uni.loc[missing, "race_id"].tolist()[:12])
+        uni.loc[missing, "lean"] = 0.0
+    log.info("fixture ratings: %d race(s) from pvi_manual.csv (current maps), %d from the "
+             "2022 lean, %d with no lean at all", n_pvi, n_from_2022 - n_pvi, int(missing.sum()))
+
     # incumbency bonus for the fixture only
     inc = uni.get("incumbent_party", pd.Series([np.nan] * len(uni))).map({"D": 2.0, "R": -2.0}).fillna(0)
     uni["rating"] = [tier_from_lean(v) for v in uni["lean"] + inc]
