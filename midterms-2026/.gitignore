@@ -7,12 +7,16 @@ data_store/processed/*.nc
 data_store/processed/
 outputs/
 
-# The polling workbook. Ignored by default for two reasons: it is a working
-# data file that gets re-saved every week, so committing it puts an ~850KB
-# binary diff in history each time, and it is yours rather than the code's.
-# If you want the repository to be self-contained, so the pipeline runs in
-# Colab or a fresh container without the OneDrive path, delete these two lines
-# and commit the file. Consider Git LFS if you do.
-data_store/manual/MidtermPolls2026.xlsx
-data_store/manual/*.xlsx
+# The polling workbook IS committed, deliberately. It costs an ~850KB binary
+# diff whenever it is re-saved, which is the price of the repository being
+# self-contained: the pipeline then runs in Colab or a fresh container without
+# the OneDrive path, and a reset container does not lose the poll set. Consider
+# Git LFS if the history gets heavy.
+#
+# Its derivatives stay out. A --in-place sync writes a timestamped backup and
+# --append writes a .updated copy, so without these two lines every run would
+# add another 900KB binary. The paste-ready CSVs are regenerable from the
+# workbook plus a scrape and are pure intermediate output.
+data_store/manual/*.backup-*.xlsx
+data_store/manual/*.updated.xlsx
 data_store/manual/new_polls_*.csv
