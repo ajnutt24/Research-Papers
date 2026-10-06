@@ -478,9 +478,15 @@ STACK_HORIZONS_ESTIMATED = [1, 3, 7, 14, 21]
 # The floor stops the variance multiplier running away on a very old poll and
 # keeps one from being discarded outright, which matters for a race whose only
 # poll is old: better a 2%-weight poll than none.
-POLL_AGE_REF_DAYS = 90.0
-POLL_AGE_WEIGHT_AT_REF = 1.0 / 3.0
-POLL_AGE_MIN_WEIGHT = 0.02
+# Environment-overridable so a sensitivity run needs no edit, the same way
+# POLL_BIAS_MODE works. POLL_AGE_WEIGHT_AT_REF=0.999 effectively turns the decay
+# off, which is the way to produce a before/after comparison:
+#     POLL_AGE_WEIGHT_AT_REF=0.999 python3 run_pipeline.py 08 09 10 11 12 13 14
+POLL_AGE_REF_DAYS = float(os.environ.get("POLL_AGE_REF_DAYS", 90.0))
+POLL_AGE_WEIGHT_AT_REF = float(os.environ.get("POLL_AGE_WEIGHT_AT_REF", 1.0 / 3.0))
+POLL_AGE_MIN_WEIGHT = float(os.environ.get("POLL_AGE_MIN_WEIGHT", 0.02))
+if not (0.0 < POLL_AGE_WEIGHT_AT_REF < 1.0):
+    raise ValueError(f"POLL_AGE_WEIGHT_AT_REF must be in (0, 1), got {POLL_AGE_WEIGHT_AT_REF}")
 # House effects are estimated from the FULL weight of every poll, not the aged
 # weight. The decay answers "how much does this poll tell me about the race
 # today", which decays; a pollster's lean is a property of the pollster and an
