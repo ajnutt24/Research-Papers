@@ -805,6 +805,110 @@ def topup_from_scrape(workbook_df: pd.DataFrame) -> pd.DataFrame | None:
     return out
 
 
+
+def dedupe_polls(df: pd.DataFrame) -> pd.DataFrame:
+    """One survey, one row. See config.POLL_DEDUP_* for the three cases.
+
+    Runs on the COMBINED frame. The de-duplication inside topup_from_scrape
+    only ever saw the scraped rows, so a survey entered twice in the workbook
+    itself passed straight through: the final combine keys on poll_id, which is
+    unique per workbook row by construction and therefore never collides.
+
+    Keeper preference inside a collapse group, in order:
+      1. larger sample size
+      2. then, among rows of EQUAL sample size, the highest two-party total
+      3. then the workbook over a scrape, the workbook being hand-curated
+      4. then poll_id, so the result does not depend on row order
+
+    The order of the first two matters and the obvious arrangement is wrong.
+    Two-party total discriminates between QUESTIONS from one survey: Glengariff's
+    600 respondents answered both a 32/34 question and a 47/45 head-to-head, and
+    the head-to-head is the one with fewer people parked in "undecided", so the
+    higher total is the base question. But it says nothing useful when the sample
+    sizes differ, because then the rows are different SAMPLES and the totals
+    differ only by rounding. Ranking on it first made Morning Consult's week of
+    2026-01-04 keep an n=2,201 row over an n=22,709 one on an 87-versus-86
+    two-party total, which is noise deciding a real question. Sample size leads,
+    and the total breaks ties within one sample.
+    """
+    if not len(df):
+        return df
+    import workbook as _wb
+
+    d = df.copy()
+    d["_end"] = pd.to_datetime(d["end_date"], errors="coerce")
+    d["_pn"] = [_wb.normalise_pollster(x).lower() for x in d["pollster"]]
+    d["_two_party"] = pd.to_numeric(d["dem_pct"], errors="coerce").fillna(0) + \
+                      pd.to_numeric(d["rep_pct"], errors="coerce").fillna(0)
+    d["_n"] = pd.to_numeric(d["sample_size"], errors="coerce")
+    d["_from_wb"] = d["source"].astype(str).str.startswith("workbook").astype(int)
+    d["_margin"] = pd.to_numeric(d["margin"], errors="coerce")
+    # Rank so that the row we want to keep sorts first.
+    d = d.sort_values(["_n", "_two_party", "_from_wb", "poll_id"],
+                      ascending=[False, False, False, True], na_position="last").reset_index(drop=True)
+
+    window = int(getattr(config, "POLL_DEDUP_DATE_WINDOW_DAYS", 2))
+    tol = float(getattr(config, "POLL_DEDUP_MARGIN_TOL", 1.0))
+
+    keep_idx, dropped = [], []
+    for (rid, pn), g in d.groupby(["race_id", "_pn"], sort=False):
+        kept_rows = []
+        for i, row in g.iterrows():
+            match = None
+            for k in kept_rows:
+                same_day = pd.notna(row._end) and pd.notna(k._end) and row._end == k._end
+                if same_day:
+                    match, reason = k, "same race, pollster and field end date"
+                    break
+                # Fuzzy: dates close AND margins agree AND sample sizes compatible.
+                if pd.isna(row._end) or pd.isna(k._end):
+                    continue
+                gap = abs((row._end - k._end).days)
+                if gap > window:
+                    continue
+                if pd.isna(row._margin) or pd.isna(k._margin) or abs(row._margin - k._margin) > tol:
+                    continue
+                n_ok = pd.isna(row._n) or pd.isna(k._n) or float(row._n) == float(k._n)
+                if not n_ok:
+                    continue
+                match = k
+                reason = (f"same race and pollster, field end {gap} day(s) apart, margins within "
+                          f"{tol:g} pt and sample sizes compatible")
+                break
+            if match is None:
+                kept_rows.append(row)
+                keep_idx.append(i)
+            else:
+                dropped.append({"race_id": rid, "pollster": row.pollster,
+                                "dropped_end_date": row.end_date, "dropped_n": row.sample_size,
+                                "dropped_margin": row._margin, "dropped_source": row.source,
+                                "dropped_poll_id": row.poll_id,
+                                "kept_end_date": match.end_date, "kept_n": match.sample_size,
+                                "kept_margin": match._margin, "kept_poll_id": match.poll_id,
+                                "reason": reason})
+
+    out = d.loc[sorted(keep_idx)].drop(
+        columns=["_end", "_pn", "_two_party", "_n", "_from_wb", "_margin"])
+    if dropped:
+        dd = pd.DataFrame(dropped)
+        log.info("de-duplication: dropped %d of %d row(s) as repeats of a survey already "
+                 "present (%d exact key, %d within the %d-day window)",
+                 len(dd), len(df), int((dd.reason.str.startswith("same race, pollster and")).sum()),
+                 int((~dd.reason.str.startswith("same race, pollster and")).sum()), window)
+        for r in dd.head(12).itertuples():
+            log.info("    %-14s %-34s %s n=%s -> kept %s n=%s",
+                     r.race_id, str(r.pollster)[:33], r.dropped_end_date, r.dropped_n,
+                     r.kept_end_date, r.kept_n)
+        if getattr(config, "POLL_DEDUP_AUDIT", True):
+            path = config.DATA_PROCESSED / "poll_dedup_dropped.csv"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            dd.to_csv(path, index=False)
+            log.info("    full list written to %s", path)
+    else:
+        log.info("de-duplication: nothing dropped, every survey appears once")
+    return out.reset_index(drop=True)
+
+
 def main(force_fixture: bool = False):
     frames, provs = [], []
     report = []
@@ -880,6 +984,7 @@ def main(force_fixture: bool = False):
         frames.append(build_fixture())
         provs.append("fixture")
     polls = pd.concat(frames, ignore_index=True).drop_duplicates("poll_id")
+    polls = dedupe_polls(polls)
     polls = filter_hypothetical(polls)
     polls = filter_to_nominees(polls)
     prov = max(provs, key=lambda p: {"live": 0, "cache": 1, "manual": 1, "fixture": 3}[p])

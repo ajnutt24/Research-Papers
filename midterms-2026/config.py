@@ -447,6 +447,42 @@ WEAK_LEAN_FUND_TO_RATING = float(os.environ.get("WEAK_LEAN_FUND_TO_RATING", 0.75
 # Replace with estimated values once a long-horizon poll archive is available.
 STACK_HORIZONS_ESTIMATED = [1, 3, 7, 14, 21]
 # --------------------------------------------------------------------------
+# Poll de-duplication
+# --------------------------------------------------------------------------
+# One survey should contribute one row. The aggregator weights by inverse
+# variance and treats every row as fresh evidence, so a survey present twice
+# gets double weight and halves the uncertainty it ought to leave alone.
+#
+# Three distinct things look like duplicates and only two of them are:
+#
+# 1. The SAME SURVEY, TWO QUESTIONS. Glengariff's Michigan governor poll of
+#    2026-01-06 appears as 32/34 and as 47/45, same pollster, same date, same
+#    600 respondents. Those are a multi-candidate or undecided-heavy question
+#    and the clean head-to-head from one survey, not two surveys. Keeping both
+#    counts 600 people twice, so one row is kept: the one whose two-party total
+#    is highest, which is the base head-to-head because it has the fewest
+#    respondents parked in "other" or "undecided".
+#
+# 2. The SAME SURVEY, TWO SOURCES, DATES ONE DAY APART. Cygnal's generic-ballot
+#    poll is in the workbook ending 2026-05-06 and in the Wikipedia scrape
+#    ending 2026-05-07, both n=1500, both D+7. One poll, two spellings of its
+#    field period. A date window catches it.
+#
+# 3. GENUINELY SEPARATE POLLS CLOSE TOGETHER. Trafalgar polled New Hampshire's
+#    Senate race ending 09-25 (n=1090, D+4) and 09-27 (n=1082, D+6). Two polls.
+#    Collapsing them would discard real evidence, which is why the date window
+#    alone is not enough: the margins and sample sizes have to agree too.
+#
+# So the fuzzy rule fires only when the dates are within the window AND the
+# margins agree within the tolerance AND the sample sizes are equal or one is
+# missing. That keeps case 2 and spares case 3.
+POLL_DEDUP_DATE_WINDOW_DAYS = 2
+POLL_DEDUP_MARGIN_TOL = 1.0
+# Every dropped row is written here with the row it lost to and the reason, so
+# a destructive step is auditable rather than taken on trust.
+POLL_DEDUP_AUDIT = True
+
+# --------------------------------------------------------------------------
 # Poll recency
 # --------------------------------------------------------------------------
 # A poll's weight in the Kalman filter is its inverse observation variance, so
