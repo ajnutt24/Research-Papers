@@ -611,18 +611,35 @@ economic regressor adds confounding rather than information.
    infers a polling correction from the gap between polls and fundamentals,
    which is confounded because the fundamentals are badly wrong in several
    polled races for unrelated reasons (they cannot see independent
-   candidates). Sensitivity, 35 days out:
+   candidates). Sensitivity, 28 days out, same polls in all three:
 
-   | Setting | House | Senate | Governor |
-   | --- | --- | --- | --- |
-   | `symmetric` (default) | ~100% | 62% | 56% |
-   | `estimated`, midterm drift prior | 97% | 38% | 31% |
-   | `estimated`, pooled drift prior | 87% | 24% | 20% |
+   | Setting | House | Senate | Governor | median D seats | fitted `poll_bias` | national sd |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | `symmetric` (default) | 98% | 67% | 62% | 239 / 52 / 27 | 0 (fixed) | 1.10 |
+   | `estimated`, midterm drift prior | 97% | 62% | 52% | 234 / 51 / 26 | +1.05 +/- 1.60 | 2.14 |
+   | `estimated`, pooled drift prior | 90% | 53% | 45% | 231 / 51 / 25 | +1.58 +/- 1.97 | 2.50 |
 
-   The backtest does not settle this: its calibration table is unchanged
+   Reproduce any row with
+   `POLL_BIAS_MODE=estimated POLL_BIAS_PRIOR=pooled python3 run_pipeline.py 08 11 12 13`.
+
+   **The specifications have converged**, and that is the main thing to know
+   about this parameter now. At 36 days out the Senate ran 62% / 38% / 24%
+   across these rows, a 38-point spread that made the assumption the dominant
+   fact about the forecast. It is now 67% / 62% / 53%, a 14-point spread,
+   because the fitted `poll_bias` is inferred from the gap between polls and
+   fundamentals and a thousand polls have closed most of that gap. The Senate
+   is a modest Democratic favourite under every specification, which was not
+   true in September.
+
+   Where the assumption now bites hardest is the **governors**: 62% under the
+   default against 45% under the pooled prior, which crosses from favourite to
+   underdog. That is the number to quote with its assumption attached.
+
+   The backtest does not settle the choice: its calibration table is unchanged
    across all three, because it scores the blend components at historical
-   cycles and never re-fits this cycle's shared polling error. Quote the
-   assumption with the number.
+   cycles and never re-fits this cycle's shared polling error. The case for the
+   midterm drift prior is the reference-class argument in
+   `config.POLL_BIAS_PRIOR_CYCLES`, not backtest evidence.
 2. **Long-horizon stacking weights are extrapolated.** The public poll
    archive covers the final 21 days of each cycle only. Two months out, the
    polls-vs-fundamentals split comes from `config.STACK_EXTRAPOLATION`, not

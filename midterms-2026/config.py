@@ -102,8 +102,14 @@ POLL_MISS_CYCLES = [2014, 2016, 2018, 2020, 2022]
 #
 # Caveats, because three cycles is thin: 2014 was a real +3.92 midterm miss, so
 # midterm bias is not zero, and this narrows rather than eliminates the term.
-# Set this to POLL_MISS_CYCLES to restore the pooled behaviour.
-POLL_BIAS_PRIOR_CYCLES = [2014, 2018, 2022]
+# Set POLL_BIAS_PRIOR=pooled in the environment to restore the pooled behaviour.
+# An environment switch rather than an edit, so a sensitivity run is reproducible
+# and nobody has to remember to put the file back afterwards. Note that stage 08
+# reads this too, so changing it means re-running 08, not just 11.
+_PRIOR_SET = os.environ.get("POLL_BIAS_PRIOR", "midterm")
+if _PRIOR_SET not in ("midterm", "pooled"):
+    raise ValueError(f"POLL_BIAS_PRIOR must be 'midterm' or 'pooled', got {_PRIOR_SET!r}")
+POLL_BIAS_PRIOR_CYCLES = [2014, 2018, 2022] if _PRIOR_SET == "midterm" else POLL_MISS_CYCLES
 
 # --------------------------------------------------------------------------
 # Credentials & HTTP behaviour
@@ -596,24 +602,37 @@ MCMC_TARGET_ACCEPT = 0.9
 #                over-determination makes the Senate and Governor figures more
 #                confident than the evidence strictly supports.
 #
-# Sensitivity on the workbook data, 36 days out (all with the shared simulation
-# shock in place):
-#                                          House   Senate   Governor  poll_bias
-#   symmetric (default)                     100%      62%       56%       0 (fixed)
-#   estimated, drift prior 2.27               97%      38%       31%      +1.96
-#   estimated, drift prior 4.03 (pooled)      87%      24%       20%      +3.08
+# Sensitivity, 28 days out, same polls in all three (reproduce with
+# POLL_BIAS_MODE=estimated POLL_BIAS_PRIOR=pooled python3 run_pipeline.py 08 11 12 13):
+#                                     House   Senate   Governor   poll_bias     nat_dev sd
+#   symmetric (default)                98%      67%       62%      0 (fixed)        1.10
+#   estimated, drift prior 2.27        97%      62%       52%      +1.05 +/- 1.60    2.14
+#   estimated, drift prior 4.03        90%      53%       45%      +1.58 +/- 1.97    2.50
+#   median D seats, in the same order: 239/52/27, 234/51/26, 231/51/25
 #
-# The last two differ only in POLL_BIAS_PRIOR_CYCLES. Calibrating the drift prior
-# on midterms rather than on all five cycles moves the Senate from 24% to 38%,
-# and the fitted poll_bias lands at +1.96 against a historical midterm mean of
-# +1.29, so the prior informs the estimate rather than dictating it. That middle
-# row is the closest thing to a compromise if the default's 100% House ever
-# becomes a problem to publish.
+# The last two differ only in POLL_BIAS_PRIOR_CYCLES.
 #
-# Note that "symmetric" returns a 100% House probability even now that 87 House
-# districts have their own polls. Its over-determination is a property of the
-# specification, not a symptom of thin House data, so more district polling will
-# not fix it.
+# THE SPECIFICATIONS HAVE CONVERGED as polls accumulated, and that is the main
+# thing to know about this parameter now. At 36 days out the Senate ran 62% /
+# 38% / 24% across these three rows, a 38-point spread that made the assumption
+# the dominant fact about the forecast. It is now 67% / 62% / 53%, a 14-point
+# spread. The cause is visible in the fitted poll_bias: it has fallen from +1.96
+# to +1.05 under the midterm prior and from +3.08 to +1.58 under the pooled one.
+# That term is inferred from the gap between polls and fundamentals, and 1,000-odd
+# polls have closed most of that gap. The Senate is a modest Democratic favourite
+# under every specification, which is a defensible thing to publish; it was not
+# in September.
+#
+# Where the assumption now bites hardest is the GOVERNORS, not the Senate: 62%
+# under symmetric against 45% under the pooled prior, which crosses from
+# favourite to underdog. Quote that one with the assumption attached.
+#
+# The over-determination critique still stands and is visible in the last
+# column: symmetric puts national uncertainty at sd 1.10, against 2.14 and 2.50
+# for the estimated runs and a 4.03-point polling miss the model itself measures.
+# Read the House number as ">95% under this specification" rather than as a
+# precise figure. It is a property of the specification, not a symptom of thin
+# House data, so more district polling will not fix it.
 #
 # The backtest does not settle the choice between these: its calibration table is
 # unchanged across all three, because it scores the blend components at historical
