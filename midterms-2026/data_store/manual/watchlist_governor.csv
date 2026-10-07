@@ -1,0 +1,19 @@
+# Governor races worth tracking for 2026. Democrats hold 6 governorships that
+# are not on the ballot and need 26 of 50 for a majority, so unlike the Senate
+# the path runs mostly through HOLDING seats rather than flipping them: Oregon
+# is the 26th seat and it is a Democratic incumbency at 54%.
+#
+# rating_at_entry is the model's consensus rating on 2026-10-06.
+race_id,office,rating_at_entry,note
+G-OH,Governor,Toss-up,R-held open seat; 58% and the 25th seat on the road to a majority
+G-MI,Governor,Lean D,"D hold; 25 polls, the best-polled governor race on the list"
+G-WI,Governor,Toss-up,D hold at +2.7; one of the two seats the majority turns on
+G-GA,Governor,Toss-up,R-held; 42% and the median outcome sits just past it
+G-FL,Governor,Likely R,"R-held; 16 polls, closest of the big Republican states"
+G-TX,Governor,Likely R,"R-held; 36 polls, the most-polled governor race in the country"
+G-AK,Governor,Toss-up,"R-held and the model likes it at +20, but on only 2 polls"
+G-IA,Governor,Lean D,R-held; Democrats favoured at 83% on 11 polls
+G-KS,Governor,Lean R,D-held and the only Democratic governorship the model has losing
+G-ME,Governor,Likely D,"D hold; open seat, 9 polls"
+G-NE,Governor,Safe R,R-held; tracked as part of the Nebraska slate
+G-MN,Governor,Safe D,D hold; 7 polls
