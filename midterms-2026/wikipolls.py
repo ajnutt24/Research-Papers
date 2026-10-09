@@ -248,6 +248,21 @@ def iter_tables_with_sections(html: str):
     import io
 
     soup = BeautifulSoup(html, "lxml")
+    # Scope to the article body when the skin provides one. A rendered page
+    # view wraps the content in chrome that carries its own headings (the
+    # Vector sidebar's "Contents" is an <h2>), and those are not article
+    # structure. Parsoid output has no mw-parser-output, so this is a no-op
+    # there and both sources go down the same path below.
+    # A page can carry more than one mw-parser-output: small page indicators
+    # (protection padlocks, "good article" icons) are rendered in their own,
+    # and on the Michigan governor article that stub comes first in document
+    # order, so taking find()'s answer scoped parsing to a 994-byte fragment
+    # and lost all 48 tables. Prefer the one inside the body content, and fall
+    # back to the largest.
+    bodies = soup.find_all("div", class_="mw-parser-output")
+    if bodies:
+        inside = [b for b in bodies if b.find_parent("div", class_="mw-body-content")]
+        soup = max(inside or bodies, key=lambda b: len(b.encode_contents()))
     for tbl in soup.find_all("table"):
         # Walk backwards collecting the heading TRAIL, not just the nearest
         # heading, keeping the first one seen at each level.
@@ -264,15 +279,29 @@ def iter_tables_with_sections(html: str):
         # outermost to innermost gives "1st congressional district > Polling",
         # which identifies the seat and still carries the subsection name for
         # the primary and hypothetical filters to match on.
+        # Accept a heading only when it is SHALLOWER than everything accepted
+        # so far. The document is flat, so walking backwards from a table runs
+        # out of its own section and into earlier ones; a deeper heading met
+        # after a shallower one belongs to a different branch of the outline,
+        # not to this table's path. Taking the first heading seen at each level
+        # instead pulled "Eliminated in primary" (an h4 from the primary
+        # section) onto every later table, and PRIMARY_RE then dropped the
+        # general-election polling tables it was supposed to keep.
         trail: dict[str, str] = {}
+        shallowest = len(HEADING_TAGS) + 1
         node = tbl
-        while True:
+        while shallowest > 1:
             node = node.find_previous(HEADING_TAGS)
             if node is None:
                 break
+            level = int(node.name[1])
+            if level >= shallowest:
+                continue
             text = node.get_text(" ", strip=True)
-            if text and node.name not in trail:
-                trail[node.name] = text
+            if not text:
+                continue
+            trail[node.name] = text
+            shallowest = level
         heading = " > ".join(trail[k] for k in sorted(trail) if trail.get(k))
         try:
             # Wikipedia puts header <th> cells inside <tbody>, which pandas does

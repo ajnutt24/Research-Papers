@@ -334,6 +334,29 @@ def fetch_rcp() -> pd.DataFrame | None:
 # gone. Each race's article carries a "Polling" wikitable that pandas can read
 # directly, and every row cites its original pollster. See wikipolls.py.
 WIKI_API = "https://en.wikipedia.org/api/rest_v1/page/html/"
+WIKI_PAGE = "https://en.wikipedia.org/wiki/"
+
+
+def fetch_wiki_html(title: str, cache_name: str, max_age_hours: float = 12) -> tuple[str, str]:
+    """Article HTML, from the page view first and the REST API as a fallback.
+
+    These return different HTML for the same article, and the parser in
+    wikipolls handles both: it scopes to mw-parser-output when the skin
+    supplies one and reconstructs the heading trail by level either way.
+
+    The page view leads because the REST endpoint (api/rest_v1/page/html) is
+    rate-limited far more aggressively per client IP. From a shared cloud
+    egress it returns 429 on essentially every request, including after the
+    15/30/45s backoff, which is what stopped the last two scrapes. The page
+    view answers the same titles without throttling.
+    """
+    try:
+        return fetch_text(WIKI_PAGE + title, cache_name, max_age_hours=max_age_hours)
+    except Exception as page_err:
+        try:
+            return fetch_text(WIKI_API + title, cache_name, max_age_hours=max_age_hours)
+        except Exception:
+            raise page_err from None
 
 
 def wiki_titles() -> list[tuple[str, str]]:
@@ -409,7 +432,7 @@ def discover_race_articles() -> dict[str, str]:
     found: dict[str, str] = {}
     for hub in HUB_PAGES:
         try:
-            html, _ = fetch_text(WIKI_API + hub, f"wiki_hub_{hub[:40]}.html", max_age_hours=12)
+            html, _ = fetch_wiki_html(hub, f"wiki_hub_{hub[:40]}.html")
         except Exception as e:
             log.debug("hub %s unreachable: %s", hub, e)
             continue
@@ -462,8 +485,7 @@ def fetch_wikipedia(limit: int | None = None,
         html = None
         for attempt in range(3):
             try:
-                html, prov = fetch_text(WIKI_API + title, f"wiki_{rid.replace('*', 'all')}.html",
-                                        max_age_hours=12)
+                html, prov = fetch_wiki_html(title, f"wiki_{rid.replace('*', 'all')}.html")
                 consecutive_network = 0
                 break
             except Exception as e:
@@ -721,8 +743,14 @@ def topup_scope() -> set[str] | None:
     if low in ("all", "*", ""):
         return None
     ids = {"GENERIC"}
-    wl = config.DATA_MANUAL / "watchlist.csv"
-    watch = (set(pd.read_csv(wl, comment="#").race_id.astype(str)) if wl.exists() else set())
+    # Both watchlists. watchlist.csv carries House and Senate; the governor
+    # races live in their own file, and reading only the first one silently
+    # left every governor race out of scope for the top-up scrape.
+    watch: set[str] = set()
+    for name in ("watchlist.csv", "watchlist_governor.csv"):
+        wl = config.DATA_MANUAL / name
+        if wl.exists():
+            watch |= set(pd.read_csv(wl, comment="#").race_id.astype(str))
     if low == "watchlist":
         return ids | watch
     if low == "senate":

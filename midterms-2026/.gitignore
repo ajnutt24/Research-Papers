@@ -20,3 +20,6 @@ outputs/
 data_store/manual/*.backup-*.xlsx
 data_store/manual/*.updated.xlsx
 data_store/manual/new_polls_*.csv
+
+# Rendered share cards: regenerate with viz/make_cards.py from outputs/
+outputs/cards/*.png
