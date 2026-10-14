@@ -7,7 +7,8 @@ Build the share cards (1080x1350, Instagram 4:5) from the current run.
     python3 viz/make_cards.py [outdir] --shoot  # also renders PNGs
 
 Five cards:
-  ig_senate_ladder    the Senate watchlist, ranked by P(D win)
+  ig_senate_ladder      the Senate watchlist, ranked by P(D win)
+  ig_senate_seat_ladder every Senate seat count, with its probability
   ig_governor_ladder  all 36 governor races, ranked by P(D win)
   ig_house            House seat distribution + P(control)
   ig_senate           Senate seat distribution + P(control)
@@ -252,6 +253,89 @@ def chamber_card(office: str, cc: dict, df: pd.DataFrame, asof_line: str) -> str
 
 
 # --------------------------------------------------------------------------
+# Seat-probability ladder: every outcome the simulation produced
+# --------------------------------------------------------------------------
+SEATLADDER_CSS = """
+.card{padding:50px 60px 40px}
+h1{font-family:var(--display);font-size:52px;font-weight:700;line-height:1.04;letter-spacing:-.02em;margin:14px 0 0}
+.sub{margin:13px 0 0;font-size:20px;color:var(--ink-2);line-height:1.38;max-width:60ch}
+.sub b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;margin-top:16px}
+tr{border-bottom:1px solid var(--line-2)} tr:last-child{border-bottom:0}
+tr.maj{border-bottom:2px solid var(--ink-3)}
+th{text-align:left;padding:5px 0;width:116px;vertical-align:middle;font-size:23px;font-weight:700;
+ font-variant-numeric:tabular-nums}
+th .cap{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;margin-left:8px;
+ padding:1px 6px;border-radius:3px;vertical-align:2px;
+ color:var(--rep);background:color-mix(in srgb,var(--rep) 15%,transparent)}
+td.bar{padding:5px 16px}
+.track{position:relative;display:block;height:19px;background:var(--line-2);border-radius:3px}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+.f-dem{background:var(--dem)} .f-rep{background:var(--rep)}
+.pc{width:120px;text-align:right;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;padding:5px 0;
+ color:var(--ink-2)}
+.cum{width:116px;text-align:right;font-size:17px;font-variant-numeric:tabular-nums;color:var(--ink-3);padding:5px 0}
+.hdr th,.hdr td{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+ color:var(--ink-3);padding-bottom:5px;border:0}
+.hdr{border-bottom:1px solid var(--line)}
+"""
+
+
+def seat_ladder_card(dist: pd.DataFrame, cc: dict, asof_line: str) -> str:
+    """Every Senate seat count the simulation produced, with its probability.
+
+    The 80% interval hides the shape: no single outcome clears 10%, and the
+    50-seat row is a Democratic plurality that still loses the chamber on the
+    vice-president's tiebreak. Both are the point of the card, so every row
+    is shown rather than the interval.
+    """
+    thr = CH["Senate"]["thr"]
+    d = dist.copy()
+    d["prob"] = d["count"] / d["count"].sum()
+    d = d.sort_values("dem_seats", ascending=False).reset_index(drop=True)
+    d["cum_ge"] = d.prob.cumsum()          # descending order: P(at least this many)
+    pmax = d.prob.max()
+
+    rows = ['<tr class="hdr"><th>D seats</th><td class="bar"></td>'
+            '<td class="pc">Probability</td><td class="cum">P(at least)</td></tr>']
+    for r in d.itertuples():
+        seats = int(r.dem_seats)
+        dem = seats >= thr
+        cap = '<span class="cap">tie &rarr; R hold</span>' if seats == thr - 1 else ""
+        if r.prob < 5e-5:
+            pct = "&lt;0.01%"
+        elif r.prob < .01:
+            pct = f"{100 * r.prob:.2f}%"
+        else:
+            pct = f"{100 * r.prob:.1f}%"
+        cum = f"{100 * r.cum_ge:.1f}%" if r.cum_ge >= .001 else "&lt;0.1%"
+        cls = ' class="maj"' if seats == thr else ""
+        rows.append(
+            f'<tr{cls}><th scope="row">{seats}{cap}</th>'
+            f'<td class="bar"><span class="track"><span class="fill {"f-dem" if dem else "f-rep"}" '
+            f'style="width:{max(r.prob / pmax * 100, 0.6):.1f}%"></span></span></td>'
+            f'<td class="pc">{pct}</td><td class="cum">{cum}</td></tr>')
+
+    c = cc["Senate"]
+    p_ctrl = 100 * c["p_dem_control"]
+    p_tie = 100 * c.get("p_dem_50_seats_tie", 0.0)
+    mode = int(d.loc[d.prob.idxmax(), "dem_seats"])
+    return (HEAD.format(title="Senate Seat Ladder", css=CSS_BASE + SEATLADDER_CSS) +
+            f'<div class="card"><p class="eyebrow">2026 Senate &middot; every outcome</p>'
+            f'<h1>No single outcome is likely.</h1>'
+            f'<p class="sub">All <b>{len(d)}</b> seat counts the model produced across '
+            f'<b>{cc["n_sims"]:,}</b> simulated elections. The best of them, <b>{mode} seats</b>, '
+            f'happens just <b>{100 * pmax:.1f}%</b> of the time. Democrats reach a majority in '
+            f'<b>{p_ctrl:.0f}%</b> of them; in another <b>{p_tie:.1f}%</b> they take exactly 50 '
+            f'and still lose the chamber on the vice-president\'s tiebreak.</p>'
+            f'<table><tbody>{"".join(rows)}</tbody></table>'
+            f'<div class="foot"><span class="key">'
+            f'<span class="k"><span class="sw sw-d"></span>Democratic majority</span>'
+            f'<span class="k"><span class="sw sw-r"></span>Republican majority</span></span>'
+            f'<span>{asof_line}</span></div></div></body></html>')
+
+
+# --------------------------------------------------------------------------
 def main():
     O = _ROOT / "outputs"
     cc = json.loads((O / "chamber_control.json").read_text())
@@ -284,11 +368,15 @@ def main():
         "Democrats hold <b>6</b> governorships that are not up and need <b>26 of 50</b>.",
         gov, fund, asof_line))
 
+    dists = {}
     for office, slug in [("House", "house"), ("Senate", "senate"), ("Governor", "governor")]:
-        dist = pd.read_csv(O / f"seat_distribution_{slug}.csv")
-        (OUTD / f"ig_{slug}.html").write_text(chamber_card(office, cc, dist, asof_line))
+        dists[office] = pd.read_csv(O / f"seat_distribution_{slug}.csv")
+        (OUTD / f"ig_{slug}.html").write_text(chamber_card(office, cc, dists[office], asof_line))
 
-    print(f"wrote 5 cards to {OUTD}  (asof {asof}, {days} days out)")
+    (OUTD / "ig_senate_seat_ladder.html").write_text(
+        seat_ladder_card(dists["Senate"], cc, asof_line))
+
+    print(f"wrote 6 cards to {OUTD}  (asof {asof}, {days} days out)")
     for f in sorted(OUTD.glob("ig_*.html")):
         print("  ", f.name)
 
