@@ -143,7 +143,7 @@ def ladder_rows(df: pd.DataFrame, fund: pd.DataFrame, compact: bool) -> str:
             f'<span class="hd {cls}">{tag}</span>{note}</th>'
             f'<td class="bar"><span class="track"><span class="fifty"></span>'
             f'<span class="fill {"f-dem" if dem else "f-rep"}" style="width:{p*100:.1f}%"></span></span></td>'
-            f'<td class="pc {"c-dem" if dem else "c-rep"}">{round(p*100)}<span class="u">%</span></td></tr>')
+            f'<td class="pc {"c-dem" if dem else "c-rep"}">{display_pct(p)}<span class="u">%</span></td></tr>')
     return "".join(out)
 
 
@@ -187,13 +187,13 @@ rect.d{fill:var(--dem)} rect.r{fill:var(--rep)}
 """
 
 CH = {
-    "House":    dict(thr=218, unit="seats", range_lbl="80% interval seat range",
+    "House":    dict(thr=218, unit="seats", range_lbl="80% interval",
                      sub="435 seats up &middot; 218 for control",
                      win="chance Democrats<br>win control"),
-    "Senate":   dict(thr=51, unit="seats", range_lbl="80% interval seat range",
+    "Senate":   dict(thr=51, unit="seats", range_lbl="80% interval",
                      sub="35 seats up &middot; 51 for control",
                      win="chance Democrats<br>win control"),
-    "Governor": dict(thr=26, unit="governorships", range_lbl="80% interval range",
+    "Governor": dict(thr=26, unit="governorships", range_lbl="80% interval",
                      sub="36 up this year &middot; 26 of 50 for a majority",
                      win="chance Democrats hold<br>26+ of 50 offices"),
 }
@@ -234,16 +234,27 @@ def histogram(df: pd.DataFrame, thr: int, office: str, trim: float = 4e-4) -> st
             f'{thr} = majority</text>{tk}</svg>')
 
 
+def display_pct(p: float) -> int:
+    """Percentage for display, never 0 and never 100.
+
+    A simulated probability of 0.996 rounds to "100%", which reads as
+    certainty and is not what the model says. Nothing in a forecast is
+    certain, so the displayed value is clamped into 1-99 while the stored
+    probability keeps its real value.
+    """
+    return int(min(99, max(1, round(p * 100))))
+
+
 def chamber_card(office: str, cc: dict, df: pd.DataFrame, asof_line: str) -> str:
     m, c = CH[office], cc[office]
-    pct = round(c["p_dem_control"] * 100)
+    pct = display_pct(c["p_dem_control"])
     med, p10, p90 = int(c["dem_seats_median"]), int(c["dem_seats_p10"]), int(c["dem_seats_p90"])
     return (HEAD.format(title=f"{office} Seat Forecast", css=CSS_BASE + CHAMBER_CSS) +
             f'<div class="card"><p class="eyebrow">2026 Midterms &middot; Seat Forecast</p>'
             f'<h1>{office}</h1><p class="sub">{m["sub"]}</p>'
             f'<div class="hero"><span class="pct">{pct}<i>%</i></span>'
             f'<span class="heroL">{m["win"]}</span></div><hr class="rule">'
-            f'<p class="range"><span class="big">{med}</span> {m["unit"]} is the median outcome'
+            f'<p class="range"><span class="big">{med}</span> {m["unit"]} is the median'
             f'&nbsp;&middot;&nbsp; {m["range_lbl"]} <b>{p10}&ndash;{p90}</b></p>'
             f'{histogram(df, m["thr"], office)}'
             f'<div class="foot"><span class="key">'
@@ -263,18 +274,18 @@ h1{font-family:var(--display);font-size:52px;font-weight:700;line-height:1.04;le
 table{width:100%;border-collapse:collapse;margin-top:16px}
 tr{border-bottom:1px solid var(--line-2)} tr:last-child{border-bottom:0}
 tr.maj{border-bottom:2px solid var(--ink-3)}
-th{text-align:left;padding:5px 0;width:116px;vertical-align:middle;font-size:23px;font-weight:700;
+th{text-align:left;padding:var(--rowpad) 0;width:116px;vertical-align:middle;font-size:23px;font-weight:700;
  font-variant-numeric:tabular-nums}
 th .cap{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;margin-left:8px;
  padding:1px 6px;border-radius:3px;vertical-align:2px;
  color:var(--rep);background:color-mix(in srgb,var(--rep) 15%,transparent)}
-td.bar{padding:5px 16px}
+td.bar{padding:var(--rowpad) 16px}
 .track{position:relative;display:block;height:19px;background:var(--line-2);border-radius:3px}
 .fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
 .f-dem{background:var(--dem)} .f-rep{background:var(--rep)}
-.pc{width:120px;text-align:right;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;padding:5px 0;
+.pc{width:120px;text-align:right;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;padding:var(--rowpad) 0;
  color:var(--ink-2)}
-.cum{width:116px;text-align:right;font-size:17px;font-variant-numeric:tabular-nums;color:var(--ink-3);padding:5px 0}
+.cum{width:116px;text-align:right;font-size:17px;font-variant-numeric:tabular-nums;color:var(--ink-3);padding:var(--rowpad) 0}
 .hdr th,.hdr td{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
  color:var(--ink-3);padding-bottom:5px;border:0}
 .hdr{border-bottom:1px solid var(--line)}
@@ -320,7 +331,13 @@ def seat_ladder_card(dist: pd.DataFrame, cc: dict, asof_line: str) -> str:
     p_ctrl = 100 * c["p_dem_control"]
     p_tie = 100 * c.get("p_dem_50_seats_tie", 0.0)
     mode = int(d.loc[d.prob.idxmax(), "dem_seats"])
-    return (HEAD.format(title="Senate Seat Ladder", css=CSS_BASE + SEATLADDER_CSS) +
+    # Fit the rows to the card. Measured on the rendered page: the header and
+    # footer take ~372px, and a row is ~28px of content plus its padding, so
+    # this is the largest padding that still clears 1350px. Clamped to keep it
+    # from going silly in either direction.
+    pad = max(1, min(7, int((978 / max(len(d), 1) - 28) / 2)))
+    css = CSS_BASE + SEATLADDER_CSS + f":root{{--rowpad:{pad}px}}"
+    return (HEAD.format(title="Senate Seat Ladder", css=css) +
             f'<div class="card"><p class="eyebrow">2026 Senate &middot; every outcome</p>'
             f'<h1>No single outcome is likely.</h1>'
             f'<p class="sub">All <b>{len(d)}</b> seat counts the model produced across '

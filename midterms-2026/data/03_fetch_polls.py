@@ -378,6 +378,16 @@ def wiki_titles() -> list[tuple[str, str]]:
     for st, inc, open_seat, note in config.GOVERNOR_2026:
         name = config.STATE_NAMES[st].replace(" ", "_")
         out.append((f"G-{st}", f"2026_{name}_gubernatorial_election"))
+    # Statewide House articles, one per state, keyed with the "-*" marker that
+    # fetch_wikipedia expands into one race per district section. Without these
+    # the House target list was empty and no district poll could ever be
+    # scraped: discover_race_articles() was the only thing that would have
+    # supplied them, and it returns nothing. Single-district states title the
+    # article "election" rather than "elections", and the plural form 404s.
+    for st, seats in sorted(config.HOUSE_SEATS_BY_STATE.items()):
+        name = config.STATE_NAMES[st].replace(" ", "_")
+        word = "election" if seats == 1 else "elections"
+        out.append((f"H-{st}-*", f"2026_United_States_House_of_Representatives_{word}_in_{name}"))
     return out
 
 
@@ -410,7 +420,8 @@ def title_to_race_id(title: str) -> str | None:
     if m:
         st = name_to_abbr.get(m.group(1).strip().lower())
         return f"G-{st}" if st else None
-    m = re.search(r"House of Representatives elections in (.+)$", t, re.I)
+    # "election" singular for the six at-large states, "elections" elsewhere.
+    m = re.search(r"House of Representatives elections? in (.+)$", t, re.I)
     if m:
         st = name_to_abbr.get(m.group(1).strip().lower())
         return f"H-{st}-*" if st else None
@@ -763,6 +774,62 @@ def topup_scope() -> set[str] | None:
     return ids | {x.strip() for x in scope.split(",") if x.strip()}
 
 
+SOURCE_DISAGREEMENT_PTS = 15.0
+
+
+def drop_disagreeing_races(scraped: pd.DataFrame, workbook: pd.DataFrame,
+                           tol: float = SOURCE_DISAGREEMENT_PTS) -> pd.DataFrame:
+    """Drop scraped rows for races where the two sources disagree wildly.
+
+    A Wikipedia polling table is parsed two-party: one Democrat, one
+    Republican. That assumption breaks where the Republican's real opponent is
+    an independent AND a minor Democrat is also on the ballot, because the
+    parser then reads the minor Democrat's column. Alaska's at-large seat is
+    the case that prompted this: Begich (R) runs against Bill Hill (I) at
+    about 40%, while the Democrat on the ballot polls 7%, so the scrape
+    produced R+43 where the workbook, which pairs Begich against Hill, has
+    R+4 to R+14. Feeding that in would have moved a real race by 30 points on
+    a column-selection mistake.
+
+    Nebraska's Senate race shows why this is not simply "skip independents":
+    Osborn is the only non-Republican there, so the table parses correctly and
+    those rows are worth keeping.
+
+    So the test is empirical rather than a hand-maintained list of races. For
+    every race the workbook also covers, compare mean recent margins; if they
+    differ by more than `tol`, the scrape is reading a different contest and
+    its rows for that race are dropped. On the 2026-10-14 scrape, 45 races had
+    both sources, the median disagreement was 1.7 points, and exactly one race
+    crossed the threshold.
+
+    Races the workbook does not cover cannot be checked this way and are kept.
+    That is the known hole in this guard.
+    """
+    if not len(scraped) or not len(workbook):
+        return scraped
+    recent = pd.Timestamp(config.FORECAST_ASOF) - pd.Timedelta(days=150)
+    def mean_margin(df):
+        d = df.copy()
+        d["_e"] = pd.to_datetime(d["end_date"], errors="coerce")
+        d = d[d["_e"] >= recent]
+        return d.groupby("race_id")["margin"].mean()
+    a, b = mean_margin(scraped), mean_margin(workbook)
+    both = pd.concat([a.rename("scraped"), b.rename("workbook")], axis=1).dropna()
+    if not len(both):
+        return scraped
+    bad = both[(both.scraped - both.workbook).abs() > tol]
+    if not len(bad):
+        log.info("    source cross-check: %d race(s) in both sources, max disagreement %.1f pts, "
+                 "none over %.0f", len(both), (both.scraped - both.workbook).abs().max(), tol)
+        return scraped
+    for rid, r in bad.iterrows():
+        log.warning("    DROPPED scraped polls for %s: scraped mean %+.1f vs workbook %+.1f "
+                    "(%.1f pts apart). The scrape is probably reading a different pair of "
+                    "candidates; the workbook's rows for this race are kept.",
+                    rid, r.scraped, r.workbook, abs(r.scraped - r.workbook))
+    return scraped[~scraped.race_id.isin(bad.index)]
+
+
 def topup_from_scrape(workbook_df: pd.DataFrame) -> pd.DataFrame | None:
     """Scraped polls that field-closed after the newest one the workbook holds.
 
@@ -817,6 +884,7 @@ def topup_from_scrape(workbook_df: pd.DataFrame) -> pd.DataFrame | None:
     # marks version 1 and includes, so the two sources stay consistent.
     out = out.sort_values("end_date").drop_duplicates(
         subset=["race_id", "pollster", "end_date"], keep="first")
+    out = drop_disagreeing_races(out, wb)
     if not len(out):
         log.info("top-up: nothing newer than the workbook")
         return out
