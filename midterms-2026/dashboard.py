@@ -80,8 +80,8 @@ def load() -> dict:
     fund = pd.read_parquet(PROC / "fundamentals_2026.parquet")[["race_id", "lean", "lean_source"]]
     races = races.merge(blend, on="race_id", how="left").merge(fund, on="race_id", how="left")
 
-    wl_path = config.DATA_MANUAL / "watchlist.csv"
-    watch = set(pd.read_csv(wl_path, comment="#").race_id) if wl_path.exists() else set()
+    from utils import watchlist_ids
+    watch = watchlist_ids()
 
     gb = pd.read_parquet(PROC / "generic_ballot_trend.parquet")
     gb["date"] = pd.to_datetime(gb["date"])

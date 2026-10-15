@@ -1,0 +1,27 @@
+# Senate watchlist, tier 2: Safe-R-rated races worth watching anyway.
+#
+# None of these is needed for a majority and the model has Democrats under 40%
+# in all of them. They are tracked because a polling shift here is the earliest
+# visible sign of a national environment moving past what tier 1 can show, and
+# because several are thinly polled enough that the number is driven by the
+# rating and the national environment rather than by evidence.
+#
+# Read the poll counts before reading the probabilities. Louisiana and
+# Mississippi carry the weight of roughly one to two polls after age decay, so
+# those figures are closer to a prior than a measurement.
+#
+# Idaho and South Dakota have an independent as the main non-Republican
+# candidate. Idaho's polls disagree by 41 points because some pollsters test
+# the independent against Risch and others test the Democrat, so the model is
+# averaging two different contests: treat its number as unreliable.
+#
+# rating_at_entry and the notes are the model's state on 2026-10-15.
+race_id,office,rating_at_entry,note
+S-SC,Senate,Safe R,"R-held; 9 polls, the most competitive Safe-R race in the model and the only tier-2 race near the line"
+S-LA,Senate,Safe R,"R-held; only 2 polls, both Democratic internals, effective weight ~1"
+S-FL-special,Senate,Safe R,R-held special election; 9 polls
+S-MS,Senate,Safe R,"R-held; 3 polls, one of them fielded 14 Oct at R+4"
+S-SD,Senate,Safe R,Independent as the main non-Republican candidate; counts only if he caucuses
+S-AR,Senate,Safe R,"R-held; 5 polls that disagree by 25 points"
+S-ID,Senate,Safe R,"Independent race; polls disagree by 41 points, number is unreliable"
+S-MT,Senate,Safe R,"R-held; the safest Republican seat in the model at R+21 on 14 polls"

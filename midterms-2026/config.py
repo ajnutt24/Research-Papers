@@ -662,6 +662,18 @@ WORKBOOK_TOPUP_SCRAPE = os.environ.get("WORKBOOK_TOPUP_SCRAPE", "1") not in ("0"
 # the weekly workbook refresh. Articles are cached either way.
 WORKBOOK_TOPUP_RACES = os.environ.get("WORKBOOK_TOPUP_RACES", "watchlist")
 
+# The files that together make up "the watchlist". Reading only watchlist.csv
+# is how every governor race silently stayed out of scrape scope for weeks, so
+# the set is named in one place and every consumer reads it from here.
+# Thematic lists (watchlist_nebraska.csv) are views, not tiers, and are left
+# out on purpose: show_results.py --watchlist <name> reads those directly.
+WATCHLIST_FILES = (
+    "watchlist.csv",            # House districts
+    "watchlist_senate1.csv",    # Senate, the races that decide control
+    "watchlist_senate2.csv",    # Senate, Safe-R races tracked as early warning
+    "watchlist_governor.csv",   # Governor
+)
+
 WORKBOOK_FEEDS_APPROVAL = True
 WORKBOOK_FEEDS_RATINGS = True
 

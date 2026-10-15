@@ -7,7 +7,8 @@ Build the share cards (1080x1350, Instagram 4:5) from the current run.
     python3 viz/make_cards.py [outdir] --shoot  # also renders PNGs
 
 Five cards:
-  ig_senate_ladder      the Senate watchlist, ranked by P(D win)
+  ig_senate_ladder      Senate tier 1 (watchlist_senate1.csv), ranked by P(D win)
+  ig_senate_ladder_tier2 Senate tier 2, the Safe-R reach races
   ig_senate_seat_ladder every Senate seat count, with its probability
   ig_governor_ladder  all 36 governor races, ranked by P(D win)
   ig_house            House seat distribution + P(control)
@@ -40,9 +41,11 @@ OUTD = Path(sys.argv[1]) if len(sys.argv) > 1 and not sys.argv[1].startswith("-"
 # Names for races whose main candidate is an independent. candidates_2026.csv
 # carries the party but not the names for these, so they are listed here and
 # must be checked by hand each cycle.
-IND_NAMES = {"S-NE": "Osborn", "S-SD": "Bengs", "S-ID": "the independent"}
+IND_NAMES = {"S-NE": "Osborn", "S-SD": "Bengs"}
 
-EXCLUDE_SENATE = {"S-ID"}   # safe enough that it crowds the ladder without informing it
+# Tier 1 no longer contains Idaho, so this is empty in practice; it stays as
+# the hook for dropping a race from the ladder without editing the watchlist.
+EXCLUDE_SENATE: set[str] = set()
 
 STATE = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -132,8 +135,10 @@ def ladder_rows(df: pd.DataFrame, fund: pd.DataFrame, compact: bool) -> str:
         dem = p >= .5
         if r.main_party == "I":
             tag, cls = "IND", "h-i"
-            name = IND_NAMES.get(r.race_id, "the independent")
-            note = f'<span class="mk dim">{name} &rarr; counts only if he caucuses</span>'
+            name = IND_NAMES.get(r.race_id)
+            caption = (f"{name} &rarr; counts only if he caucuses" if name
+                       else "counts only if the independent caucuses")
+            note = f'<span class="mk dim">{caption}</span>'
         else:
             held = inc.get(r.race_id, "R")
             tag, cls = ("D hold", "h-d") if held == "D" else ("FLIP", "h-r")
@@ -142,7 +147,7 @@ def ladder_rows(df: pd.DataFrame, fund: pd.DataFrame, compact: bool) -> str:
             f'<tr><th scope="row"><span class="st">{state}</span>'
             f'<span class="hd {cls}">{tag}</span>{note}</th>'
             f'<td class="bar"><span class="track"><span class="fifty"></span>'
-            f'<span class="fill {"f-dem" if dem else "f-rep"}" style="width:{p*100:.1f}%"></span></span></td>'
+            f'<span class="fill {"f-dem" if dem else "f-rep"}" style="width:{max(p*100, 0.7):.1f}%"></span></span></td>'
             f'<td class="pc {"c-dem" if dem else "c-rep"}">{display_pct(p)}<span class="u">%</span></td></tr>')
     return "".join(out)
 
@@ -150,8 +155,9 @@ def ladder_rows(df: pd.DataFrame, fund: pd.DataFrame, compact: bool) -> str:
 def ladder_card(title, eyebrow, h1, sub, df, fund, asof_line) -> str:
     n = len(df)
     compact = n > 20
-    vars_ = (":root{--rowpad:2px;--stsize:19px;--barh:15px;--pcsize:21px}" if compact
-             else ":root{--rowpad:5px;--stsize:24px;--barh:25px;--pcsize:30px}")
+    pad = 2 if compact else max(5, min(17, int(5 + (14 - n) * 1.6)))
+    vars_ = (f":root{{--rowpad:{pad}px;--stsize:19px;--barh:15px;--pcsize:21px}}" if compact
+             else f":root{{--rowpad:{pad}px;--stsize:24px;--barh:25px;--pcsize:30px}}")
     css = CSS_BASE + LADDER_CSS + vars_
     return (HEAD.format(title=title, css=css) +
             f'<div class="card{" compact" if compact else ""}">'
@@ -364,17 +370,31 @@ def main():
     asof_line = f"{cc['n_sims']:,} simulations &middot; {nice}"
     OUTD.mkdir(parents=True, exist_ok=True)
 
-    # Senate ladder: the watchlist, minus the races that only pad it.
-    wl = pd.read_csv(config.DATA_MANUAL / "watchlist.csv", comment="#")
-    sen_ids = [r for r in wl.race_id if r.startswith("S-") and r not in EXCLUDE_SENATE]
-    sen = rp[rp.race_id.isin(sen_ids)].sort_values("p_dem", ascending=False)
-    settled = 35 - len(sen)
+    # Senate ladders, one per tier. Tier 1 is the card that answers "who wins
+    # the Senate"; tier 2 is the Safe-R early-warning set and is a separate
+    # card rather than 20 crowded rows on one.
+    from utils import watchlist_frame
+    t1 = [r for r in watchlist_frame("watchlist_senate1.csv").race_id if r not in EXCLUDE_SENATE]
+    sen = rp[rp.race_id.isin(t1)].sort_values("p_dem", ascending=False)
     (OUTD / "ig_senate_ladder.html").write_text(ladder_card(
-        "Road to 51", f"2026 Senate &middot; road to 51",
+        "Road to 51", "2026 Senate &middot; road to 51",
         f"{len(sen)} races decide<br>control of the Senate.",
-        "Democrats hold <b>34 seats</b> not on the ballot. Each bar is the model's chance "
-        "Democrats win that race; the tick is 50%.",
+        "Democrats hold <b>34 seats</b> not on the ballot and are favoured in <b>9</b> more "
+        "that are not competitive, so 51 means winning <b>8 of these 12</b>. Each bar is the "
+        "model's chance Democrats win that race; the tick is 50%.",
         sen, fund, asof_line))
+
+    t2 = list(watchlist_frame("watchlist_senate2.csv").race_id)
+    sen2 = rp[rp.race_id.isin(t2)].sort_values("p_dem", ascending=False)
+    if len(sen2):
+        (OUTD / "ig_senate_ladder_tier2.html").write_text(ladder_card(
+            "Reach Races", "2026 Senate &middot; the reach races",
+            "None of these decides<br>the Senate. Yet.",
+            f"All <b>{len(sen2)}</b> are rated Safe R and none is needed for a majority. They are "
+            "the early warning: a shift here shows a national environment moving before tier 1 "
+            "can show it. Read the poll counts first, several are thin enough that the number is "
+            "a prior rather than a measurement.",
+            sen2, fund, asof_line))
 
     # Governor ladder: every race on the ballot.
     gov = rp[rp.office == "Governor"].sort_values("p_dem", ascending=False)
@@ -393,7 +413,7 @@ def main():
     (OUTD / "ig_senate_seat_ladder.html").write_text(
         seat_ladder_card(dists["Senate"], cc, asof_line))
 
-    print(f"wrote 6 cards to {OUTD}  (asof {asof}, {days} days out)")
+    print(f"wrote {len(list(OUTD.glob('ig_*.html')))} cards to {OUTD}  (asof {asof}, {days} days out)")
     for f in sorted(OUTD.glob("ig_*.html")):
         print("  ", f.name)
 

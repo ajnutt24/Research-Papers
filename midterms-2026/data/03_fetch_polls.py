@@ -754,16 +754,16 @@ def topup_scope() -> set[str] | None:
     if low in ("all", "*", ""):
         return None
     ids = {"GENERIC"}
-    # Both watchlists. watchlist.csv carries House and Senate; the governor
-    # races live in their own file, and reading only the first one silently
-    # left every governor race out of scope for the top-up scrape.
-    watch: set[str] = set()
-    for name in ("watchlist.csv", "watchlist_governor.csv"):
-        wl = config.DATA_MANUAL / name
-        if wl.exists():
-            watch |= set(pd.read_csv(wl, comment="#").race_id.astype(str))
+    # Every list in config.WATCHLIST_FILES, via the shared loader. Reading one
+    # file by hand is how the governor races stayed out of scope for weeks.
+    from utils import watchlist_ids
+    watch = watchlist_ids()
     if low == "watchlist":
         return ids | watch
+    if low in ("senate1", "tier1"):
+        return ids | watchlist_ids(("watchlist_senate1.csv",))
+    if low in ("senate2", "tier2"):
+        return ids | watchlist_ids(("watchlist_senate2.csv",))
     if low == "senate":
         # Statewide articles only. Every top-up poll found so far has been a
         # Senate or generic-ballot poll: Wikipedia's per-state House articles

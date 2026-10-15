@@ -193,6 +193,28 @@ def fetch_json(url: str, cache_name: str, **kw) -> tuple[dict, str]:
 # --------------------------------------------------------------------------
 # IO
 # --------------------------------------------------------------------------
+def watchlist_ids(files: tuple[str, ...] | None = None) -> set[str]:
+    """Every race_id across config.WATCHLIST_FILES, as one set.
+
+    Missing files are skipped rather than raising: a list can be absent
+    mid-edit, and a scrape that covers fewer races is better than one that
+    does not run.
+    """
+    out: set[str] = set()
+    for name in (files or config.WATCHLIST_FILES):
+        p = config.DATA_MANUAL / name
+        if p.exists():
+            out |= set(pd.read_csv(p, comment="#").race_id.astype(str))
+    return out
+
+
+def watchlist_frame(name: str) -> pd.DataFrame:
+    """One watchlist file as a frame, empty if it is not there."""
+    p = config.DATA_MANUAL / name
+    return (pd.read_csv(p, comment="#") if p.exists()
+            else pd.DataFrame(columns=["race_id", "office", "rating_at_entry", "note"]))
+
+
 def save_stage(df: pd.DataFrame, name: str, provenance: str, meta: dict | None = None) -> Path:
     """Write a stage output as parquet (+ CSV twin for eyeballing) and a JSON sidecar."""
     df = df.copy()

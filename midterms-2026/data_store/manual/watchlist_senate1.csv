@@ -1,0 +1,24 @@
+# Senate watchlist, tier 1: the races that decide control.
+#
+# Every race here is rated Toss-up or closer to the line, and the model gives
+# Democrats between 46% and 94%. Democrats hold 34 seats not on the ballot and
+# are favoured in 9 more that are not competitive, so the majority is decided
+# inside this list: 51 seats means winning 8 of these 12.
+#
+# Nebraska is Dan Osborn (I) against Pete Ricketts (R) with no Democrat on the
+# ballot, so it counts toward a majority only if Osborn caucuses with them.
+#
+# rating_at_entry and the notes are the model's state on 2026-10-15.
+race_id,office,rating_at_entry,note
+S-NC,Senate,Lean D,R-held open seat; 37 polls and the strongest Democratic pickup on the board
+S-GA,Senate,Lean D,D hold; 14 polls
+S-NH,Senate,Lean D,D hold; 20 polls
+S-MN,Senate,Likely D,D hold; 15 polls
+S-OH-special,Senate,Toss-up,R-held special election; 27 polls
+S-MI,Senate,Toss-up,"D hold; 44 polls, among the best-polled races in the country"
+S-TX,Senate,Toss-up,"R-held; 50 polls, the most-polled Senate race in the model"
+S-AK,Senate,Toss-up,R-held; 18 polls
+S-ME,Senate,Toss-up,R-held; 24 polls
+S-IA,Senate,Toss-up,R-held; 30 polls and the closest race in the tier
+S-KS,Senate,Likely R,R-held; crossed above 50% in October on 12 polls
+S-NE,Senate,Likely R,Osborn (I) vs Ricketts (R); counts toward a majority only if he caucuses

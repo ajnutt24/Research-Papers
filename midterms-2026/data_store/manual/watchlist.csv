@@ -1,3 +1,12 @@
+# House watchlist: the districts the seat count turns on.
+#
+# Senate races used to live in this file too. They now live in
+# watchlist_senate1.csv (the races that decide control) and
+# watchlist_senate2.csv (Safe-R races tracked as an early warning), split on
+# 2026-10-15. Governor races are in watchlist_governor.csv.
+#
+# config.WATCHLIST_FILES lists the four files that together make up "the
+# watchlist" for the top-up scrape and the dashboard.
 race_id,office,rating_at_entry,note
 H-CA-21,House,Likely D,
 H-CA-45,House,Likely D,
@@ -69,18 +78,3 @@ H-TX-35,House,Likely R,
 H-WI-01,House,Likely R,
 H-NE-01,House,Likely R,
 H-TN-09,House,Likely R,
-S-TX,Senate,,
-S-OH-special,Senate,,
-S-ME,Senate,,
-S-GA,Senate,,
-S-NC,Senate,,
-S-MI,Senate,,
-S-NH,Senate,,
-S-MN,Senate,,
-S-IA,Senate,,
-S-NE,Senate,,
-S-AK,Senate,,
-S-KS,Senate,,
-S-SD,Senate,,
-S-ID,Senate,,
-S-SC,Senate,Safe R,polls have Graham up only ~3 across 7 surveys; most competitive Safe-R-rated Senate race in the model
