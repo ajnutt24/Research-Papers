@@ -56,9 +56,11 @@ EXCLUDE_SENATE: set[str] = {"S-SD"}
 # Which published release the cover slide announces. Counts posts, not runs.
 RELEASE_NUMBER = int(os.environ.get("RELEASE_NUMBER", "2"))
 
-# The cover's italic line. "Initial" belonged to 1.0; later releases say
-# Updated unless COVER_SUBTITLE overrides it.
-COVER_SUBTITLE = os.environ.get("COVER_SUBTITLE", "Initial Forecast Results")
+# Cover wording. Release 1.0 read "Preliminary Findings" / "Initial Forecast
+# Results"; from 2.0 on it is Revised / Updated. Both are overridable so a
+# future release can change the line without touching this file.
+COVER_EYEBROW = os.environ.get("COVER_EYEBROW", "Revised Findings")
+COVER_SUBTITLE = os.environ.get("COVER_SUBTITLE", "Updated Forecast Results")
 
 STATE = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -435,7 +437,7 @@ def cover_card(cc: dict, release: int, asof: str) -> str:
     d = pd.Timestamp(asof)
     return COVER_HTML.format(
         title="2026 Midterm Forecast",
-        eyebrow="Preliminary Findings",
+        eyebrow=COVER_EYEBROW,
         version=f"{release}.0",
         headline="The 2026<br>U.S. Midterm<br>Elections",
         subtitle=COVER_SUBTITLE,
