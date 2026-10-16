@@ -7,7 +7,7 @@ Build the share cards (1080x1350, Instagram 4:5) from the current run.
     python3 viz/make_cards.py [outdir] --shoot  # also renders PNGs
 
 Five cards:
-  ig_cover              carousel slide 1: the three headline numbers
+  ig_trend              P(control) over time, from analysis/16_trend_snapshots.py\n  ig_cover              carousel slide 1: the three headline numbers
   ig_senate_ladder      Senate tier 1 (watchlist_senate1.csv), ranked by P(D win)
   ig_senate_ladder_tier2 Senate tier 2, the Safe-R reach races
   ig_senate_seat_ladder every Senate seat count, with its probability
@@ -446,6 +446,80 @@ def cover_card(cc: dict, release: int, asof: str) -> str:
     )
 
 
+
+# --------------------------------------------------------------------------
+# Trend card
+# --------------------------------------------------------------------------
+TREND_CSS = """
+.card{padding:50px 60px 40px}
+h1{font-family:var(--display);font-size:56px;font-weight:700;line-height:1.03;letter-spacing:-.02em;margin:14px 0 0}
+.sub{margin:14px 0 0;font-size:21px;color:var(--ink-2);line-height:1.38;max-width:60ch}
+.sub b{color:var(--ink);font-weight:600}
+.panel{margin-top:30px}
+.ptitle{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.ptitle b{font-family:var(--display);font-size:33px;font-weight:700;letter-spacing:-.01em}
+.ptitle span{font-size:20px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.ptitle span em{font-style:normal;color:var(--ink);font-weight:800;font-size:25px}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.ln{fill:none;stroke:var(--dem);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.dot{fill:var(--dem)}
+.grid{stroke:var(--line-2);stroke-width:1}
+.ax{font-family:var(--body);font-size:17px;fill:var(--ink-3);font-variant-numeric:tabular-nums}
+"""
+
+TW, TH, TPAD = 952.0, 200.0, 30.0   # panel plot box: width, height, left gutter
+TLO, THI = 55.0, 103.0              # headroom so a ~99.7% line clears the 100% rule
+
+
+def _trend_panel(office: str, xs, ys, dates) -> str:
+    """One panel. All three share the 55-100% axis so the House reading as a
+    flat line near the top is the honest picture rather than noise magnified
+    by a per-panel scale."""
+    n = len(xs)
+    def X(i): return TPAD + (TW - TPAD) * (i / max(n - 1, 1))
+    def Y(v): return TH - (v - TLO) / (THI - TLO) * TH
+    pts = " ".join(f"{X(i):.1f},{Y(v):.1f}" for i, v in enumerate(ys))
+    grid = "".join(f'<line class="grid" x1="{TPAD}" y1="{Y(g):.1f}" x2="{TW}" y2="{Y(g):.1f}"/>'
+                   f'<text class="ax" x="0" y="{Y(g)+6:.1f}">{int(g)}%</text>' for g in (60, 80, 100))
+    last = f'<circle class="dot" cx="{X(n-1):.1f}" cy="{Y(ys[-1]):.1f}" r="7"/>'
+    return (f'<svg viewBox="-6 -14 {TW+14:.0f} {TH+34:.0f}" role="img" '
+            f'aria-label="{office} probability of Democratic control, {dates[0]} to {dates[-1]}, '
+            f'{ys[0]:.0f}% rising or falling to {ys[-1]:.0f}%">'
+            f'{grid}<polyline class="ln" points="{pts}"/>{last}</svg>')
+
+
+def trend_card(trend_df: pd.DataFrame, asof_line: str) -> str:
+    t = trend_df.copy()
+    t["asof_date"] = pd.to_datetime(t["asof_date"])
+    t = t.sort_values("asof_date")
+    panels = []
+    for office in ("House", "Senate", "Governor"):
+        g = t[t.office == office]
+        ys = (100 * g.p_dem_control).tolist()
+        dates = [d.strftime("%-d %b") for d in g["asof_date"]]
+        move = ys[-1] - ys[0]
+        # Same clamp as every other card: a 99.7% House never reads as certain.
+        a, b = display_pct(ys[0] / 100), display_pct(ys[-1] / 100)
+        delta = "unchanged since June" if abs(move) < 0.5 else f"{b - a:+d} since June"
+        panels.append(
+            f'<div class="panel"><div class="ptitle"><b>{office}</b>'
+            f'<span>{a}% &rarr; <em>{b}%</em> &nbsp;({delta})</span></div>'
+            f'{_trend_panel(office, range(len(ys)), ys, dates)}</div>')
+    sen = t[t.office == "Senate"]
+    lo = sen.loc[sen.p_dem_control.idxmin()]
+    first = t["asof_date"].min().strftime("%-d %B")
+    return (HEAD.format(title="Forecast Trend", css=CSS_BASE + TREND_CSS) +
+            f'<div class="card"><p class="eyebrow">2026 Midterms &middot; how it moved</p>'
+            f'<h1>The House was never<br>the question.</h1>'
+            f'<p class="sub">Democratic odds of control since <b>{first}</b>, same model applied to a '
+            f'growing poll set. The Senate fell from the high eighties to <b>'
+            f'{100*lo.p_dem_control:.0f}%</b> on {lo["asof_date"].strftime("%-d %B")} and has climbed '
+            f'back since. All three panels share one axis.</p>'
+            f'{"".join(panels)}'
+            f'<div class="foot"><span>Replayed at weekly as-of dates &middot; today\'s model, '
+            f'past polls</span><span>{asof_line}</span></div></div></body></html>')
+
+
 # --------------------------------------------------------------------------
 def main():
     O = _ROOT / "outputs"
@@ -504,6 +578,10 @@ def main():
     # Carousel cover. RELEASE_NUMBER is the count of published forecasts, not
     # of runs: bump it when a post goes out, not when the pipeline re-runs.
     (OUTD / "ig_cover.html").write_text(cover_card(cc, RELEASE_NUMBER, asof))
+
+    tpath = config.DATA_PROCESSED / "trend_chambers.parquet"
+    if tpath.exists():
+        (OUTD / "ig_trend.html").write_text(trend_card(pd.read_parquet(tpath), asof_line))
 
     print(f"wrote {len(list(OUTD.glob('ig_*.html')))} cards to {OUTD}  (asof {asof}, {days} days out)")
     for f in sorted(OUTD.glob("ig_*.html")):

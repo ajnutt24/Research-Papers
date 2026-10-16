@@ -277,13 +277,16 @@ INDEPENDENT_RACES_2026 = {
              "note": "Osborn (I) vs Ricketts (R); no Democrat. 0.90 rather than 1.0 because "
                      "Osborn has publicly said he would caucus with neither party, so a small "
                      "amount of doubt is warranted even on a confident expectation."},
-    "S-ID": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.5,
-             "independent": "Achilles",
-             "note": "Achilles (I) vs Risch (R); no Democrat. Caucus intent unknown, so 0.5 "
-                     "is a deliberate coin flip rather than a guess dressed as an estimate."},
-    "S-SD": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.5,
-             "independent": "Beng",
-             "note": "Beng (I) vs Rounds (R); no Democrat. Caucus intent unknown; 0.5."},
+    "S-ID": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.75,
+             "independent": "Todd Achilles",
+             "note": "Achilles (I) vs Risch (R); no Democrat. 0.75 set by the author on "
+                     "2026-10-16, replacing the 0.5 placeholder. Still a judgement rather "
+                     "than an estimate: it leans Democratic without claiming certainty."},
+    "S-SD": {"has_democrat": False, "three_way": False, "caucus_prob_dem": 0.75,
+             "independent": "Brian Bengs",
+             "note": "Bengs (I) vs Rounds (R); no Democrat. 0.75 set by the author on "
+                     "2026-10-16, replacing the 0.5 placeholder. The name was recorded as "
+                     "'Beng' here and is Bengs."},
     "S-MT": {"has_democrat": True, "three_way": True, "caucus_prob_dem": 0.5,
              "independent": "", "note": "Three-way: Daines (R) vs a Democrat vs an independent."},
 }
