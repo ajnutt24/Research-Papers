@@ -44,9 +44,15 @@ OUTD = Path(sys.argv[1]) if len(sys.argv) > 1 and not sys.argv[1].startswith("-"
 IND_NAMES = {"S-NE": "Osborn", "S-SD": "Bengs"}
 
 # Races kept in the model and the scrape but dropped from the Senate ladder
-# graphics. South Dakota is here by request; editing this set does not change
-# any forecast, only what the card shows.
-EXCLUDE_SENATE: set[str] = {"S-SD"}
+# graphics. Editing this set changes no forecast, only what the cards show.
+#
+# South Dakota is here by request. Montana is here because the tier-2 card
+# claims these races get interesting in a wave and Montana is the one race
+# that does not: a uniform 10-point swing toward Democrats takes it from 0.0%
+# to 3.9%, while every other race on the card gains 26 to 50 points. Its real
+# upside is structural, the Democrat standing down so the independent runs
+# against Daines alone, and the model cannot price that.
+EXCLUDE_SENATE: set[str] = {"S-SD", "S-MT"}
 
 STATE = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -389,12 +395,12 @@ def main():
     sen2 = rp[rp.race_id.isin(t2)].sort_values("p_dem", ascending=False)
     if len(sen2):
         (OUTD / "ig_senate_ladder_tier2.html").write_text(ladder_card(
-            "Reach Races", "2026 Senate &middot; the reach races",
-            "None of these decides<br>the Senate. Yet.",
-            f"All <b>{len(sen2)}</b> are rated Safe R and none is needed for a majority. They are "
-            "the early warning: a shift here shows a national environment moving before tier 1 "
-            "can show it. Read the poll counts first, several are thin enough that the number is "
-            "a prior rather than a measurement.",
+            "Wave Races", "2026 Senate &middot; if the wave is real",
+            "Additional races that could<br>be interesting in a wave.",
+            f"<b>{len(sen2)}</b> Safe-R-rated seats, none needed for a majority. Each would move "
+            "a long way on a national swing: five of them clear <b>50%</b> if Democrats run "
+            "<b>10 points</b> better than the model's current estimate. Read the poll counts "
+            "first, several are thin enough that the number is a prior rather than a measurement.",
             sen2, fund, asof_line))
 
     # Governor ladder: every race on the ballot.
