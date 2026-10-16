@@ -5,7 +5,7 @@ S-AR,D,,unknown,False,,unknown,True,False,True,Cotton
 S-CO,D,,unknown,True,,unknown,False,False,True,Hickenlooper
 S-DE,D,,unknown,True,,unknown,False,False,True,Coons
 S-GA,D,Jon Ossoff,none,True,,unknown,False,False,True,Ossoff
-S-ID,I,,unknown,False,,unknown,True,False,True,Independent vs Risch (R); no Democrat. Verify.
+S-ID,I,Todd Achilles,unknown,False,Jim Risch,unknown,True,False,False,"Jim Risch (R, incumbent) vs Todd Achilles (I); no Democrat on the ballot. Names confirmed 2026-10-16."
 S-IL,D,,unknown,False,,unknown,False,False,True,Durbin retiring
 S-IA,D,,unknown,False,,unknown,False,False,True,Ernst retiring (verify)
 S-KS,D,,unknown,False,,unknown,True,False,True,Marshall
@@ -17,7 +17,7 @@ S-MI,D,,unknown,False,,unknown,False,False,True,Peters retiring
 S-MN,D,,unknown,False,,unknown,False,False,True,Smith retiring
 S-MS,D,,unknown,False,,unknown,True,False,True,Hyde-Smith
 S-MT,D,,unknown,False,,unknown,True,True,True,Three-way: Daines (R) vs a Democrat vs an independent.
-S-NE,I,,unknown,False,,unknown,True,False,True,Independent vs Ricketts (R). Verify nominee names.
+S-NE,I,Dan Osborn,unknown,False,Pete Ricketts,unknown,True,False,False,"Pete Ricketts (R, incumbent) vs Dan Osborn (I); no Democrat on the ballot. Names confirmed 2026-10-16."
 S-NH,D,,unknown,False,,unknown,False,False,True,Shaheen retiring
 S-NJ,D,,unknown,True,,unknown,False,False,True,Booker
 S-NM,D,,unknown,True,,unknown,False,False,True,Lujan
@@ -26,7 +26,7 @@ S-OK,D,,unknown,False,,unknown,True,False,True,Mullin
 S-OR,D,,unknown,True,,unknown,False,False,True,Merkley
 S-RI,D,,unknown,True,,unknown,False,False,True,Reed
 S-SC,D,,unknown,False,,unknown,True,False,True,Graham
-S-SD,I,,unknown,False,,unknown,True,False,True,Independent vs Rounds (R); no Democrat. Verify.
+S-SD,I,Brian Bengs,unknown,False,Mike Rounds,unknown,True,False,False,"Mike Rounds (R, incumbent) vs Brian Bengs (I); no Democrat on the ballot. Names confirmed 2026-10-16."
 S-TN,D,,unknown,False,,unknown,True,False,True,Hagerty
 S-TX,D,James Talarico,state_legislator,False,Ken Paxton,statewide,False,False,True,"Paxton (R, AG) beat Cornyn in the primary. Experience scale scores him the same as Cornyn (statewide); it cannot see scandal or candidate weakness, which is what the polls showing Talarico ahead are capturing."
 S-VA,D,,unknown,True,,unknown,False,False,True,Warner

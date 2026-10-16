@@ -41,18 +41,15 @@ OUTD = Path(sys.argv[1]) if len(sys.argv) > 1 and not sys.argv[1].startswith("-"
 # Names for races whose main candidate is an independent. candidates_2026.csv
 # carries the party but not the names for these, so they are listed here and
 # must be checked by hand each cycle.
-IND_NAMES = {"S-NE": "Osborn", "S-SD": "Bengs"}
+IND_NAMES = {"S-NE": "Osborn", "S-SD": "Bengs", "S-ID": "Achilles"}
 
 # Races kept in the model and the scrape but dropped from the Senate ladder
 # graphics. Editing this set changes no forecast, only what the cards show.
 #
-# South Dakota is here by request. Montana is here because the tier-2 card
-# claims these races get interesting in a wave and Montana is the one race
-# that does not: a uniform 10-point swing toward Democrats takes it from 0.0%
-# to 3.9%, while every other race on the card gains 26 to 50 points. Its real
-# upside is structural, the Democrat standing down so the independent runs
-# against Daines alone, and the model cannot price that.
-EXCLUDE_SENATE: set[str] = {"S-SD", "S-MT"}
+# South Dakota is here by request: still scraped and still forecast, just not
+# on the card. Montana needs no entry, having been dropped from
+# watchlist_senate2.csv outright.
+EXCLUDE_SENATE: set[str] = {"S-SD"}
 
 STATE = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
