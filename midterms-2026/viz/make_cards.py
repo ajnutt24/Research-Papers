@@ -7,6 +7,7 @@ Build the share cards (1080x1350, Instagram 4:5) from the current run.
     python3 viz/make_cards.py [outdir] --shoot  # also renders PNGs
 
 Five cards:
+  ig_cover              carousel slide 1: the three headline numbers
   ig_senate_ladder      Senate tier 1 (watchlist_senate1.csv), ranked by P(D win)
   ig_senate_ladder_tier2 Senate tier 2, the Safe-R reach races
   ig_senate_seat_ladder every Senate seat count, with its probability
@@ -27,6 +28,7 @@ statistic and the one the interval is built around, so it is what is shown.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -50,6 +52,9 @@ IND_NAMES = {"S-NE": "Osborn", "S-SD": "Bengs", "S-ID": "Achilles"}
 # on the card. Montana needs no entry, having been dropped from
 # watchlist_senate2.csv outright.
 EXCLUDE_SENATE: set[str] = {"S-SD"}
+
+# Which published release the cover slide announces. Counts posts, not runs.
+RELEASE_NUMBER = int(os.environ.get("RELEASE_NUMBER", "2"))
 
 STATE = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -362,6 +367,60 @@ def seat_ladder_card(dist: pd.DataFrame, cc: dict, asof_line: str) -> str:
             f'<span>{asof_line}</span></div></div></body></html>')
 
 
+
+# --------------------------------------------------------------------------
+# Carousel cover
+# --------------------------------------------------------------------------
+COVER_CSS = """
+.card{padding:76px 64px 52px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.pill{font-size:17px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+ color:var(--bg);background:var(--ink);padding:7px 15px;border-radius:999px;white-space:nowrap}
+h1{font-family:var(--display);font-size:72px;font-weight:700;line-height:1.02;
+ letter-spacing:-.025em;margin:30px 0 0}
+.lede{margin:20px 0 0;font-size:25px;color:var(--ink-2);line-height:1.4;max-width:30ch}
+.rows{margin-top:38px;border-top:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:28px;padding:44px 0;border-bottom:1px solid var(--line)}
+.ch{flex:1}
+.ch b{display:block;font-family:var(--display);font-size:52px;font-weight:700;letter-spacing:-.015em;line-height:1}
+.ch span{display:block;font-size:23px;color:var(--ink-3);margin-top:11px;font-variant-numeric:tabular-nums}
+.big{font-family:var(--display);font-weight:700;font-size:132px;line-height:.82;color:var(--dem);
+ font-variant-numeric:tabular-nums;letter-spacing:-.04em;text-align:right;min-width:290px}
+.big i{font-style:normal;font-size:54px;letter-spacing:0}
+.swipe{margin-top:auto;padding-top:24px;display:flex;justify-content:space-between;
+ align-items:flex-end;gap:20px;font-size:19px;color:var(--ink-3)}
+.swipe b{color:var(--ink);font-weight:700}
+"""
+
+
+def cover_card(cc: dict, release: int, asof_line: str) -> str:
+    """Carousel slide 1: the three headline numbers and nothing else.
+
+    Percentages go through display_pct, so a 99.67% House never reads as a
+    certain one. The seat line carries the median and the 80% interval,
+    because a bare point estimate is the thing people over-read.
+    """
+    rows = []
+    for office in ("House", "Senate", "Governor"):
+        c, m = cc[office], CH[office]
+        med, lo, hi = (int(c["dem_seats_median"]), int(c["dem_seats_p10"]), int(c["dem_seats_p90"]))
+        unit = "of 50" if office == "Governor" else "seats"
+        rows.append(
+            f'<div class="row"><span class="ch"><b>{office}</b>'
+            f'<span>{med} {unit} &middot; 80% range {lo}&ndash;{hi}</span></span>'
+            f'<span class="big">{display_pct(c["p_dem_control"])}<i>%</i></span></div>')
+    days = cc.get("days_to_election", "")
+    return (HEAD.format(title="2026 Midterm Forecast", css=CSS_BASE + COVER_CSS) +
+            f'<div class="card">'
+            f'<div class="top"><p class="eyebrow">2026 Midterms &middot; Forecast</p>'
+            f'<span class="pill">Release {release:02d}</span></div>'
+            f'<h1>I built a model.<br>Here\'s what it says.</h1>'
+            f'<p class="lede">Democratic odds of winning control, {days} days out.</p>'
+            f'<div class="rows">{"".join(rows)}</div>'
+            f'<div class="swipe"><span>{asof_line}</span>'
+            f'<span><b>Swipe for the math &rarr;</b></span></div></div></body></html>')
+
+
 # --------------------------------------------------------------------------
 def main():
     O = _ROOT / "outputs"
@@ -416,6 +475,10 @@ def main():
 
     (OUTD / "ig_senate_seat_ladder.html").write_text(
         seat_ladder_card(dists["Senate"], cc, asof_line))
+
+    # Carousel cover. RELEASE_NUMBER is the count of published forecasts, not
+    # of runs: bump it when a post goes out, not when the pipeline re-runs.
+    (OUTD / "ig_cover.html").write_text(cover_card(cc, RELEASE_NUMBER, asof_line))
 
     print(f"wrote {len(list(OUTD.glob('ig_*.html')))} cards to {OUTD}  (asof {asof}, {days} days out)")
     for f in sorted(OUTD.glob("ig_*.html")):
