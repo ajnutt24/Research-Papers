@@ -43,9 +43,10 @@ OUTD = Path(sys.argv[1]) if len(sys.argv) > 1 and not sys.argv[1].startswith("-"
 # must be checked by hand each cycle.
 IND_NAMES = {"S-NE": "Osborn", "S-SD": "Bengs"}
 
-# Tier 1 no longer contains Idaho, so this is empty in practice; it stays as
-# the hook for dropping a race from the ladder without editing the watchlist.
-EXCLUDE_SENATE: set[str] = set()
+# Races kept in the model and the scrape but dropped from the Senate ladder
+# graphics. South Dakota is here by request; editing this set does not change
+# any forecast, only what the card shows.
+EXCLUDE_SENATE: set[str] = {"S-SD"}
 
 STATE = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -377,14 +378,14 @@ def main():
     t1 = [r for r in watchlist_frame("watchlist_senate1.csv").race_id if r not in EXCLUDE_SENATE]
     sen = rp[rp.race_id.isin(t1)].sort_values("p_dem", ascending=False)
     (OUTD / "ig_senate_ladder.html").write_text(ladder_card(
-        "Road to 51", "2026 Senate &middot; road to 51",
-        f"{len(sen)} races decide<br>control of the Senate.",
+        "Key Senate Races", "2026 Senate &middot; the races to watch",
+        "Key Senate races<br>to watch.",
         "Democrats hold <b>34 seats</b> not on the ballot and are favoured in <b>9</b> more "
         "that are not competitive, so 51 means winning <b>8 of these 12</b>. Each bar is the "
         "model's chance Democrats win that race; the tick is 50%.",
         sen, fund, asof_line))
 
-    t2 = list(watchlist_frame("watchlist_senate2.csv").race_id)
+    t2 = [r for r in watchlist_frame("watchlist_senate2.csv").race_id if r not in EXCLUDE_SENATE]
     sen2 = rp[rp.race_id.isin(t2)].sort_values("p_dem", ascending=False)
     if len(sen2):
         (OUTD / "ig_senate_ladder_tier2.html").write_text(ladder_card(
@@ -400,7 +401,7 @@ def main():
     gov = rp[rp.office == "Governor"].sort_values("p_dem", ascending=False)
     (OUTD / "ig_governor_ladder.html").write_text(ladder_card(
         "Road to 26", "2026 Governors &middot; road to 26",
-        "Democrats get to a majority<br>by holding, not flipping.",
+        "Democrats play defense,<br>pick up three.",
         f"All <b>{len(gov)}</b> races on the ballot, ranked by the model's chance Democrats win. "
         "Democrats hold <b>6</b> governorships that are not up and need <b>26 of 50</b>.",
         gov, fund, asof_line))

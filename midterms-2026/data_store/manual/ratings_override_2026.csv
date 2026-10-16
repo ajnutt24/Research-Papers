@@ -1,0 +1,84 @@
+# Cook Political Report ratings, Senate and Governor, as published 2026-10-15.
+#
+# Applied ON TOP of whatever source supplied the base ratings. The workbook
+# feeds ratings whenever it carries 50+ rows, so race_ratings_2026.csv is never
+# read in practice and editing it has no effect; this file is the hook that
+# does. Rows here replace the matching (race_id, source) pair and are added if
+# absent. Stage 05 logs every row that actually changed a rating.
+#
+# Transcribed from the published rating grid. Counts check: Senate 9 Solid D,
+# 3 Likely D, 1 Lean D, 7 Toss-up, 0 Lean R, 2 Likely R, 13 Solid R = 35.
+# Governor 13 Solid D, 0 Likely D, 5 Lean D, 4 Toss-up, 3 Lean R, 4 Likely R,
+# 7 Solid R = 36.
+race_id,source,rating
+S-CO,cook,Safe D
+S-DE,cook,Safe D
+S-IL,cook,Safe D
+S-MA,cook,Safe D
+S-NJ,cook,Safe D
+S-NM,cook,Safe D
+S-OR,cook,Safe D
+S-RI,cook,Safe D
+S-VA,cook,Safe D
+S-GA,cook,Likely D
+S-MN,cook,Likely D
+S-NC,cook,Likely D
+S-NH,cook,Lean D
+S-AK,cook,Toss-up
+S-IA,cook,Toss-up
+S-KS,cook,Toss-up
+S-ME,cook,Toss-up
+S-MI,cook,Toss-up
+S-OH-special,cook,Toss-up
+S-TX,cook,Toss-up
+S-NE,cook,Likely R
+S-SC,cook,Likely R
+S-AL,cook,Safe R
+S-AR,cook,Safe R
+S-FL-special,cook,Safe R
+S-ID,cook,Safe R
+S-KY,cook,Safe R
+S-LA,cook,Safe R
+S-MS,cook,Safe R
+S-MT,cook,Safe R
+S-OK,cook,Safe R
+S-SD,cook,Safe R
+S-TN,cook,Safe R
+S-WV,cook,Safe R
+S-WY,cook,Safe R
+G-CA,cook,Safe D
+G-CO,cook,Safe D
+G-CT,cook,Safe D
+G-HI,cook,Safe D
+G-IL,cook,Safe D
+G-MA,cook,Safe D
+G-MD,cook,Safe D
+G-ME,cook,Safe D
+G-MN,cook,Safe D
+G-NM,cook,Safe D
+G-NY,cook,Safe D
+G-PA,cook,Safe D
+G-RI,cook,Safe D
+G-AK,cook,Lean D
+G-AZ,cook,Lean D
+G-IA,cook,Lean D
+G-MI,cook,Lean D
+G-OR,cook,Lean D
+G-GA,cook,Toss-up
+G-NV,cook,Toss-up
+G-OH,cook,Toss-up
+G-WI,cook,Toss-up
+G-FL,cook,Lean R
+G-KS,cook,Lean R
+G-TX,cook,Lean R
+G-NE,cook,Likely R
+G-NH,cook,Likely R
+G-OK,cook,Likely R
+G-VT,cook,Likely R
+G-AL,cook,Safe R
+G-AR,cook,Safe R
+G-ID,cook,Safe R
+G-SC,cook,Safe R
+G-SD,cook,Safe R
+G-TN,cook,Safe R
+G-WY,cook,Safe R

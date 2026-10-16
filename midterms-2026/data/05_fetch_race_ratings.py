@@ -87,6 +87,7 @@ SOURCES = {
                "Governor": "https://insideelections.com/ratings/governor"},
 }
 MANUAL = config.DATA_MANUAL / "race_ratings_2026.csv"
+OVERRIDE = config.DATA_MANUAL / "ratings_override_2026.csv"
 MANUAL_HIST = config.DATA_MANUAL / "historical_ratings.csv"
 FR2018 = f"{GH}/fivethirtyeight/data/master/forecast-review/forecast_results_2018.csv"
 
@@ -329,6 +330,45 @@ def load_workbook_ratings():
     return df if len(df) >= 50 else None
 
 
+def apply_overrides(df: pd.DataFrame) -> pd.DataFrame:
+    """Apply ratings_override_2026.csv on top of whatever source supplied `df`.
+
+    Ratings move between publication and the next workbook refresh, and the
+    workbook wins the source contest whenever it carries 50+ rows, so editing
+    race_ratings_2026.csv has no effect in practice. This is the hook that
+    does: a row here replaces the matching (race_id, source) pair and is added
+    if absent.
+
+    Every row that actually changes a rating is logged, because a silent
+    override is how a hand edit becomes an unexplained forecast move weeks
+    later.
+    """
+    if not OVERRIDE.exists():
+        return df
+    ov = pd.read_csv(OVERRIDE, comment="#")
+    ov["rating"] = ov["rating"].map(normalise_rating)
+    ov = ov.dropna(subset=["rating", "race_id", "source"])
+    if not len(ov):
+        return df
+    key = ["race_id", "source"]
+    before = df.set_index(key)["rating"] if len(df) else pd.Series(dtype=object)
+    changed, added = [], []
+    for r in ov.itertuples():
+        k = (r.race_id, r.source)
+        old = before.get(k)
+        if old is None or (isinstance(old, float) and old != old):
+            added.append(r.race_id)
+        elif str(old) != str(r.rating):
+            changed.append((r.race_id, old, r.rating))
+    out = pd.concat([df[~df.set_index(key).index.isin(ov.set_index(key).index)], ov[df.columns.intersection(ov.columns).tolist()]
+                     if len(df) else ov], ignore_index=True)
+    log.info("ratings override: %d row(s) from %s -> %d changed, %d added, %d confirmed",
+             len(ov), OVERRIDE.name, len(changed), len(added), len(ov) - len(changed) - len(added))
+    for rid, old, new in changed:
+        log.info("    %-14s %-9s -> %s", rid, old, new)
+    return out
+
+
 def main():
     df = load_workbook_ratings()
     prov = "manual" if df is not None else None
@@ -352,6 +392,7 @@ def main():
     # A hand-entered list usually covers only the competitive races. Rather than
     # leave several hundred safe seats unrated, fill the gaps from partisan lean
     # and label each row with where it came from, so the mix stays visible.
+    df = apply_overrides(df)
     n_real = int(df.race_id.nunique())
     covered = set(df.race_id)
     uni_ids = set(config.race_universe().race_id)
