@@ -56,6 +56,10 @@ EXCLUDE_SENATE: set[str] = {"S-SD"}
 # Which published release the cover slide announces. Counts posts, not runs.
 RELEASE_NUMBER = int(os.environ.get("RELEASE_NUMBER", "2"))
 
+# The cover's italic line. "Initial" belonged to 1.0; later releases say
+# Updated unless COVER_SUBTITLE overrides it.
+COVER_SUBTITLE = os.environ.get("COVER_SUBTITLE", "Initial Forecast Results")
+
 STATE = {
     "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
     "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware", "FL": "Florida", "GA": "Georgia",
@@ -371,54 +375,73 @@ def seat_ladder_card(dist: pd.DataFrame, cc: dict, asof_line: str) -> str:
 # --------------------------------------------------------------------------
 # Carousel cover
 # --------------------------------------------------------------------------
-COVER_CSS = """
-.card{padding:76px 64px 52px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:16px}
-.pill{font-size:17px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
- color:var(--bg);background:var(--ink);padding:7px 15px;border-radius:999px;white-space:nowrap}
-h1{font-family:var(--display);font-size:72px;font-weight:700;line-height:1.02;
- letter-spacing:-.025em;margin:30px 0 0}
-.lede{margin:20px 0 0;font-size:25px;color:var(--ink-2);line-height:1.4;max-width:30ch}
-.rows{margin-top:38px;border-top:1px solid var(--line)}
-.row{display:flex;align-items:center;gap:28px;padding:44px 0;border-bottom:1px solid var(--line)}
-.ch{flex:1}
-.ch b{display:block;font-family:var(--display);font-size:52px;font-weight:700;letter-spacing:-.015em;line-height:1}
-.ch span{display:block;font-size:23px;color:var(--ink-3);margin-top:11px;font-variant-numeric:tabular-nums}
-.big{font-family:var(--display);font-weight:700;font-size:132px;line-height:.82;color:var(--dem);
- font-variant-numeric:tabular-nums;letter-spacing:-.04em;text-align:right;min-width:290px}
-.big i{font-style:normal;font-size:54px;letter-spacing:0}
-.swipe{margin-top:auto;padding-top:24px;display:flex;justify-content:space-between;
- align-items:flex-end;gap:20px;font-size:19px;color:var(--ink-3)}
-.swipe b{color:var(--ink);font-weight:700}
-"""
+# Deliberately NOT on the chamber-card design system. The published carousel
+# opens on a navy editorial title page, and the colours and metrics below are
+# sampled from the Release 1.0 cover rather than guessed: background #0F2240,
+# cream #F3EFE6, a 36px rule inset, a 98px content margin and a 107px gold rule
+# above the subtitle. It is a fixed-palette card, so it does not take the
+# light/dark treatment the other cards do.
+COVER_HTML = """<!doctype html><html><head><meta charset="utf-8"><title>{title}</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@300;400;500&display=swap">
+<style>
+:root{{--navy:#0f2240;--cream:#f3efe6;--gold:#c0a775;--rule:#354863;--edge:#41526e;
+ --muted:#b6c2d4;--display:"Playfair Display",Georgia,serif;--body:"Inter",-apple-system,Helvetica,Arial,sans-serif}}
+*{{box-sizing:border-box}} html,body{{margin:0;padding:0}}
+body{{background:var(--navy);font-family:var(--body);color:var(--cream)}}
+.card{{width:1080px;height:1350px;background:var(--navy);position:relative;
+ padding:117px 98px 0;display:flex;flex-direction:column}}
+.card::before{{content:"";position:absolute;left:36px;right:36px;top:37px;bottom:37px;
+ border:1px solid var(--edge);opacity:.55;pointer-events:none}}
+.eyebrow{{display:flex;justify-content:space-between;align-items:baseline;
+ font-size:17px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}}
+.hr{{height:1px;background:var(--rule);margin-top:22px}}
+h1{{font-family:var(--display);font-weight:500;font-size:116px;line-height:1.06;
+ letter-spacing:-.015em;color:var(--cream);margin:148px 0 0}}
+.goldrule{{width:107px;height:3px;background:var(--gold);margin:74px 0 0}}
+.sub{{font-family:var(--display);font-style:italic;font-weight:500;font-size:53px;
+ color:var(--gold);margin:40px 0 0;letter-spacing:.005em}}
+.desc{{font-size:27px;font-weight:300;line-height:1.5;color:var(--cream);margin:30px 0 0;max-width:690px}}
+.foot{{margin-top:auto;padding-bottom:111px}}
+.foot .hr{{margin:0 0 30px}}
+.row{{display:flex;justify-content:space-between;align-items:center;font-size:21px;font-weight:300}}
+.row .date{{color:var(--muted)}}
+.row .swipe{{display:inline-flex;align-items:center;gap:14px;color:var(--cream)}}
+.arrow{{display:inline-block;width:46px;height:1px;background:var(--cream);position:relative}}
+.arrow::after{{content:"";position:absolute;right:0;top:-4px;width:9px;height:9px;
+ border-top:1px solid var(--cream);border-right:1px solid var(--cream);transform:rotate(45deg)}}
+</style></head><body>
+<div class="card">
+  <div class="eyebrow"><span>{eyebrow}</span><span>Version {version}</span></div>
+  <div class="hr"></div>
+  <h1>{headline}</h1>
+  <div class="goldrule"></div>
+  <p class="sub">{subtitle}</p>
+  <p class="desc">{desc}</p>
+  <div class="foot"><div class="hr"></div>
+    <div class="row"><span class="date">{date}</span>
+      <span class="swipe">Swipe to read <span class="arrow"></span></span></div>
+  </div>
+</div></body></html>"""
 
 
-def cover_card(cc: dict, release: int, asof_line: str) -> str:
-    """Carousel slide 1: the three headline numbers and nothing else.
+def cover_card(cc: dict, release: int, asof: str) -> str:
+    """Carousel slide 1, in the published title-page design.
 
-    Percentages go through display_pct, so a 99.67% House never reads as a
-    certain one. The seat line carries the median and the 80% interval,
-    because a bare point estimate is the thing people over-read.
+    Carries no forecast numbers on purpose: Release 1.0 did not, and the
+    numbers live on the chamber cards behind it. Only the version and the date
+    move between releases.
     """
-    rows = []
-    for office in ("House", "Senate", "Governor"):
-        c, m = cc[office], CH[office]
-        med, lo, hi = (int(c["dem_seats_median"]), int(c["dem_seats_p10"]), int(c["dem_seats_p90"]))
-        unit = "of 50" if office == "Governor" else "seats"
-        rows.append(
-            f'<div class="row"><span class="ch"><b>{office}</b>'
-            f'<span>{med} {unit} &middot; 80% range {lo}&ndash;{hi}</span></span>'
-            f'<span class="big">{display_pct(c["p_dem_control"])}<i>%</i></span></div>')
-    days = cc.get("days_to_election", "")
-    return (HEAD.format(title="2026 Midterm Forecast", css=CSS_BASE + COVER_CSS) +
-            f'<div class="card">'
-            f'<div class="top"><p class="eyebrow">2026 Midterms &middot; Forecast</p>'
-            f'<span class="pill">Release {release:02d}</span></div>'
-            f'<h1>I built a model.<br>Here\'s what it says.</h1>'
-            f'<p class="lede">Democratic odds of winning control, {days} days out.</p>'
-            f'<div class="rows">{"".join(rows)}</div>'
-            f'<div class="swipe"><span>{asof_line}</span>'
-            f'<span><b>Swipe for the math &rarr;</b></span></div></div></body></html>')
+    d = pd.Timestamp(asof)
+    return COVER_HTML.format(
+        title="2026 Midterm Forecast",
+        eyebrow="Preliminary Findings",
+        version=f"{release}.0",
+        headline="The 2026<br>U.S. Midterm<br>Elections",
+        subtitle=COVER_SUBTITLE,
+        desc="A Bayesian hierarchical model of House, Senate, and Governor races",
+        date=d.strftime("%B %-d, %Y"),
+    )
 
 
 # --------------------------------------------------------------------------
@@ -478,7 +501,7 @@ def main():
 
     # Carousel cover. RELEASE_NUMBER is the count of published forecasts, not
     # of runs: bump it when a post goes out, not when the pipeline re-runs.
-    (OUTD / "ig_cover.html").write_text(cover_card(cc, RELEASE_NUMBER, asof_line))
+    (OUTD / "ig_cover.html").write_text(cover_card(cc, RELEASE_NUMBER, asof))
 
     print(f"wrote {len(list(OUTD.glob('ig_*.html')))} cards to {OUTD}  (asof {asof}, {days} days out)")
     for f in sorted(OUTD.glob("ig_*.html")):
