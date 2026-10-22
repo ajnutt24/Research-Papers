@@ -902,6 +902,43 @@ def topup_from_scrape(workbook_df: pd.DataFrame) -> pd.DataFrame | None:
 
 
 
+def drop_excluded_pollsters(df: pd.DataFrame) -> pd.DataFrame:
+    """Remove every poll from a house listed in config.EXCLUDED_POLLSTERS.
+
+    Runs after all sources are merged, because an excluded house can appear in
+    the scrape AND the workbook and dropping it from one path would leave the
+    other feeding it back in. Matching is a case-insensitive substring, which
+    also catches sponsored variants of the same name.
+
+    Logs the races it touched and how much of each it removed, so the effect on
+    a thin race is visible at the point of removal rather than showing up later
+    as an unexplained move.
+    """
+    rules = getattr(config, "EXCLUDED_POLLSTERS", {}) or {}
+    if not rules or not len(df):
+        return df
+    name = df["pollster"].fillna("").astype(str)
+    hit = pd.Series(False, index=df.index)
+    for pat in rules:
+        hit |= name.str.contains(pat, case=False, regex=False, na=False)
+    if not hit.any():
+        return df
+    gone = df[hit]
+    before = df.groupby("race_id").size()
+    log.warning("excluded pollsters: dropped %d poll(s) across %d race(s)",
+                len(gone), gone.race_id.nunique())
+    for pat, why in rules.items():
+        n = int(name.str.contains(pat, case=False, regex=False, na=False).sum())
+        if n:
+            log.warning("    %s: %d poll(s). %s", pat, n, why)
+    for rid, g in gone.groupby("race_id"):
+        tot = int(before.get(rid, 0))
+        left = tot - len(g)
+        flag = "  <-- race now has very little left" if left <= 2 else ""
+        log.info("    %-14s removed %d of %d, %d remain%s", rid, len(g), tot, left, flag)
+    return df[~hit]
+
+
 def dedupe_polls(df: pd.DataFrame) -> pd.DataFrame:
     """One survey, one row. See config.POLL_DEDUP_* for the three cases.
 
@@ -1080,6 +1117,7 @@ def main(force_fixture: bool = False):
         frames.append(build_fixture())
         provs.append("fixture")
     polls = pd.concat(frames, ignore_index=True).drop_duplicates("poll_id")
+    polls = drop_excluded_pollsters(polls)
     polls = dedupe_polls(polls)
     polls = filter_hypothetical(polls)
     polls = filter_to_nominees(polls)

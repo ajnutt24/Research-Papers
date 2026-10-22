@@ -479,6 +479,28 @@ STACK_HORIZONS_ESTIMATED = [1, 3, 7, 14, 21]
 # So the fuzzy rule fires only when the dates are within the window AND the
 # margins agree within the tolerance AND the sample sizes are equal or one is
 # missing. That keeps case 2 and spares case 3.
+# Pollsters excluded from the 2026 aggregator entirely.
+#
+# This is for houses whose data cannot be trusted at all, not for houses that
+# merely lean or perform poorly. A bad-but-honest pollster is already handled:
+# the house-effect step estimates its bias within race and subtracts it, and
+# the variance model widens what a low-quality poll contributes. Fabrication is
+# different in kind. There is no bias to estimate because there is no
+# measurement underneath, so the only correct weight is zero.
+#
+# Matching is a case-insensitive substring on the pollster name, so one entry
+# catches the sponsored variants too ("Wedgewood Polls" and "Wedgewood Polls
+# (D)"). Exclusion runs after every source is merged, because these rows arrive
+# from the scrape AND the workbook, and dropping them in one path alone would
+# leave the other feeding them straight back in.
+#
+# Every entry needs a date and a reason. An undocumented exclusion is
+# indistinguishable from putting a thumb on the scale.
+EXCLUDED_POLLSTERS = {
+    "Wedgewood": "2026-10-22: the firm stated publicly that its results were "
+                 "fabricated rather than collected. 20 polls removed across 18 races.",
+}
+
 POLL_DEDUP_DATE_WINDOW_DAYS = 2
 POLL_DEDUP_MARGIN_TOL = 1.0
 # Every dropped row is written here with the row it lost to and the reason, so
