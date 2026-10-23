@@ -7,7 +7,7 @@ Build the share cards (1080x1350, Instagram 4:5) from the current run.
     python3 viz/make_cards.py [outdir] --shoot  # also renders PNGs
 
 Five cards:
-  ig_trend              P(control) over time, from analysis/16_trend_snapshots.py\n  ig_cover              carousel slide 1: the three headline numbers
+  ig_trend_senate1      12 tier-1 races, biweekly small multiples\n  ig_trend_senate2      tier-2 races, same treatment\n  ig_trend              P(control) over time, from analysis/16_trend_snapshots.py\n  ig_cover              carousel slide 1: the three headline numbers
   ig_senate_ladder      Senate tier 1 (watchlist_senate1.csv), ranked by P(D win)
   ig_senate_ladder_tier2 Senate tier 2, the Safe-R reach races
   ig_senate_seat_ladder every Senate seat count, with its probability
@@ -52,6 +52,17 @@ IND_NAMES = {"S-NE": "Osborn", "S-SD": "Bengs", "S-ID": "Achilles"}
 # on the card. Montana needs no entry, having been dropped from
 # watchlist_senate2.csv outright.
 EXCLUDE_SENATE: set[str] = {"S-SD"}
+
+# race_id -> state abbreviation, for cards that label by state.
+RACE_STATE = {"S-OH-special": "OH", "S-FL-special": "FL"}
+
+
+def race_state(race_id: str) -> str:
+    """State abbreviation for a race_id, handling the -special suffixes."""
+    if race_id in RACE_STATE:
+        return RACE_STATE[race_id]
+    parts = race_id.split("-")
+    return parts[1] if len(parts) > 1 else race_id
 
 # Which published release the cover slide announces. Counts posts, not runs.
 RELEASE_NUMBER = int(os.environ.get("RELEASE_NUMBER", "2"))
@@ -520,6 +531,82 @@ def trend_card(trend_df: pd.DataFrame, asof_line: str) -> str:
             f'past polls</span><span>{asof_line}</span></div></div></body></html>')
 
 
+
+# --------------------------------------------------------------------------
+# Race trend grid (small multiples)
+# --------------------------------------------------------------------------
+# Twelve races will not fit one line chart: a categorical palette tops out
+# around eight hues and cycling past that makes the series unreadable. Small
+# multiples sidestep it entirely. Every panel carries one line, so no legend is
+# needed, and all panels share a 0-100 scale with the 50% line drawn, which is
+# what makes the shapes comparable and "crossed over" visible at a glance.
+GRID_CSS = """
+.card{padding:50px 60px 40px}
+h1{font-family:var(--display);font-size:54px;font-weight:700;line-height:1.03;letter-spacing:-.02em;margin:14px 0 0}
+.sub{margin:13px 0 0;font-size:20px;color:var(--ink-2);line-height:1.38;max-width:62ch}
+.sub b{color:var(--ink);font-weight:600}
+.grid{display:grid;gap:var(--gap);margin-top:28px}
+.cell{}
+.chead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.chead b{font-family:var(--display);font-size:var(--namesize);font-weight:700;letter-spacing:-.01em;line-height:1}
+.chead i{font-style:normal;font-size:var(--pctsize);font-weight:800;font-variant-numeric:tabular-nums}
+.up{color:var(--dem)} .dn{color:var(--rep)}
+.spark{display:block;width:100%;height:auto;overflow:visible}
+.half{stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:4 4;opacity:.65}
+.pl{fill:none;stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.pl.up{stroke:var(--dem)} .pl.dn{stroke:var(--rep)}
+.pd.up{fill:var(--dem)} .pd.dn{fill:var(--rep)}
+.chg{font-size:var(--chgsize);color:var(--ink-3);font-variant-numeric:tabular-nums;margin-top:7px;display:block}
+"""
+
+SW, SH = 300.0, 150.0    # sparkline viewBox; tall enough that shape is readable
+
+
+def _spark(ys: list[float]) -> str:
+    n = len(ys)
+    X = lambda i: 3 + (SW - 6) * (i / max(n - 1, 1))
+    Y = lambda v: SH - (v / 100.0) * SH          # fixed 0-100 scale, shared by every panel
+    cls = "up" if ys[-1] >= 50 else "dn"
+    pts = " ".join(f"{X(i):.1f},{Y(v):.1f}" for i, v in enumerate(ys))
+    return (f'<svg class="spark" viewBox="0 -4 {SW:.0f} {SH+8:.0f}" role="img" '
+            f'aria-label="trend from {ys[0]:.0f}% to {ys[-1]:.0f}%">'
+            f'<line class="half" x1="0" y1="{Y(50):.1f}" x2="{SW:.0f}" y2="{Y(50):.1f}"/>'
+            f'<polyline class="pl {cls}" points="{pts}"/>'
+            f'<circle class="pd {cls}" cx="{X(n-1):.1f}" cy="{Y(ys[-1]):.1f}" r="6"/></svg>')
+
+
+def trend_grid_card(trend_df: pd.DataFrame, race_ids: list[str], *, title: str, eyebrow: str,
+                    sub: str, cols: int, asof_line: str, dates: list) -> str:
+    t = trend_df.copy()
+    t["asof_date"] = pd.to_datetime(t["asof_date"])
+    keep = [pd.Timestamp(d) for d in dates]
+    t = t[t["asof_date"].isin(keep)].sort_values("asof_date")
+    series = {r: (100 * t[t.race_id == r].sort_values("asof_date").p_dem).tolist() for r in race_ids}
+    series = {r: v for r, v in series.items() if len(v) == len(keep)}
+    order = sorted(series, key=lambda r: -series[r][-1])
+
+    n = len(order)
+    big = cols <= 2 or n <= 6
+    vars_ = (f":root{{--gap:14px;--namesize:32px;--pctsize:32px;--chgsize:17px}}" if big
+             else f":root{{--gap:22px;--namesize:26px;--pctsize:27px;--chgsize:16px}}")
+    cells = []
+    for r in order:
+        ys = series[r]
+        now, move = ys[-1], ys[-1] - ys[0]
+        cls = "up" if now >= 50 else "dn"
+        cells.append(
+            f'<div class="cell"><div class="chead"><b>{STATE.get(race_state(r), r)}</b>'
+            f'<i class="{cls}">{display_pct(now/100)}%</i></div>{_spark(ys)}'
+            f'<span class="chg">{"no change" if abs(move) < 0.5 else f"{move:+.0f} pts"}  since {keep[0].strftime("%-d %b")}</span></div>')
+    css = CSS_BASE + GRID_CSS + vars_ + f".grid{{grid-template-columns:repeat({cols},1fr)}}"
+    return (HEAD.format(title=title, css=css) +
+            f'<div class="card"><p class="eyebrow">{eyebrow}</p><h1>{title}</h1>'
+            f'<p class="sub">{sub}</p><div class="grid">{"".join(cells)}</div>'
+            f'<div class="foot"><span>Each panel 0-100%, dashed line is 50% &middot; '
+            f'{keep[0].strftime("%-d %b")} to {keep[-1].strftime("%-d %b")}, every two weeks</span>'
+            f'<span>{asof_line}</span></div></div></body></html>')
+
+
 # --------------------------------------------------------------------------
 def main():
     O = _ROOT / "outputs"
@@ -578,6 +665,28 @@ def main():
     # Carousel cover. RELEASE_NUMBER is the count of published forecasts, not
     # of runs: bump it when a post goes out, not when the pipeline re-runs.
     (OUTD / "ig_cover.html").write_text(cover_card(cc, RELEASE_NUMBER, asof))
+
+    rpath = config.DATA_PROCESSED / "trend_races.parquet"
+    if rpath.exists():
+        tr = pd.read_parquet(rpath)
+        biweekly = ["2026-08-01", "2026-08-15", "2026-08-29", "2026-09-12",
+                    "2026-09-26", "2026-10-10", asof]
+        t1 = list(watchlist_frame("watchlist_senate1.csv").race_id)
+        (OUTD / "ig_trend_senate1.html").write_text(trend_grid_card(
+            tr, t1, title="The 12 races that<br>decide the Senate.",
+            eyebrow="2026 Senate &middot; tier 1 &middot; how each moved",
+            sub="Democratic chance of winning each race, every two weeks since <b>1 August</b>. "
+                "Every panel runs 0&ndash;100% on the same scale and the dashed line is 50%, so a "
+                "line crossing it is a race changing hands.",
+            cols=3, asof_line=asof_line, dates=biweekly))
+        t2 = [r for r in watchlist_frame("watchlist_senate2.csv").race_id if r not in EXCLUDE_SENATE]
+        (OUTD / "ig_trend_senate2.html").write_text(trend_grid_card(
+            tr, t2, title="The reach races,<br>same two weeks apart.",
+            eyebrow="2026 Senate &middot; tier 2 &middot; how each moved",
+            sub="The Safe-R-rated seats worth watching, on the same 0&ndash;100% scale as tier 1. "
+                "None is needed for a majority; the point is the direction, and how far each still "
+                "sits below the dashed 50% line.",
+            cols=2, asof_line=asof_line, dates=biweekly))
 
     tpath = config.DATA_PROCESSED / "trend_chambers.parquet"
     if tpath.exists():
