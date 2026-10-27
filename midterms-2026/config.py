@@ -705,8 +705,21 @@ WORKBOOK_FEEDS_RATINGS = True
 # --------------------------------------------------------------------------
 # PyMC sampling defaults (small models; increase for publication runs)
 # --------------------------------------------------------------------------
-MCMC_DRAWS = int(os.environ.get("MCMC_DRAWS", 1000))
-MCMC_TUNE = int(os.environ.get("MCMC_TUNE", 1000))
+# 1,000/1,000 sampled fast but did not converge cleanly once the dataset grew
+# to 2,072 polls: the 2026-10-27 fit reported 103 divergences, r-hat 1.033 on
+# tau_state and an effective sample size of 199, with 46 of 1,621 parameters
+# over the 1.01 r-hat threshold. 2,500/1,500 at MCMC_TARGET_ACCEPT=0.95 brings
+# that to 0 of 1,621 over the threshold and lifts theta's effective sample size
+# from 568 to 3,516.
+#
+# The forecast did NOT depend on this. Across all 506 races the two fits differ
+# by 0.10 points on average and 1.53 at most, no race by more than 3 points, and
+# the chamber probabilities by under 0.11. So this buys defensible diagnostics,
+# not a different answer, which is the honest way to describe it. These are the
+# defaults because they are the settings the committed outputs were produced
+# with, and a default that cannot reproduce the published forecast is a trap.
+MCMC_DRAWS = int(os.environ.get("MCMC_DRAWS", 1500))
+MCMC_TUNE = int(os.environ.get("MCMC_TUNE", 2500))
 # 4 chains is the standard minimum for trustworthy convergence diagnostics:
 # R-hat and effective sample size are both between-chain statistics, so with
 # 2 chains they have almost no power to detect a chain stuck in the wrong
@@ -722,7 +735,16 @@ MCMC_CHAINS = int(os.environ.get("MCMC_CHAINS", 4))
 # each chain and removes that failure mode entirely. Set MCMC_CORES=4 to opt
 # in on Linux or macOS, where it is safe and roughly 4x faster.
 MCMC_CORES = int(os.environ.get("MCMC_CORES", 1))
-MCMC_TARGET_ACCEPT = 0.9
+
+# Overridable like the other sampler knobs so a convergence warning can be
+# chased without editing this file. Raising it shortens the step size, the
+# standard answer to divergences in a hierarchical variance parameter, and
+# tau_state is where this model funnels. See MCMC_DRAWS above for the
+# measurements behind 0.95. Divergences drop from 103 to 92 rather than to
+# zero, so the funnel is still there; what clears is r-hat and the effective
+# sample size. Reparameterising tau_state non-centredly is the real fix and
+# wants a backtest, so it is not an eight-days-out change.
+MCMC_TARGET_ACCEPT = float(os.environ.get("MCMC_TARGET_ACCEPT", 0.95))
 
 # --------------------------------------------------------------------------
 # How the shared polling error is treated in the hierarchical fit
