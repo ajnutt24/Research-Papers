@@ -239,13 +239,43 @@ def fetch_workbook_approval():
     return df[["date", "approve", "disapprove"]], "manual"
 
 
+STALE_GAP_DAYS = 7
+
+
+def _newest(df: pd.DataFrame | None):
+    if df is None or not len(df):
+        return None
+    return pd.to_datetime(df["date"], errors="coerce").max()
+
+
 def main():
     df, prov = fetch_workbook_approval()
-    if df is None:
-        # Ahead of the scrapes, behind the workbook: a hand-curated series with
-        # a human's include/exclude call on each poll still outranks a bulk
-        # export, but the export outranks anything scraped off a page.
-        df, prov = fetch_nyt_approval()
+
+    # Ahead of the scrapes, and ahead of even the workbook when the workbook has
+    # gone stale. A curated series with a human's include/exclude call on each
+    # poll is the better source only while it is being kept up; the headline
+    # figure here is the median of the last APPROVAL_WINDOW polls, so what the
+    # series ends on drives the published number and staleness hurts more than
+    # curation helps. Ordering these by hand got it wrong in October 2026: the
+    # workbook ended 2026-09-20 and the export 2026-10-26, and taking the
+    # workbook on precedence alone reported approval from a five-week-old
+    # window. So the comparison is on recency, with a week of slack so a
+    # workbook saved in the normal course still wins.
+    nyt, nyt_prov = fetch_nyt_approval()
+    if nyt is not None and len(nyt):
+        wb_end, nyt_end = _newest(df), _newest(nyt)
+        if df is None:
+            df, prov = nyt, nyt_prov
+        elif wb_end is None or (nyt_end - wb_end).days > STALE_GAP_DAYS:
+            log.warning("workbook approval ends %s but the NYT export ends %s "
+                        "(%d days newer); using the export",
+                        wb_end.date() if wb_end is not None else "never",
+                        nyt_end.date(), (nyt_end - wb_end).days if wb_end is not None else -1)
+            df, prov = nyt, nyt_prov
+        else:
+            log.info("keeping workbook approval (ends %s; export ends %s, within "
+                     "the %d-day slack)", wb_end.date(), nyt_end.date(), STALE_GAP_DAYS)
+
     if df is None:
         df, prov = fetch_live()
     if df is None:
