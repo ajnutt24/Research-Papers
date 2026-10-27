@@ -96,6 +96,7 @@ OUT_COLS = ["poll_id", "race_id", "office", "state", "district", "pollster", "sp
 POLL_WINDOW_START = date(2026, 1, 1)
 RCP_GENERIC_URL = "https://www.realclearpolling.com/polls/state-of-the-union/generic-congressional-vote"
 MANUAL_POLLS = config.DATA_MANUAL / "polls_2026.csv"
+NYT_EXPORT = config.DATA_MANUAL / "polls_nyt.csv"
 MANUAL_CANDIDATES = config.DATA_MANUAL / "candidates_2026.csv"
 MANUAL_RCP_URLS = config.DATA_MANUAL / "rcp_urls.csv"
 
@@ -580,6 +581,43 @@ def load_manual() -> pd.DataFrame | None:
     df = df.dropna(subset=["race_id"])
     out = standardise(df, "manual")
     log.info("manual polls: %d rows", len(out))
+    return out
+
+
+# --------------------------------------------------------------------------
+# Source 5: the New York Times poll export
+# --------------------------------------------------------------------------
+def load_nyt_export() -> pd.DataFrame | None:
+    """Read the converted NYT export written by data/03c_import_nyt_export.py.
+
+    Kept separate from `fetch_nyt_csv`, which downloads an already-wide CSV from
+    NYT_POLLS_URL. The published export is in the long one-row-per-candidate
+    layout and has to be pivoted first, which is script 03c's job.
+
+    This source is additive: it is merged with whatever the workbook and the
+    scrape supplied and the combined frame then goes through
+    `drop_excluded_pollsters` -> `dedupe_polls` -> `filter_hypothetical` ->
+    `filter_to_nominees`, so a survey already held under another source is
+    collapsed rather than counted twice.
+    """
+    if not NYT_EXPORT.exists():
+        return None
+    df = pd.read_csv(NYT_EXPORT, comment="#")
+    df = df.dropna(subset=["race_id"])
+    if not len(df):
+        return None
+    out = standardise(df, "nyt:export")
+    # `standardise` derives poll_id from race, pollster, field end, sample size
+    # and population, which are identical for the several ballot questions of
+    # one survey, so main()'s drop_duplicates("poll_id") would keep an arbitrary
+    # one. 03c already emitted a per-question identifier; restoring it here
+    # keeps both rows alive until `dedupe_polls`, whose documented preference
+    # (larger sample, then the higher two-party total) is what should choose
+    # between a head-to-head and a question listing minor candidates. The
+    # workbook loader overrides poll_id the same way and for the same reason.
+    out["poll_id"] = df["poll_id"].astype(str).values
+    log.info("NYT export: %d rows across %d races (newest field end %s)",
+             len(out), out.race_id.nunique(), pd.to_datetime(out.end_date).max().date())
     return out
 
 
@@ -1098,6 +1136,26 @@ def main(force_fixture: bool = False):
                         for skipped, _, _ in sources[1:]:
                             report.append((skipped, "not tried (workbook supplied the polls)"))
                     break
+
+    # The NYT export is merged outside the source loop on purpose. That loop
+    # stops at the first source that returns polls, so with the workbook present
+    # nothing after it is ever reached; the Wikipedia top-up is already bolted on
+    # the same way. Unlike the scrapers, this source cannot double-count: the
+    # combined frame goes through dedupe_polls below, and its rows carry the
+    # sponsor and partisan-lean fields no other source supplies.
+    if not force_fixture:
+        try:
+            nyt = load_nyt_export()
+        except Exception as e:  # noqa: BLE001
+            report.append(("NYT export (data_store/manual/polls_nyt.csv)",
+                           f"error: {type(e).__name__}: {e}"))
+            nyt = None
+        if nyt is not None and len(nyt):
+            report.append(("NYT export (data_store/manual/polls_nyt.csv)", f"{len(nyt)} polls"))
+            frames.append(nyt)
+            provs.append("manual")
+        else:
+            report.append(("NYT export (data_store/manual/polls_nyt.csv)", "not available"))
 
     log.info("poll sources tried:")
     for name, outcome in report:

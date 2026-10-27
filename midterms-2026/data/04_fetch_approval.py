@@ -156,6 +156,59 @@ def fetch_wikipedia_approval() -> tuple[pd.DataFrame | None, str]:
         return None, "missing"
 
 
+NYT_PRESIDENT = config.DATA_MANUAL / "nyt" / "president.csv"
+
+
+def fetch_nyt_approval() -> tuple[pd.DataFrame | None, str]:
+    """Trump approval polls from the New York Times poll export.
+
+    Preferred over the Wikipedia scrape because it is the same kind of data,
+    individual polls citing their original pollster, but several times as many
+    of them and closer to current: 1,085 polls against the scrape's 180, running
+    a fortnight further forward. The headline figure is the median of the last
+    `APPROVAL_WINDOW` polls, so poll count is not cosmetic here. Ten polls out of
+    180 is a thin window that one unusual house can swing.
+
+    This REPLACES rather than merges with the scrape, which is why it sits in
+    the source chain rather than being concatenated. The two sources overlap
+    almost entirely, pollster names are spelled differently in each, and the
+    headline is a median over a fixed count of rows, so a survey arriving twice
+    under two spellings would quietly get double weight in exactly the window
+    that sets the published number.
+
+    One row per survey. A single poll reports up to three population bases and
+    the export files each as its own row, so taking them all would give a poll
+    that breaks out likely, registered and all adults three times the weight of
+    one that reports a single base. Likely voters win, then registered, then
+    adults, matching the preference the race polls already use.
+    """
+    if not NYT_PRESIDENT.exists():
+        return None, "missing"
+    try:
+        raw = pd.read_csv(NYT_PRESIDENT, dtype=str, low_memory=False)
+        d = raw[raw.politician.astype(str).str.strip() == "Donald Trump"].copy()
+        d["date"] = pd.to_datetime(d.end_date, format="%m/%d/%y", errors="coerce")
+        d["approve"] = pd.to_numeric(d.yes, errors="coerce")
+        d["disapprove"] = pd.to_numeric(d.no, errors="coerce")
+        d = d.dropna(subset=["date", "approve", "disapprove"])
+        if not len(d):
+            return None, "missing"
+        rank = {"lv": 0, "rv": 1, "a": 2}
+        d["_pop"] = d.population.astype(str).str.lower().str.strip().map(rank).fillna(3)
+        d = (d.sort_values(["poll_id", "_pop"])
+               .drop_duplicates("poll_id", keep="first")
+               .sort_values("date"))
+        out = d[["date", "approve", "disapprove"]].copy()
+        out["date"] = out.date.dt.date
+        out["source"] = "nyt:export"
+        log.info("NYT approval: %d polls (one per survey), %s to %s",
+                 len(out), out.date.min(), out.date.max())
+        return out, "manual"
+    except Exception as e:  # noqa: BLE001
+        log.warning("NYT approval export unreadable: %s: %s", type(e).__name__, e)
+        return None, "missing"
+
+
 def fetch_workbook_approval():
     """Approval from the hand-maintained Excel workbook, or (None, None).
 
@@ -188,6 +241,11 @@ def fetch_workbook_approval():
 
 def main():
     df, prov = fetch_workbook_approval()
+    if df is None:
+        # Ahead of the scrapes, behind the workbook: a hand-curated series with
+        # a human's include/exclude call on each poll still outranks a bulk
+        # export, but the export outranks anything scraped off a page.
+        df, prov = fetch_nyt_approval()
     if df is None:
         df, prov = fetch_live()
     if df is None:
