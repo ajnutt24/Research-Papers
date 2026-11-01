@@ -64,8 +64,16 @@ def race_state(race_id: str) -> str:
     parts = race_id.split("-")
     return parts[1] if len(parts) > 1 else race_id
 
-# Which published release the cover slide announces. Counts posts, not runs.
-RELEASE_NUMBER = int(os.environ.get("RELEASE_NUMBER", "2"))
+# How many districts the House ladder shows, and which it always shows
+# regardless of how close they are.
+HOUSE_LADDER_N = int(os.environ.get("HOUSE_LADDER_N", "24"))
+HOUSE_LADDER_ALWAYS = tuple(
+    x for x in os.environ.get("HOUSE_LADDER_ALWAYS", "H-NE-01,H-NE-02").split(",") if x)
+
+# Which published release the cover slide announces. Counts posts, not runs:
+# bump it when a post goes out, not when the pipeline re-runs. 3 is the final
+# pre-election release, dated 2026-11-01, two days out.
+RELEASE_NUMBER = int(os.environ.get("RELEASE_NUMBER", "3"))
 
 # Cover wording. Release 1.0 read "Preliminary Findings" / "Initial Forecast
 # Results"; from 2.0 on it is Revised / Updated. Both are overridable so a
@@ -152,11 +160,14 @@ td.bar{padding:var(--rowpad) 18px}
 """
 
 
-def ladder_rows(df: pd.DataFrame, fund: pd.DataFrame, compact: bool) -> str:
+def ladder_rows(df: pd.DataFrame, fund: pd.DataFrame, compact: bool,
+                labels: dict[str, str] | None = None) -> str:
     inc = dict(zip(fund.race_id, fund.incumbent_party))
     out = []
     for r in df.itertuples():
-        state = STATE.get(r.state, r.state)
+        # House rows need the district, not the state: a state has up to 38 of
+        # them and "Texas" five times over identifies nothing.
+        state = (labels or {}).get(r.race_id) or STATE.get(r.state, r.state)
         p = float(r.p_dem)
         dem = p >= .5
         if r.main_party == "I":
@@ -178,7 +189,8 @@ def ladder_rows(df: pd.DataFrame, fund: pd.DataFrame, compact: bool) -> str:
     return "".join(out)
 
 
-def ladder_card(title, eyebrow, h1, sub, df, fund, asof_line) -> str:
+def ladder_card(title, eyebrow, h1, sub, df, fund, asof_line,
+                labels: dict[str, str] | None = None) -> str:
     n = len(df)
     compact = n > 20
     pad = 2 if compact else max(5, min(17, int(5 + (14 - n) * 1.6)))
@@ -189,7 +201,7 @@ def ladder_card(title, eyebrow, h1, sub, df, fund, asof_line) -> str:
             f'<div class="card{" compact" if compact else ""}">'
             f'<p class="eyebrow">{eyebrow}</p><h1>{h1}</h1>'
             f'<p class="sub">{sub}</p>'
-            f'<table><tbody>{ladder_rows(df, fund, compact)}</tbody></table>'
+            f'<table><tbody>{ladder_rows(df, fund, compact, labels)}</tbody></table>'
             f'<div class="foot"><span class="key">'
             f'<span class="k"><span class="sw sw-d"></span>Democrat favoured</span>'
             f'<span class="k"><span class="sw sw-r"></span>Republican favoured</span></span>'
@@ -653,6 +665,31 @@ def main():
         f"All <b>{len(gov)}</b> races on the ballot, ranked by the model's chance Democrats win. "
         "Democrats hold <b>6</b> governorships that are not up and need <b>26 of 50</b>.",
         gov, fund, asof_line))
+
+    # House ladder: the closest races, plus Nebraska's two by request. Ranked by
+    # distance from 50% rather than by probability, because "most competitive"
+    # means most uncertain, and a 4% race and a 96% race are equally settled.
+    # Nebraska is appended rather than merged into the ranking so that asking
+    # for it cannot push a genuinely closer race off the card.
+    hr = rp[rp.office == "House"].copy()
+    hr["_gap"] = (hr.p_dem - 0.5).abs()
+    closest = hr.nsmallest(HOUSE_LADDER_N, "_gap").race_id.tolist()
+    extra = [r for r in HOUSE_LADDER_ALWAYS if r in set(hr.race_id) and r not in closest]
+    house_ids = closest + extra
+    hl = (hr[hr.race_id.isin(house_ids)]
+          .assign(_o=lambda d: d.race_id.map({r: i for i, r in enumerate(house_ids)}))
+          .sort_values("p_dem", ascending=False))
+    hlabels = {r: f"{race_state(r)}-{r.split('-')[2]}" for r in house_ids}
+    (OUTD / "ig_house_ladder.html").write_text(ladder_card(
+        "Closest House Races", "2026 House &middot; the closest races",
+        "The House races<br>still in doubt.",
+        f"The <b>{len(closest)}</b> districts nearest a coin flip"
+        + (f", plus Nebraska's <b>{len(extra)}</b>" if extra else "")
+        + ". Democrats need <b>218</b> of 435 and the model's median is "
+          f"<b>{cc['House']['dem_seats_median']:.0f}</b>, so these are the seats that decide the "
+          "size of the majority rather than whether there is one. FLIP marks a Republican-held "
+          "seat; the tick is 50%.",
+        hl, fund, asof_line, labels=hlabels))
 
     dists = {}
     for office, slug in [("House", "house"), ("Senate", "senate"), ("Governor", "governor")]:

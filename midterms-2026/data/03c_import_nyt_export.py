@@ -153,6 +153,30 @@ def resolve_ranked_choice(q: pd.DataFrame) -> pd.DataFrame | None:
     return None
 
 
+def is_two_way_hypothetical(q: pd.DataFrame, dem_and_ind_on_ballot: bool) -> bool:
+    """True when this question drops a candidate who is actually on the ballot.
+
+    Only meaningful where a Democrat AND an independent are both running, which
+    among the 2026 races is Montana alone: Alme (R) against Bankhead (D) against
+    Bodnar (I). Pollsters there asked three questions off one sample, the real
+    three-way plus a Bodnar-Alme head-to-head and a Bankhead-Alme head-to-head,
+    and the head-to-heads are polling a ballot that will not exist.
+
+    The spread is not cosmetic. Hart Research's 2026-08-04 sample gave Alme 45 /
+    Bodnar 30 / Bankhead 15 on the real ballot, Bodnar 46 / Alme 46 in the
+    two-way, and Alme 52 / Bankhead 38 in the other two-way. Averaging those
+    puts a 15-point race and a tied race in the same pot and produces neither.
+
+    Nebraska, Idaho and South Dakota have no Democrat on the ballot at all
+    (`has_democrat: False`), so their two-candidate questions ARE the real
+    ballot and must not be caught by this.
+    """
+    if not dem_and_ind_on_ballot:
+        return False
+    party = q["party"].astype(str).str.upper()
+    return not ((party == "DEM").any() and (party == "IND").any())
+
+
 def pivot_question(q: pd.DataFrame, independent_led: bool) -> dict | None:
     """Turn one question's candidate rows into a two-party row."""
     q = q.copy()
@@ -170,11 +194,11 @@ def pivot_question(q: pd.DataFrame, independent_led: bool) -> dict | None:
 
     # Which non-Republican is the candidate the model tracks. See choice 3.
     if independent_led and len(ind):
-        main = ind
+        main, main_from_ind = ind, True
     elif len(dem):
-        main = dem
+        main, main_from_ind = dem, False
     elif len(ind):
-        main = ind
+        main, main_from_ind = ind, True
     else:
         return None
 
@@ -184,10 +208,10 @@ def pivot_question(q: pd.DataFrame, independent_led: bool) -> dict | None:
     rep = rep.loc[[rep.pct_f.idxmax()]]
     first = q.iloc[0]
     return {
-        # Matches workbook.py's definition: the main candidate is not a Democrat.
-        # Independent of the party CODE, because the export files Nebraska's
-        # Osborn under DEM while Idaho's and South Dakota's independents get IND.
-        "main_is_independent": bool(independent_led) or not len(dem),
+        # Whether the row actually used an IND candidate, not merely whether the
+        # race has one. Keying it off the race marked Montana's Bankhead-vs-Alme
+        # head-to-head as independent-led, which it is not.
+        "main_is_independent": bool(main_from_ind),
         "dem_pct": float(main.pct_f.iloc[0]),
         "rep_pct": float(rep.pct_f.iloc[0]),
         "dem_candidate": _s(main.candidate_name.iloc[0]),
@@ -219,7 +243,7 @@ def _s(v) -> str:
 
 
 def convert(office: str, path: Path, spellings: dict[str, str],
-            independent_races: set[str]) -> pd.DataFrame:
+            independent_races: set[str], dem_and_ind_races: set[str]) -> pd.DataFrame:
     raw = pd.read_csv(path, dtype=str, low_memory=False)
     n_all = len(raw)
     g = raw[(raw.cycle.astype(str) == str(config.CYCLE))
@@ -227,7 +251,7 @@ def convert(office: str, path: Path, spellings: dict[str, str],
     log.info("%s: %d rows -> %d rows in the %s general election",
              office, n_all, len(g), config.CYCLE)
 
-    rows, dropped_rc, dropped_map, dropped_pivot = [], 0, 0, 0
+    rows, dropped_rc, dropped_map, dropped_pivot, n_hypo = [], 0, 0, 0, 0
     for qid, q in g.groupby("question_id", sort=False):
         rid = race_id_for(office, q.iloc[0])
         if rid is None:
@@ -241,13 +265,16 @@ def convert(office: str, path: Path, spellings: dict[str, str],
         if rec is None:
             dropped_pivot += 1
             continue
+        rec["hypothetical"] = is_two_way_hypothetical(q2, rid in dem_and_ind_races)
+        if rec["hypothetical"]:
+            n_hypo += 1
         rec["race_id"] = rid
         rec["office"] = "Generic" if rid == "GENERIC" else office
         rows.append(rec)
 
-    log.info("%s: %d questions kept; dropped %d unmapped, %d ranked-choice without a "
-             "final round, %d without a usable two-party pair",
-             office, len(rows), dropped_map, dropped_rc, dropped_pivot)
+    log.info("%s: %d questions kept (%d flagged two-way hypothetical); dropped %d unmapped, "
+             "%d ranked-choice without a final round, %d without a usable two-party pair",
+             office, len(rows), n_hypo, dropped_map, dropped_rc, dropped_pivot)
     if not rows:
         return pd.DataFrame(columns=OUT_COLS)
 
@@ -266,7 +293,6 @@ def convert(office: str, path: Path, spellings: dict[str, str],
         lambda r: "US" if r == "GENERIC" else (r.split("-")[1] if "-" in r else ""))
     d["district"] = d.race_id.map(
         lambda r: int(r.split("-")[2]) if r.startswith("H-") and r != "GENERIC" else 0)
-    d["hypothetical"] = False
     # Stable, source-tagged identifier. The export's poll_id repeats across the
     # questions of one survey, so the question_id has to be part of the key or
     # the final drop_duplicates("poll_id") in stage 03 would keep just one.
@@ -286,7 +312,12 @@ def main() -> None:
     independent_races = set(getattr(config, "INDEPENDENT_RACES_2026", {}))
     log.info("independent-led races: %s", ", ".join(sorted(independent_races)) or "none")
 
-    frames = [convert(office, SRC_DIR / fn, spellings, independent_races)
+    dem_and_ind_races = {r for r, v in getattr(config, "INDEPENDENT_RACES_2026", {}).items()
+                         if v.get("has_democrat")}
+    log.info("races with BOTH a Democrat and an independent on the ballot (two-way "
+             "questions there are hypothetical): %s",
+             ", ".join(sorted(dem_and_ind_races)) or "none")
+    frames = [convert(office, SRC_DIR / fn, spellings, independent_races, dem_and_ind_races)
               for office, fn in FILES.items()]
     out = pd.concat(frames, ignore_index=True)
     out = out.dropna(subset=["end_date", "dem_pct", "rep_pct"])

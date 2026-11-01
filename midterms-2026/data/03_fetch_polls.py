@@ -977,6 +977,33 @@ def drop_excluded_pollsters(df: pd.DataFrame) -> pd.DataFrame:
     return df[~hit]
 
 
+_STEM_STOPWORDS = {"the", "of", "and"}
+
+
+def _pollster_stem(name: str) -> str:
+    """The first distinctive word of a pollster's name, lowercased.
+
+    Used ONLY by the cross-source pass in `dedupe_polls`, never for house
+    effects, where `normalise_pollster` keeps the partisan marker on purpose.
+
+    `normalise_pollster` collapses punctuation and spacing but cannot collapse
+    a different wording of the same firm, so when two sources name one pollster
+    differently the same survey survives twice. Observed in the Montana Senate
+    file: "Hart Research (D)" against "Hart Research Associates (D)",
+    "Rutgers-Eagleton" against "Rutgers University Eagleton Institute of
+    Politics", "Mason-Dixon Polling & Research, Inc." against "Mason-Dixon
+    Polling & Strategy", "Peak Insights" against "Peak Insights (R)", and a
+    misspelled "Public Opinon Strategies (R)". A stem matches every one of
+    those pairs.
+    """
+    s = re.sub(r"\(\s*[DRI]\s*\)\s*$", "", str(name or "")).strip().lower()
+    s = re.sub(r"[^a-z0-9/& ]+", " ", s)
+    for tok in s.split():
+        if tok not in _STEM_STOPWORDS and len(tok) >= 3:
+            return tok
+    return s.strip()
+
+
 def dedupe_polls(df: pd.DataFrame) -> pd.DataFrame:
     """One survey, one row. See config.POLL_DEDUP_* for the three cases.
 
@@ -1009,6 +1036,7 @@ def dedupe_polls(df: pd.DataFrame) -> pd.DataFrame:
     d = df.copy()
     d["_end"] = pd.to_datetime(d["end_date"], errors="coerce")
     d["_pn"] = [_wb.normalise_pollster(x).lower() for x in d["pollster"]]
+    d["_stem"] = [_pollster_stem(x) for x in d["pollster"]]
     d["_two_party"] = pd.to_numeric(d["dem_pct"], errors="coerce").fillna(0) + \
                       pd.to_numeric(d["rep_pct"], errors="coerce").fillna(0)
     d["_n"] = pd.to_numeric(d["sample_size"], errors="coerce")
@@ -1058,8 +1086,50 @@ def dedupe_polls(df: pd.DataFrame) -> pd.DataFrame:
                                 "kept_margin": match._margin, "kept_poll_id": match.poll_id,
                                 "reason": reason})
 
+    # Second pass, for one survey that two sources name differently. The pass
+    # above groups on `_pn`, so it cannot see that "Hart Research (D)" and
+    # "Hart Research Associates (D)" are one firm, and the survey stays in
+    # twice. Requiring the race, the field end date, the sample size AND the
+    # pollster's first distinctive word to match makes a false collapse
+    # unlikely, while catching every cross-source pair observed.
+    #
+    # Needed as its own pass rather than a looser `_pn`, because the margins of
+    # the two rows can differ enormously: they are different QUESTIONS off one
+    # sample, which is exactly why the keeper preference below, the higher
+    # two-party total at equal sample size, has to decide between them.
+    survivors = d.loc[sorted(keep_idx)]
+    second, cross = [], []
+    for (rid, stem, end, n), g in survivors.groupby(
+            ["race_id", "_stem", "_end", "_n"], sort=False, dropna=False):
+        if len(g) == 1 or pd.isna(end) or pd.isna(n):
+            second.extend(g.index.tolist())
+            continue
+        keep = g.index[0]          # frame is pre-sorted by the keeper preference
+        second.append(keep)
+        for i in g.index[1:]:
+            r, k = g.loc[i], g.loc[keep]
+            cross.append({"race_id": rid, "pollster": r.pollster,
+                          "dropped_end_date": r.end_date, "dropped_n": r.sample_size,
+                          "dropped_margin": r._margin, "dropped_source": r.source,
+                          "dropped_poll_id": r.poll_id,
+                          "kept_end_date": k.end_date, "kept_n": k.sample_size,
+                          "kept_margin": k._margin, "kept_poll_id": k.poll_id,
+                          "reason": f"same race, field end and sample size as "
+                                    f"'{k.pollster}' (one survey named differently "
+                                    f"by two sources)"})
+    if cross:
+        log.info("de-duplication, cross-source pass: dropped %d row(s) naming one survey "
+                 "differently in two sources", len(cross))
+        for c in cross:
+            log.info("    %-14s %-34s %s n=%s margin %+.1f -> kept '%s' margin %+.1f",
+                     c["race_id"], str(c["pollster"])[:33], c["dropped_end_date"],
+                     c["dropped_n"], c["dropped_margin"] if pd.notna(c["dropped_margin"]) else 0.0,
+                     str(c["reason"]).split("'")[1], c["kept_margin"] if pd.notna(c["kept_margin"]) else 0.0)
+        dropped.extend(cross)
+        keep_idx = second
+
     out = d.loc[sorted(keep_idx)].drop(
-        columns=["_end", "_pn", "_two_party", "_n", "_from_wb", "_margin"])
+        columns=["_end", "_pn", "_stem", "_two_party", "_n", "_from_wb", "_margin"])
     if dropped:
         dd = pd.DataFrame(dropped)
         log.info("de-duplication: dropped %d of %d row(s) as repeats of a survey already "
