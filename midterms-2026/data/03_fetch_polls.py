@@ -682,6 +682,43 @@ def build_fixture(seed: int = config.RANDOM_SEED) -> pd.DataFrame:
 # --------------------------------------------------------------------------
 # Filters
 # --------------------------------------------------------------------------
+def flag_two_way_in_three_way_races(df: pd.DataFrame) -> pd.DataFrame:
+    """Mark two-candidate questions as hypothetical where three are running.
+
+    Script 03c flags these for the NYT export, but the workbook and the
+    Wikipedia scrape carry their own rows and neither knows the difference, so
+    Montana kept arriving with a Tavern Research "Bodnar 50, Alme 50" beside
+    genuine three-way readings of the same contest.
+
+    Detected from the numbers rather than the candidate names, which is what
+    lets one rule cover every source. With Alme, Bankhead, Bodnar and a
+    Libertarian on the ballot, a real three-way reading leaves a quarter of the
+    sample elsewhere and the two named shares sum to 56-77. A two-way sums to
+    90 or more because there is nowhere else for a respondent to go. The gap
+    between those is wide enough that the threshold is not a close call.
+
+    Applies only to races config marks as having both a Democrat and an
+    independent on the ballot, so Nebraska, Idaho and South Dakota, where the
+    two-candidate question IS the ballot, are untouched.
+    """
+    races = {r for r, v in getattr(config, "INDEPENDENT_RACES_2026", {}).items()
+             if v.get("has_democrat")}
+    if not races:
+        return df
+    two_party = pd.to_numeric(df["dem_pct"], errors="coerce") + pd.to_numeric(df["rep_pct"], errors="coerce")
+    mask = df["race_id"].isin(races) & (two_party >= 90) & ~df["hypothetical"].astype(bool)
+    if mask.any():
+        log.info("flagged %d two-candidate question(s) as hypothetical in %s (three "
+                 "candidates are on the ballot there)",
+                 int(mask.sum()), ", ".join(sorted(df.loc[mask, "race_id"].unique())))
+        for r in df[mask].itertuples():
+            log.info("    %-14s %-34s %s  %.0f vs %.0f", r.race_id, str(r.pollster)[:33],
+                     r.end_date, r.dem_pct, r.rep_pct)
+        df = df.copy()
+        df.loc[mask, "hypothetical"] = True
+    return df
+
+
 def filter_hypothetical(df: pd.DataFrame, raw_names: pd.DataFrame | None = None) -> pd.DataFrame:
     before = len(df)
     df = df[~df["hypothetical"]]
@@ -1043,8 +1080,20 @@ def dedupe_polls(df: pd.DataFrame) -> pd.DataFrame:
     d["_from_wb"] = d["source"].astype(str).str.startswith("workbook").astype(int)
     d["_margin"] = pd.to_numeric(d["margin"], errors="coerce")
     # Rank so that the row we want to keep sorts first.
-    d = d.sort_values(["_n", "_two_party", "_from_wb", "poll_id"],
-                      ascending=[False, False, False, True], na_position="last").reset_index(drop=True)
+    #
+    # `_hypo` leads, ahead of even sample size, because `filter_hypothetical`
+    # runs AFTER this and deletes what it marks: a collapse group that keeps a
+    # hypothetical row loses the whole survey a step later. That is not
+    # theoretical. It cost three Montana polls (Hart 06-24 n=800, Hart 08-04
+    # n=800, GQR 07-26 n=500), where the two-party total preferred the
+    # Bodnar-Alme head-to-head over the real three-way off the same sample, and
+    # the head-to-head was then dropped as the hypothetical it is.
+    #
+    # Leading with it is safe because a collapse group is one survey, so its
+    # rows share a sample size and the later keys still decide everything else.
+    d["_hypo"] = d["hypothetical"].astype(bool).astype(int)
+    d = d.sort_values(["_hypo", "_n", "_two_party", "_from_wb", "poll_id"],
+                      ascending=[True, False, False, False, True], na_position="last").reset_index(drop=True)
 
     window = int(getattr(config, "POLL_DEDUP_DATE_WINDOW_DAYS", 2))
     tol = float(getattr(config, "POLL_DEDUP_MARGIN_TOL", 1.0))
@@ -1129,7 +1178,7 @@ def dedupe_polls(df: pd.DataFrame) -> pd.DataFrame:
         keep_idx = second
 
     out = d.loc[sorted(keep_idx)].drop(
-        columns=["_end", "_pn", "_stem", "_two_party", "_n", "_from_wb", "_margin"])
+        columns=["_end", "_pn", "_stem", "_two_party", "_n", "_from_wb", "_margin", "_hypo"])
     if dropped:
         dd = pd.DataFrame(dropped)
         log.info("de-duplication: dropped %d of %d row(s) as repeats of a survey already "
@@ -1246,6 +1295,9 @@ def main(force_fixture: bool = False):
         provs.append("fixture")
     polls = pd.concat(frames, ignore_index=True).drop_duplicates("poll_id")
     polls = drop_excluded_pollsters(polls)
+    # Before dedupe, so that its keeper preference can avoid a row destined for
+    # deletion rather than discarding the survey's real question alongside it.
+    polls = flag_two_way_in_three_way_races(polls)
     polls = dedupe_polls(polls)
     polls = filter_hypothetical(polls)
     polls = filter_to_nominees(polls)
