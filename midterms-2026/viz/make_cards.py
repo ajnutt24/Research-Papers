@@ -193,7 +193,14 @@ def ladder_card(title, eyebrow, h1, sub, df, fund, asof_line,
                 labels: dict[str, str] | None = None) -> str:
     n = len(df)
     compact = n > 20
-    pad = 2 if compact else max(5, min(17, int(5 + (14 - n) * 1.6)))
+    # Compact rows used a flat 2px, which was tuned for the ~35-row governor
+    # ladder and leaves a 26-row card with roughly 150px of dead space under
+    # the last bar. Scaling it to the row count fills the frame at any length
+    # while still collapsing to 2px once the card is genuinely full.
+    # Above 28 rows the card is full and padding has to stay at the 2px the
+    # 36-row governor ladder was tuned for; anything more pushes the last row
+    # and the footer off the bottom.
+    pad = (2 if n > 28 else min(8, 140 // n)) if compact else max(5, min(17, int(5 + (14 - n) * 1.6)))
     vars_ = (f":root{{--rowpad:{pad}px;--stsize:19px;--barh:15px;--pcsize:21px}}" if compact
              else f":root{{--rowpad:{pad}px;--stsize:24px;--barh:25px;--pcsize:30px}}")
     css = CSS_BASE + LADDER_CSS + vars_
