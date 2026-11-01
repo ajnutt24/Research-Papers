@@ -1146,6 +1146,45 @@ def dedupe_polls(df: pd.DataFrame) -> pd.DataFrame:
     # the two rows can differ enormously: they are different QUESTIONS off one
     # sample, which is exactly why the keeper preference below, the higher
     # two-party total at equal sample size, has to decide between them.
+    # Third pass first, because it is the strictest. Identical race, field end
+    # date, sample size AND both percentages is one survey, whatever the two
+    # sources called it. The stem pass below cannot catch these because the
+    # names differ at the FIRST word: a media partner prefixed ("CNN/SSRS"
+    # against "SSRS", "CBS/YouGov" against "YouGov"), an abbreviation ("St.
+    # Anselm" against "Saint Anselm College", "Berkeley IGS" against
+    # "University of California Berkeley Institute of Governmental Studies"),
+    # or one source naming the sponsor where the other names the field house
+    # ("Texas Public Opinion Research" against "Slingshot Strategies (D)").
+    # 119 surveys were in the 2026-11-01 data twice for this reason.
+    #
+    # Two different firms agreeing to the unit on sample size and to a tenth
+    # of a point on both shares, in one race on one closing date, is not
+    # something that happens; requiring five exact matches is what makes this
+    # safe without looking at the names at all.
+    survivors = d.loc[sorted(keep_idx)]
+    exact, value_dupes = [], []
+    for _k, g in survivors.groupby(["race_id", "_end", "_n", "dem_pct", "rep_pct"],
+                                   sort=False, dropna=False):
+        exact.append(g.index[0])
+        for i in g.index[1:]:
+            r, k = g.loc[i], g.loc[g.index[0]]
+            value_dupes.append({"race_id": r.race_id, "pollster": r.pollster,
+                                "dropped_end_date": r.end_date, "dropped_n": r.sample_size,
+                                "dropped_margin": r._margin, "dropped_source": r.source,
+                                "dropped_poll_id": r.poll_id,
+                                "kept_end_date": k.end_date, "kept_n": k.sample_size,
+                                "kept_margin": k._margin, "kept_poll_id": k.poll_id,
+                                "reason": f"identical field end, sample size and both shares "
+                                          f"as '{k.pollster}' (one survey, two names)"})
+    if value_dupes:
+        log.info("de-duplication, identical-values pass: dropped %d row(s) that match another "
+                 "row exactly on race, field end, sample size and both shares", len(value_dupes))
+        for c in value_dupes[:15]:
+            log.info("    %-14s %-32s %s n=%s  <- '%s'", c["race_id"], str(c["pollster"])[:31],
+                     c["dropped_end_date"], c["dropped_n"], str(c["reason"]).split("'")[1])
+        dropped.extend(value_dupes)
+        keep_idx = exact
+
     survivors = d.loc[sorted(keep_idx)]
     second, cross = [], []
     for (rid, stem, end, n), g in survivors.groupby(
