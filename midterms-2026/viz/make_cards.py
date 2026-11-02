@@ -668,7 +668,7 @@ def main():
     gov = rp[rp.office == "Governor"].sort_values("p_dem", ascending=False)
     (OUTD / "ig_governor_ladder.html").write_text(ladder_card(
         "Road to 26", "2026 Governors &middot; road to 26",
-        "Democrats play defense,<br>pick up three.",
+        "Democrats play defense,<br>pick up four.",
         f"All <b>{len(gov)}</b> races on the ballot, ranked by the model's chance Democrats win. "
         "Democrats hold <b>6</b> governorships that are not up and need <b>26 of 50</b>.",
         gov, fund, asof_line))
