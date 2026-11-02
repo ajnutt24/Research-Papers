@@ -13,6 +13,8 @@ NYT-e5216fed-8842aabb,G-AK,Governor,AK,0,Alaska Survey Research,,,2026-10-01,202
 NYT-fa49898d-f0e81635,G-AK,Governor,AK,0,Data for Progress (D),,,2026-10-08,2026-10-16,629.0,lv,Text-to-Web/Nonprobability Panel,53.0,47.0,False,Jonathan Kreiss-Tomkins,Bernadette Wilson,False
 NYT-97fd4cb1-8b14b64a,G-AK,Governor,AK,0,Alaska Survey Research,,,2026-10-15,2026-10-18,1568.0,lv,Text-to-Web/Nonprobability Panel,55.0,45.0,False,Jonathan Kreiss-Tomkins,Bernadette Wilson,False
 NYT-5b664e2d-4f5a17b1,G-AK,Governor,AK,0,Alaska Survey Research,,,2026-10-23,2026-10-25,1068.0,lv,,53.4,46.6,False,Jonathan Kreiss-Tomkins,Bernadette Wilson,False
+NYT-a0d99ae7-42caddef,G-AK,Governor,AK,0,New York Times/Siena University,,,2026-10-23,2026-10-30,610.0,lv,Live Phone,41.7,25.0,False,Jonathan Kreiss-Tomkins,Bernadette Wilson,False
+NYT-a0d99ae7-f24a59eb,G-AK,Governor,AK,0,New York Times/Siena University,,,2026-10-23,2026-10-30,549.0,lv,Live Phone,54.1,45.9,False,Jonathan Kreiss-Tomkins,Bernadette Wilson,False
 NYT-4d581320-59607ad3,G-AL,Governor,AL,0,Cygnal Political,,,2025-11-12,2025-11-13,605.0,lv,Nonprobability Panel/Text-to-Web,34.1,52.6,False,Doug Jones,Tommy Tuberville,False
 NYT-b9c13563-dfffe4f9,G-AL,Governor,AL,0,yes. every kid. foundation.,,,2026-07-08,2026-07-11,601.0,lv,,41.0,49.0,False,Doug Jones,Tommy Tuberville,False
 NYT-080dacda-7fe9928d,G-AL,Governor,AL,0,RMG Research,Alabama Policy Action | Napolitan News Service,REP,2026-09-21,2026-09-25,800.0,rv,,37.0,50.0,False,Doug Jones,Tommy Tuberville,False
@@ -90,6 +92,7 @@ NYT-dace5ed7-b62f1252,G-CA,Governor,CA,0,SurveyUSA,KGTV-TV (California) | San Di
 NYT-00e214c1-00539750,G-CA,Governor,CA,0,University of California Berkeley Institute of Governmental Studies,Los Angeles Times,,2026-10-19,2026-10-25,1477.0,lv,,61.0,34.0,False,Xavier Becerra,Steve Hilton,False
 NYT-b6559bf5-c4c2ab23,G-CA,Governor,CA,0,ActiVote,,,2026-10-17,2026-10-31,400.0,lv,App Panel,63.2,36.8,False,Xavier Becerra,Steve Hilton,False
 NYT-8c916fa9-ab6a8252,G-CO,Governor,CO,0,Magellan Strategies,,,2025-07-30,2025-08-12,1136.0,rv,Text-to-Web,50.1,37.8,False,Generic Democrat,Generic Republican,False
+NYT-b805e995-ca0710ca,G-CO,Governor,CO,0,Lake Research Partners (D),Ballot Initiative Strategy Center,,2026-09-16,2026-09-30,600.0,rv,,51.0,36.0,False,Phil Weiser,Victor Marx,False
 NYT-748f1fff-a4ac6f91,G-CT,Governor,CT,0,OnMessage Inc. (R),,REP,2025-08-11,2025-08-14,600.0,lv,,50.0,42.0,False,Ned Lamont,Erin Stewart,False
 NYT-d51bef7e-e64a58a3,G-CT,Governor,CT,0,University of New Hampshire,,,2026-06-18,2026-06-23,821.0,lv,Probability Panel,49.0,36.0,False,Ned Lamont,Ryan Fazio,False
 NYT-e19f0e43-e279fe3a,G-CT,Governor,CT,0,GreatBlue Research,Connecticut Insider | Sacred Heart University Institute for Public Policy and Civic Engagement | WFSB,,2026-07-21,2026-07-26,,lv,,48.8,34.3,False,Josh Elliott,Ryan Fazio,False
@@ -107,10 +110,11 @@ NYT-1a8f3044-2b90cb8f,G-CT,Governor,CT,0,GreatBlue Research,Connecticut Insider 
 NYT-1a8f3044-690a69fc,G-CT,Governor,CT,0,GreatBlue Research,Connecticut Insider | Sacred Heart University Institute for Public Policy and Civic Engagement | WFSB,,2026-10-06,2026-10-12,1000.0,rv,Nonprobability Panel,56.3,33.1,False,Ned Lamont,Ryan Fazio,False
 NYT-9563cb79-bdcd4fb6,G-CT,Governor,CT,0,Emerson College,Nexstar,,2026-10-10,2026-10-12,800.0,lv,Text-to-Web/Nonprobability Panel,51.39,37.79,False,Ned Lamont,Ryan Fazio,False
 NYT-8732195e-036ccefb,G-CT,Governor,CT,0,Quinnipiac University,,,2026-10-08,2026-10-12,1225.0,lv,Live Phone,58.0,38.0,False,Ned Lamont,Ryan Fazio,False
+NYT-7a62f5ef-b20672c2,G-CT,Governor,CT,0,University of New Hampshire,,,2026-10-27,2026-10-31,811.0,lv,Probability Panel,54.0,41.0,False,Ned Lamont,Ryan Fazio,False
 NYT-8abdc9e2-d9c2445a,G-FL,Governor,FL,0,Cygnal Political,,,2024-10-26,2024-10-28,600.0,lv,Live Phone/Text-to-Web,40.9,48.1,False,Generic Democrat,Generic Republican,False
 NYT-8ba070e8-1de78332,G-FL,Governor,FL,0,Targoz Market Research,James Madison Institute,,2025-05-05,2025-05-07,1144.0,rv,,35.0,39.0,False,Daniella Levine Cava,Casey DeSantis,False
 NYT-8ba070e8-0cee0090,G-FL,Governor,FL,0,Targoz Market Research,James Madison Institute,,2025-05-05,2025-05-07,1153.0,rv,,34.0,38.0,False,Daniella Levine Cava,Byron Donalds,False
-NYT-b0a26e46-80bd8b2d,G-FL,Governor,FL,0,Victory Insights,,,2025-06-07,2025-06-10,600.0,lv,,31.4,36.7,False,David Jolly,Byron Donalds,False
+NYT-b0a26e46-80bd8b2d,G-FL,Governor,FL,0,Victory Insights (R),,,2025-06-07,2025-06-10,600.0,lv,,31.4,36.7,False,David Jolly,Byron Donalds,False
 NYT-8072964e-a8a43acc,G-FL,Governor,FL,0,Cygnal Political,Conservatives for Clean Energy,REP,2025-08-25,2025-08-27,1000.0,lv,,38.0,50.6,False,Generic Democrat,Generic Republican,False
 NYT-741611b9-6dca0c7c,G-FL,Governor,FL,0,McLaughlin and Associates (R),Associated Industries of Florida,,2025-08-25,2025-08-27,800.0,lv,,41.0,49.0,False,David Jolly,Byron Donalds,False
 NYT-3a7cb664-6f959b64,G-FL,Governor,FL,0,Bendixen and Amandi International (D),,DEM,2025-09-07,2025-09-09,631.0,lv,Live Phone/Text-to-Web,40.0,42.0,False,David Jolly,Paul Renner,False
@@ -232,6 +236,8 @@ NYT-3f0c3827-a387b401,G-IA,Governor,IA,0,New River Strategies/GS Strategy Group,
 NYT-714e6be6-c88a33fd,G-IA,Governor,IA,0,co/efficient (R),,,2026-10-15,2026-10-19,863.0,lv,Live Phone/Text,49.0,45.0,False,Rob Sand,Zach Lahn,False
 NYT-5fed9be9-d3c55c78,G-IA,Governor,IA,0,Echelon Insights,,,2026-10-16,2026-10-23,403.0,lv,Text-to-Web/Nonprobability Panel,50.0,46.0,False,Rob Sand,Zach Lahn,False
 NYT-0d52e74a-09ec3e8a,G-IA,Governor,IA,0,co/efficient (R),,,2026-10-28,2026-10-28,1020.0,lv,Text/Live Phone,50.0,45.0,False,Rob Sand,Zach Lahn,False
+NYT-4be09574-dbef76a6,G-IA,Governor,IA,0,YouGov,,,2026-10-26,2026-10-29,2019.0,lv,Text-to-Web,53.0,46.0,False,Rob Sand,Zach Lahn,False
+NYT-97e6dede-4e548428,G-IA,Governor,IA,0,New York Times/Siena University,,,2026-10-26,2026-11-01,705.0,lv,Live Phone,51.3,43.0,False,Rob Sand,Zach Lahn,False
 NYT-909a333a-61a1d6b9,G-ID,Governor,ID,0,Change Research (D),,IND,2026-07-28,2026-07-30,1213.0,lv,,32.0,53.0,False,Generic Democrat,Brad Little,False
 NYT-909a333a-94b369d4,G-ID,Governor,ID,0,Change Research (D),,IND,2026-07-28,2026-07-30,1213.0,lv,,33.0,54.0,False,Terri Pickens,Brad Little,False
 NYT-909a333a-78271eed,G-ID,Governor,ID,0,Change Research (D),,IND,2026-07-28,2026-07-30,1213.0,lv,,27.0,48.0,False,Terri Pickens,Brad Little,False
@@ -251,6 +257,8 @@ NYT-2777acf5-ed252ecd,G-KS,Governor,KS,0,Global Strategy Group (D),,DEM,2026-10-
 NYT-57631c63-dfc3041d,G-KS,Governor,KS,0,The Washington Post/George Mason University Schar School of Policy and Government,,,2026-10-22,2026-10-26,801.0,lv,Live Phone/Text-to-Web,51.0,45.0,False,Cindy Holscher,Ty Masterson,False
 NYT-cc6fe4a3-200c78ed,G-KS,Governor,KS,0,CNN/SSRS,,,2026-10-20,2026-10-26,838.0,lv,Live Phone/Probability Panel,45.0,50.0,False,Cindy Holscher,Ty Masterson,False
 NYT-03a5f4fe-1f50cef6,G-KS,Governor,KS,0,Emerson College,,,2026-10-26,2026-10-28,800.0,lv,IVR/Text-to-Web/Nonprobability Panel,47.5,52.5,False,Cindy Holscher,Ty Masterson,False
+NYT-d12ca396-fd15ed80,G-KS,Governor,KS,0,YouGov,,,2026-10-26,2026-10-29,2085.0,lv,Text-to-Web,49.0,50.0,False,Cindy Holscher,Ty Masterson,False
+NYT-488d5c04-6c32ae9e,G-KS,Governor,KS,0,New York Times/Siena University,,,2026-10-27,2026-11-01,736.0,lv,Live Phone,47.8,47.4,False,Cindy Holscher,Ty Masterson,False
 NYT-732db927-260cc4c7,G-MA,Governor,MA,0,YouGov,UMass Amherst,,2025-02-14,2025-02-20,700.0,a,Nonprobability Panel,41.0,14.0,False,Maura Healey,Peter Durant,False
 NYT-732db927-904c338d,G-MA,Governor,MA,0,YouGov,UMass Amherst,,2025-02-14,2025-02-20,700.0,a,Nonprobability Panel,44.0,14.0,False,Maura Healey,Lew Evangelidis,False
 NYT-732db927-0bbe8c7e,G-MA,Governor,MA,0,YouGov,UMass Amherst,,2025-02-14,2025-02-20,700.0,a,Nonprobability Panel,44.0,12.0,False,Maura Healey,Brian Shortsleeve,False
@@ -282,6 +290,7 @@ NYT-377b9e38-e3110ac6,G-MA,Governor,MA,0,MassINC Polling Group,Commonwealth Beac
 NYT-c5000c5b-87776c57,G-MA,Governor,MA,0,YouGov,UMass Amherst | WCVB-TV,,2026-10-05,2026-10-12,800.0,rv,,57.0,32.0,False,Maura Healey,Mike Minogue,False
 NYT-d75f0973-f335d5d7,G-MA,Governor,MA,0,UMass Lowell,,,2026-10-07,2026-10-18,850.0,lv,Nonprobability Panel,57.0,29.0,False,Maura Healey,Mike Minogue,False
 NYT-318ee917-2078df2a,G-MA,Governor,MA,0,Suffolk University,Boston Globe,,2026-10-14,2026-10-18,500.0,lv,Live Phone,58.6,36.0,False,Maura Healey,Mike Minogue,False
+NYT-7fca87a7-fc030f65,G-MA,Governor,MA,0,University of New Hampshire,,,2026-10-27,2026-10-31,894.0,lv,Probability Panel,55.0,36.0,False,Maura Healey,Mike Minogue,False
 NYT-81b666da-0478cfa9,G-MD,Governor,MD,0,OpinionWorks,Baltimore Banner | Robert W. Deutsch Foundation,,2025-10-07,2025-10-10,928.0,rv,Text-to-Web/Nonprobability Panel,45.0,37.0,False,Wes Moore,Larry Hogan,False
 NYT-ec83baa8-95aa430a,G-MD,Governor,MD,0,University of Maryland Baltimore County,,,2025-10-21,2025-10-25,757.0,rv,Live Phone/Text-to-Web,49.0,29.0,False,Wes Moore,Generic Republican,False
 NYT-3b7ea0a7-61325b9a,G-MD,Governor,MD,0,Gonzales Research,,,2025-12-21,2026-01-06,808.0,lv,Live Phone,49.9,28.0,False,Wes Moore,Generic Republican,False
@@ -312,6 +321,10 @@ NYT-0102d73f-11f16b48,G-ME,Governor,ME,0,Marist University,,,2026-10-22,2026-10-
 NYT-0102d73f-828023d7,G-ME,Governor,ME,0,Marist University,,,2026-10-22,2026-10-25,1449.0,lv,Live Phone/Text/Nonprobability Panel,44.0,44.0,False,Hannah Pingree,Bobby Charles,False
 NYT-d65e372a-c38d334d,G-ME,Governor,ME,0,CNN/SSRS,,,2026-10-20,2026-10-26,783.0,lv,Live Phone/Probability Panel,53.0,39.0,False,Hannah Pingree,Bobby Charles,False
 NYT-ace5053f-f25037ae,G-ME,Governor,ME,0,Data for Progress (D),,,2026-10-23,2026-10-27,652.0,lv,Live Phone/Text/Nonprobability Panel,49.0,37.0,False,Hannah Pingree,Bobby Charles,False
+NYT-29bc618a-44a2eed6,G-ME,Governor,ME,0,YouGov,,,2026-10-26,2026-10-29,1500.0,lv,Text-to-Web,53.0,45.0,False,Hannah Pingree,Bobby Charles,False
+NYT-874e66b5-c0fae9b3,G-ME,Governor,ME,0,University of New Hampshire,,,2026-10-27,2026-10-31,1648.0,lv,Probability Panel,51.0,40.0,False,Hannah Pingree,Bobby Charles,False
+NYT-38454df3-638d2d7c,G-ME,Governor,ME,0,New York Times/Siena University,,,2026-10-27,2026-11-01,714.0,lv,Live Phone,54.8,39.8,False,Hannah Pingree,Bobby Charles,False
+NYT-38454df3-9e9d20bd,G-ME,Governor,ME,0,New York Times/Siena University,,,2026-10-27,2026-11-01,714.0,lv,Live Phone,49.4,36.6,False,Hannah Pingree,Bobby Charles,False
 NYT-2ed1c72b-088f6b31,G-MI,Governor,MI,0,Target Insyght,MIRS News Service,,2025-03-03,2025-03-06,600.0,rv,,42.0,30.0,False,Jocelyn Benson,John James,False
 NYT-843c4867-983eccac,G-MI,Governor,MI,0,Mitchell Research and Communications,MIRS News Service,,2025-03-13,2025-03-13,688.0,lv,,37.0,34.0,False,Jocelyn Benson,John James,False
 NYT-843c4867-77e9fa56,G-MI,Governor,MI,0,Mitchell Research and Communications,MIRS News Service,,2025-03-13,2025-03-13,688.0,lv,,38.0,36.0,False,Jocelyn Benson,Tudor Dixon,False
@@ -396,6 +409,9 @@ NYT-c506a63c-baa624e0,G-MI,Governor,MI,0,Michigan State University Office for Su
 NYT-6aa99f8a-41d4152e,G-MI,Governor,MI,0,Data for Progress (D),,,2026-10-23,2026-10-25,622.0,lv,Live Phone/Text/Nonprobability Panel,52.0,43.0,False,Jocelyn Benson,John James,False
 NYT-e05bf93a-fc7e79af,G-MI,Governor,MI,0,CNN/SSRS,,,2026-10-20,2026-10-27,768.0,lv,Live Phone/Probability Panel,53.0,41.0,False,Jocelyn Benson,John James,False
 NYT-b8ae6e54-328b8800,G-MI,Governor,MI,0,Mitchell Research and Communications,CBS Detroit,,2026-10-26,2026-10-27,636.0,lv,Text-to-Web,49.0,44.0,False,Jocelyn Benson,John James,False
+NYT-69fc5034-49f97a2b,G-MI,Governor,MI,0,YouGov,,,2026-10-26,2026-10-29,2086.0,lv,Text-to-Web,52.0,46.0,False,Jocelyn Benson,John James,False
+NYT-79c1089e-adc98d9d,G-MI,Governor,MI,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,53.0,41.0,False,Jocelyn Benson,John James,False
+NYT-c1d14361-9f5c9eb3,G-MI,Governor,MI,0,New York Times/Siena University,,,2026-10-23,2026-11-01,1011.0,lv,Live Phone,51.8,39.4,False,Jocelyn Benson,John James,False
 NYT-18cabd47-07a27c1c,G-MN,Governor,MN,0,SurveyUSA,KSTP-TV Minneapolis,,2025-09-15,2025-09-18,568.0,lv,,49.0,38.0,False,Tim Walz,Phillip Parrish,False
 NYT-18cabd47-e9e2a39c,G-MN,Governor,MN,0,SurveyUSA,KSTP-TV Minneapolis,,2025-09-15,2025-09-18,568.0,lv,,47.0,40.0,False,Tim Walz,Kristin Robbins,False
 NYT-18cabd47-8b616067,G-MN,Governor,MN,0,SurveyUSA,KSTP-TV Minneapolis,,2025-09-15,2025-09-18,568.0,lv,,50.0,37.0,False,Tim Walz,Kendall Qualls,False
@@ -428,6 +444,7 @@ NYT-d547a305-f07d623c,G-MN,Governor,MN,0,Victory Insights (R),,REP,2026-10-21,20
 NYT-c2682803-bdee3660,G-MN,Governor,MN,0,New York Times/Siena University,,,2026-10-19,2026-10-26,752.0,lv,Live Phone,55.92,37.88,False,Amy Klobuchar,Lisa Demuth,False
 NYT-913c201c-a773024e,G-MN,Governor,MN,0,SurveyUSA,KSTP-TV Minneapolis,,2026-10-24,2026-10-28,714.0,lv,,51.0,39.0,False,Amy Klobuchar,Lisa Demuth,False
 NYT-270449aa-f5060078,G-MN,Governor,MN,0,State Navigate,,,2026-10-26,2026-10-28,806.0,lv,Text-to-Web,52.0,42.0,False,Amy Klobuchar,Lisa Demuth,False
+NYT-f96cc69b-dec8d741,G-MN,Governor,MN,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,53.0,40.0,False,Amy Klobuchar,Lisa Demuth,False
 NYT-fff26d55-c61e2ceb,G-NE,Governor,NE,0,Public Policy Polling (D),,DEM,2026-04-06,2026-04-07,670.0,rv,,33.0,38.0,False,Lynne Walz,Jim Pillen,False
 NYT-d6e1af5b-fcc24ec1,G-NE,Governor,NE,0,Public Policy Polling (D),DGA,DEM,2026-09-01,2026-09-02,559.0,rv,Text,31.0,32.0,False,Lynne Walz,Jim Pillen,False
 NYT-bb94417f-830a7292,G-NE,Governor,NE,0,SurveyUSA,"Grant Forbes, LLC",,2026-09-08,2026-09-13,503.0,lv,Live Phone/Text-to-Web/Nonprobability Panel,35.0,43.0,False,Lynne Walz,Jim Pillen,False
@@ -441,6 +458,7 @@ NYT-2ecb9952-76b2a066,G-NE,Governor,NE,0,Concord Public Opinion Partners (D),Edu
 NYT-561c2f6a-241fec48,G-NE,Governor,NE,0,Global Strategy Group (D),,DEM,2026-10-13,2026-10-18,800.0,lv,Live Phone/Text-to-Web,39.0,40.0,False,Lynne Walz,Jim Pillen,False
 NYT-185e2532-ae5404bb,G-NE,Governor,NE,0,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-15,2026-10-18,598.0,lv,Live Phone/Text-to-Web,41.0,47.0,False,Lynne Walz,Jim Pillen,False
 NYT-fb010920-c383538d,G-NE,Governor,NE,0,Echelon Insights,NetChoice,,2026-10-16,2026-10-23,407.0,lv,Text-to-Web/Nonprobability Panel,40.0,47.0,False,Lynne Walz,Jim Pillen,False
+NYT-261adc4a-99bf24a7,G-NE,Governor,NE,0,YouGov,,,2026-10-26,2026-10-29,1974.0,lv,Text-to-Web,47.0,50.0,False,Lynne Walz,Jim Pillen,False
 NYT-96d6e3cb-574a0713,G-NE,Governor,NE,0,New York Times/Siena University,,,2026-10-23,2026-10-29,809.0,lv,Live Phone,39.57,53.09,False,Lynne Walz,Jim Pillen,False
 NYT-e88447b9-3c1f053b,G-NH,Governor,NH,0,co/efficient (R),,,2025-10-09,2025-10-13,1034.0,lv,Live Phone/Text,40.0,43.0,False,Generic Democrat,Kelly Ayotte,False
 NYT-595a8c5c-19d4f136,G-NH,Governor,NH,0,University of New Hampshire,,,2026-01-15,2026-01-19,2027.0,lv,Probability Panel,41.0,49.0,False,Deaglan McEachern,Kelly Ayotte,False
@@ -461,6 +479,8 @@ NYT-7e22772a-8303f239,G-NH,Governor,NH,0,YouGov,,,2026-09-28,2026-10-05,1520.0,l
 NYT-22e1eaa2-b72078dc,G-NH,Governor,NH,0,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-08,2026-10-12,600.0,lv,Live Phone/Text-to-Web,38.0,54.0,False,Cinde Warmington,Kelly Ayotte,False
 NYT-9ca6ae7a-4707384d,G-NH,Governor,NH,0,UMass Lowell,,,2026-10-02,2026-10-19,600.0,lv,Nonprobability Panel,42.0,48.0,False,Cinde Warmington,Kelly Ayotte,False
 NYT-2e6c66e4-13ef2398,G-NH,Governor,NH,0,St. Anselm,,,2026-10-19,2026-10-20,1672.0,lv,Text-to-Web,42.0,50.0,False,Cinde Warmington,Kelly Ayotte,False
+NYT-e03c576a-8fa38c98,G-NH,Governor,NH,0,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-25,2026-10-29,800.0,lv,Live Phone/Text-to-Web,43.0,52.0,False,Cinde Warmington,Kelly Ayotte,False
+NYT-63516926-add898b3,G-NH,Governor,NH,0,University of New Hampshire,,,2026-10-27,2026-10-31,2026.0,lv,Probability Panel,48.0,48.0,False,Cinde Warmington,Kelly Ayotte,False
 NYT-d11fa49c-ac3544af,G-NM,Governor,NM,0,McLaughlin and Associates (R),,REP,2026-07-13,2026-07-15,400.0,lv,,46.0,45.0,False,Deb Haaland,Gregg Hull,False
 NYT-eabf58e9-30e595d1,G-NM,Governor,NM,0,BSP Research (D),,,2026-07-22,2026-08-07,800.0,rv,,41.0,24.0,False,Deb Haaland,Gregg Hull,False
 NYT-361a1729-0eae3570,G-NM,Governor,NM,0,Research & Polling Inc.,Albuquerque Journal,,2026-08-21,2026-08-28,516.0,lv,Live Phone,49.0,43.0,False,Deb Haaland,Gregg Hull,False
@@ -534,6 +554,7 @@ NYT-1d724491-a7d0c2d9,G-NY,Governor,NY,0,Siena University,,,2026-10-19,2026-10-2
 NYT-e1faab24-ca5d668d,G-NY,Governor,NY,0,ActiVote,,,2026-10-01,2026-10-23,400.0,lv,App Panel,59.0,41.0,False,Kathy Hochul,Bruce Blakeman,False
 NYT-0203080e-c6837cd0,G-NY,Governor,NY,0,Marist University,,,2026-10-22,2026-10-25,1448.0,rv,Live Phone/Nonprobability Panel/Text-to-Web,55.0,41.0,False,Kathy Hochul,Bruce Blakeman,False
 NYT-0203080e-d9c80bec,G-NY,Governor,NY,0,Marist University,,,2026-10-22,2026-10-25,1448.0,lv,Live Phone/Nonprobability Panel/Text-to-Web,53.0,42.0,False,Kathy Hochul,Bruce Blakeman,False
+NYT-bf002799-b0c0dc25,G-NY,Governor,NY,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,52.0,43.0,False,Kathy Hochul,Bruce Blakeman,False
 NYT-f48c4408-bd4ae287,G-OH,Governor,OH,0,Public Policy Polling (D),314 Action,DEM,2025-02-19,2025-02-20,642.0,lv,,42.0,48.0,False,Tim Ryan,Vivek Ramaswamy,False
 NYT-f48c4408-942f7abe,G-OH,Governor,OH,0,Public Policy Polling (D),314 Action,DEM,2025-02-19,2025-02-20,642.0,rv,,45.0,44.0,False,Amy Acton,Vivek Ramaswamy,False
 NYT-36ad1b65-0d8a8fc5,G-OH,Governor,OH,0,Bowling Green State University Democracy and Public Policy Research Network/YouGov,,,2025-04-18,2025-04-24,800.0,rv,,45.0,50.0,False,Amy Acton,Vivek Ramaswamy,False
@@ -580,8 +601,13 @@ NYT-29b6e1bc-c6ed6715,G-OH,Governor,OH,0,ActiVote,,,2026-09-27,2026-10-19,400.0,
 NYT-a1c11dbe-33054139,G-OH,Governor,OH,0,Verasight,VoteHub,,2026-10-01,2026-10-20,531.0,lv,Nonprobability Panel,46.2,45.4,False,Amy Acton,Vivek Ramaswamy,False
 NYT-a1c11dbe-22fade21,G-OH,Governor,OH,0,Verasight,VoteHub,,2026-10-01,2026-10-20,535.0,rv,Nonprobability Panel,44.4,45.9,False,Amy Acton,Vivek Ramaswamy,False
 NYT-0c92af41-7cf0fc70,G-OH,Governor,OH,0,Echelon Insights,NetChoice,,2026-10-16,2026-10-23,508.0,lv,Text-to-Web/Nonprobability Panel,45.0,47.0,False,Amy Acton,Vivek Ramaswamy,False
+NYT-a516eb44-a7fb2f97,G-OH,Governor,OH,0,Concord Public Opinion Partners (D),Education Reform Now Advocacy,DEM,2026-10-22,2026-10-24,469.0,lv,Live Phone/Text-to-Web,49.0,39.0,False,Amy Acton,Vivek Ramaswamy,False
 NYT-ef2061ce-feae5745,G-OH,Governor,OH,0,Suffolk University,USA Today,,2026-10-21,2026-10-26,500.0,lv,Live Phone,48.0,44.0,False,Amy Acton,Vivek Ramaswamy,False
+NYT-178f4a20-d8f31a74,G-OH,Governor,OH,0,YouGov,,,2026-10-26,2026-10-29,2082.0,lv,Text-to-Web,52.0,46.0,False,Amy Acton,Vivek Ramaswamy,False
+NYT-a6c01fbe-9586d63e,G-OH,Governor,OH,0,InsiderAdvantage (R),,,2026-10-29,2026-10-30,1200.0,lv,,49.2,46.3,False,Amy Acton,Vivek Ramaswamy,False
 NYT-6632016f-0733e5ab,G-OH,Governor,OH,0,ActiVote,,,2026-10-16,2026-10-31,400.0,lv,App Panel,50.8,49.2,False,Amy Acton,Vivek Ramaswamy,False
+NYT-2483fb30-69f65b0b,G-OH,Governor,OH,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,48.0,42.0,False,Amy Acton,Vivek Ramaswamy,False
+NYT-624f1dc6-32fd3a50,G-OH,Governor,OH,0,New York Times/Siena University,,,2026-10-26,2026-11-01,717.0,lv,Live Phone,48.8,43.2,False,Amy Acton,Vivek Ramaswamy,False
 NYT-a13b26d9-01987447,G-OK,Governor,OK,0,Workbench Strategy (D),,DEM,2026-10-08,2026-10-13,600.0,lv,,45.0,49.0,False,Cyndi Munson,Mike Mazzei,False
 NYT-a2722ecb-16597666,G-OR,Governor,OR,0,FM3 Research (D),Charlie Health,,2026-01-28,2026-02-04,1065.0,lv,,45.0,35.0,False,Tina Kotek,Chris Dudley,False
 NYT-a2722ecb-ab2e77ba,G-OR,Governor,OR,0,FM3 Research (D),Charlie Health,,2026-01-28,2026-02-04,1065.0,lv,,43.0,37.0,False,Tina Kotek,Ed Diehl,False
@@ -621,6 +647,7 @@ NYT-64636577-a4df2851,G-PA,Governor,PA,0,Bravo Group,PennLive,,2026-10-05,2026-1
 NYT-8e853324-39ff1322,G-PA,Governor,PA,0,Franklin and Marshall College,,,2026-10-07,2026-10-18,808.0,rv,,54.0,33.0,False,Josh Shapiro,Stacy Garrity,False
 NYT-8e853324-8b2829dd,G-PA,Governor,PA,0,Franklin and Marshall College,,,2026-10-07,2026-10-18,,lv,,59.0,36.0,False,Josh Shapiro,Stacy Garrity,False
 NYT-85d66183-dc7420d3,G-PA,Governor,PA,0,ActiVote,,,2026-10-01,2026-10-21,400.0,lv,App Panel,61.5,38.5,False,Josh Shapiro,Stacy Garrity,False
+NYT-a448c730-a702d103,G-PA,Governor,PA,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,59.0,34.0,False,Josh Shapiro,Stacy Garrity,False
 NYT-5e0ce830-11a07663,G-RI,Governor,RI,0,Opinion Diagnostics,,IND,2026-04-13,2026-04-16,802.0,lv,Text-to-Web/Live Phone,33.0,16.0,False,Helena Foulkes,Aaron Guckian,False
 NYT-5e0ce830-200d6b3b,G-RI,Governor,RI,0,Opinion Diagnostics,,IND,2026-04-13,2026-04-16,802.0,lv,Text-to-Web/Live Phone,28.0,15.0,False,Daniel McKee,Aaron Guckian,False
 NYT-cf5aecb5-ff47c070,G-RI,Governor,RI,0,Emerson College,WPRI-TV,,2026-05-14,2026-05-16,1000.0,lv,Text-to-Web/Nonprobability Panel,38.9,20.8,False,Helena Foulkes,Generic Republican,False
@@ -637,6 +664,7 @@ NYT-f6bc7bf9-bc833b36,G-RI,Governor,RI,0,University of New Hampshire,,,2026-09-1
 NYT-d17445d2-dbe952b9,G-RI,Governor,RI,0,Opinion Diagnostics,,IND,2026-09-23,2026-09-25,800.0,lv,Text-to-Web,41.0,19.0,False,Helena Foulkes,Aaron Guckian,False
 NYT-af05ce70-e72f5ee5,G-RI,Governor,RI,0,Embold Research,Salve Regina University Pell Center for International Relations and Public Policy,,2026-10-05,2026-10-08,815.0,lv,Text-to-Web/Online Ad,39.0,17.0,False,Helena Foulkes,Aaron Guckian,False
 NYT-15c62ccc-34a5dbd1,G-RI,Governor,RI,0,Emerson College,WPRI-TV,,2026-10-08,2026-10-11,800.0,lv,Text-to-Web/Probability Panel/Nonprobability Panel,47.58,11.92,False,Helena Foulkes,Aaron Guckian,False
+NYT-c7bbd60b-e82d3cc8,G-RI,Governor,RI,0,University of New Hampshire,,,2026-10-27,2026-10-31,747.0,lv,Probability Panel,55.0,8.0,False,Helena Foulkes,Aaron Guckian,False
 NYT-f2d2c9b9-ee77663d,G-SC,Governor,SC,0,Public Policy Polling (D),,DEM,2026-07-16,2026-07-17,577.0,rv,,37.0,45.0,False,Jermaine Johnson,Alan Wilson,False
 NYT-7fcf792a-4b4164b4,G-SC,Governor,SC,0,Hart Research Associates (D),,DEM,2026-08-12,2026-08-15,600.0,lv,,41.0,48.0,False,Jermaine Johnson,Alan Wilson,False
 NYT-9555ad55-8bbf36f8,G-SC,Governor,SC,0,National Public Affairs (R),,REP,2026-10-13,2026-10-16,604.0,lv,Text-to-Web/Live Phone,41.0,51.0,False,Jermaine Johnson,Alan Wilson,False
@@ -723,8 +751,12 @@ NYT-f9198a5f-41d5586f,G-TX,Governor,TX,0,YouGov Blue (D),254 Labs,,2026-10-21,20
 NYT-f9198a5f-3ab9ad0f,G-TX,Governor,TX,0,YouGov Blue (D),254 Labs,,2026-10-21,2026-10-26,1000.0,lv,Text-to-Web,49.0,46.0,False,Gina Hinojosa,Greg Abbott,False
 NYT-136e2129-ee305812,G-TX,Governor,TX,0,CNN/SSRS,,,2026-10-20,2026-10-27,923.0,lv,Live Phone/Probability Panel,46.0,48.0,False,Gina Hinojosa,Greg Abbott,False
 NYT-efb35ed0-438c67d3,G-TX,Governor,TX,0,Quantus Insights (R),,,2026-10-26,2026-10-28,1214.0,lv,Text-to-Web,46.3,51.6,False,Gina Hinojosa,Greg Abbott,False
+NYT-4a8b3e3c-5f026779,G-TX,Governor,TX,0,YouGov,,,2026-10-26,2026-10-29,2139.0,lv,Text-to-Web,49.0,50.0,False,Gina Hinojosa,Greg Abbott,False
 NYT-9778f4db-4cb3c14f,G-TX,Governor,TX,0,ActiVote,,,2026-10-23,2026-10-29,400.0,lv,App Panel,47.9,52.1,False,Gina Hinojosa,Greg Abbott,False
 NYT-45558885-ae7cf95c,G-TX,Governor,TX,0,Kreate Strategies,,,2026-10-27,2026-10-30,900.0,lv,Nonprobability Panel,47.0,49.0,False,Gina Hinojosa,Greg Abbott,False
+NYT-e516bc0a-96860dca,G-TX,Governor,TX,0,AtlasIntel,,,2026-10-28,2026-11-01,1678.0,a,,49.2,47.6,False,Gina Hinojosa,Greg Abbott,False
+NYT-58393008-5b7c1e5d,G-TX,Governor,TX,0,New York Times/Siena University,,,2026-10-27,2026-11-01,1215.0,lv,Live Phone,48.1,46.6,False,Gina Hinojosa,Greg Abbott,False
+NYT-58393008-4a189818,G-TX,Governor,TX,0,New York Times/Siena University,,,2026-10-27,2026-11-01,1215.0,rv,Live Phone,49.3,43.1,False,Gina Hinojosa,Greg Abbott,False
 NYT-a2347bc3-15d81ab3,G-VT,Governor,VT,0,University of New Hampshire,,,2026-06-18,2026-06-23,867.0,lv,Probability Panel,25.0,41.0,False,Aly Richards,Phil Scott,False
 NYT-a2347bc3-308b40a9,G-VT,Governor,VT,0,University of New Hampshire,,,2026-06-18,2026-06-23,867.0,lv,Probability Panel,27.0,42.0,False,Amanda Janoo,Phil Scott,False
 NYT-6390a575-cbc6f34c,G-VT,Governor,VT,0,University of New Hampshire,,,2026-07-15,2026-07-20,925.0,lv,Probability Panel,35.0,43.0,False,Aly Richards,Phil Scott,False
@@ -734,6 +766,7 @@ NYT-43d79f29-4304b856,G-VT,Governor,VT,0,Braun Research,Vermont Public Radio,,20
 NYT-1f0a52b7-338f0871,G-VT,Governor,VT,0,University of New Hampshire,,,2026-09-17,2026-09-21,829.0,lv,Probability Panel,49.0,43.0,False,Amanda Janoo,Phil Scott,False
 NYT-a1fc230b-b8df5258,G-VT,Governor,VT,0,State Navigate,,,2026-10-02,2026-10-04,948.0,lv,Text-to-Web,43.0,46.0,False,Amanda Janoo,Phil Scott,False
 NYT-e0ed7271-46e92298,G-VT,Governor,VT,0,State Navigate,,,2026-10-23,2026-10-25,1752.0,lv,Text-to-Web,46.0,49.0,False,Amanda Janoo,Phil Scott,False
+NYT-d7ccb742-98a0c792,G-VT,Governor,VT,0,University of New Hampshire,,,2026-10-27,2026-10-31,1164.0,lv,Probability Panel,51.0,43.0,False,Amanda Janoo,Phil Scott,False
 NYT-d83adb65-a1f290fd,G-WI,Governor,WI,0,Platform Communications (R),Badger Battleground Poll,,2025-09-28,2025-09-30,500.0,lv,Live Phone,40.0,43.0,False,Generic Democrat,Generic Republican,False
 NYT-4864dd42-11ca90d7,G-WI,Governor,WI,0,Impact Research (D),The Long Run PAC,DEM,2025-10-02,2025-10-08,500.0,lv,Live Phone/Text-to-Web,51.0,44.0,False,Mandela Barnes,Tim Michels,False
 NYT-4864dd42-69bfd344,G-WI,Governor,WI,0,Impact Research (D),The Long Run PAC,DEM,2025-10-02,2025-10-08,500.0,lv,Live Phone/Text-to-Web,50.0,44.0,False,Mandela Barnes,Tom Tiffany,False
@@ -774,6 +807,7 @@ NYT-dad3c827-6fefdfc1,G-WI,Governor,WI,0,YouGov,CFC Action Fund | City Forward C
 NYT-cab98ee4-076bf221,G-WI,Governor,WI,0,Marquette University Law School,,,2026-10-14,2026-10-22,818.0,rv,Live Phone/Probability Panel/Text-to-Web,49.0,46.0,False,David Crowley,Tom Tiffany,False
 NYT-cab98ee4-ae78fc43,G-WI,Governor,WI,0,Marquette University Law School,,,2026-10-14,2026-10-22,668.0,lv,Live Phone/Probability Panel/Text-to-Web,53.0,46.0,False,David Crowley,Tom Tiffany,False
 NYT-bff4925c-b5f6f8fd,G-WI,Governor,WI,0,Wick,League of American Workers,REP,2026-10-19,2026-10-23,1213.0,lv,,47.7,44.6,False,David Crowley,Tom Tiffany,False
+NYT-abd93dd2-e659bd07,G-WI,Governor,WI,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,50.0,45.0,False,David Crowley,Tom Tiffany,False
 NYT-557d846f-d8e5f283,GENERIC,Generic,US,0,Cygnal Political,,,2024-12-09,2024-12-11,1500.0,lv,,44.4,48.4,False,Generic Democrat,Generic Republican,False
 NYT-0b2225b0-e8928c46,GENERIC,Generic,US,0,McLaughlin and Associates (R),,,2024-12-11,2024-12-16,1000.0,lv,Online Opt-In Panel,42.0,47.0,False,Generic Democrat,Generic Republican,False
 NYT-4608f298-0fda4c04,GENERIC,Generic,US,0,Cygnal Political,,,2025-01-09,2025-01-12,1500.0,lv,,44.6,46.8,False,Generic Democrat,Generic Republican,False
@@ -1670,10 +1704,12 @@ NYT-db237858-3105314a,GENERIC,Generic,US,0,Tufts,,,2026-10-23,2026-10-27,499.0,l
 NYT-04053aa5-cc4a35fe,GENERIC,Generic,US,0,Ipsos,,,2026-10-09,2026-10-28,1209.0,lv,,50.0,44.0,False,Generic Democrat,Generic Republican,False
 NYT-07bc5c84-2ffaa021,GENERIC,Generic,US,0,Honest Poll,,,2026-10-28,2026-10-29,1158.0,lv,Text/Nonprobability Panel,54.0,41.0,False,Generic Democrat,Generic Republican,False
 NYT-07bc5c84-12e5464a,GENERIC,Generic,US,0,Honest Poll,,,2026-10-28,2026-10-29,1290.0,rv,Text/Nonprobability Panel,52.0,40.0,False,Generic Democrat,Generic Republican,False
+NYT-98e6e19d-b3c4aaae,GENERIC,Generic,US,0,TIPP Insights (R),Issues & Insights,,2026-10-27,2026-10-30,1158.0,lv,,52.0,42.0,False,Generic Democrat,Generic Republican,False
 NYT-b42ce1dd-f4d45635,GENERIC,Generic,US,0,Hart Research Associates/Public Opinion Strategies,NBC News,,2026-10-28,2026-10-30,1000.0,rv,Live Phone/Text-to-Web,52.0,45.0,False,Generic Democrat,Generic Republican,False
 NYT-cffea967-041f66e6,GENERIC,Generic,US,0,Big Data Poll (R),Public Polling Project,,2026-10-27,2026-10-30,3214.0,lv,Live Phone/Text-to-Web/Text/Nonprobability Panel,52.3,40.0,False,Generic Democrat,Generic Republican,False
 NYT-cffea967-e2c8e76d,GENERIC,Generic,US,0,Big Data Poll (R),Public Polling Project,,2026-10-27,2026-10-30,3418.0,rv,Live Phone/Text-to-Web/Text/Nonprobability Panel,51.2,39.5,False,Generic Democrat,Generic Republican,False
 NYT-b606d0d2-2f2a6739,GENERIC,Generic,US,0,ActiVote,,,2026-10-22,2026-10-30,2000.0,lv,App Panel,53.5,46.5,False,Generic Democrat,Generic Republican,False
+NYT-dd7a5188-1f83be8c,GENERIC,Generic,US,0,AtlasIntel,,,2026-10-28,2026-11-01,3566.0,a,,55.5,41.4,False,Generic Democrat,Generic Republican,False
 NYT-1cb7cec3-39a3244f,H-AK-01,House,AK,1,Data for Progress (D),,,2025-02-28,2025-03-07,1008.0,lv,,46.0,46.0,False,Mary Peltola,Nick Begich,False
 NYT-20ef28e6-b5405480,H-AK-01,House,AK,1,Data for Progress (D),,,2025-07-21,2025-07-27,678.0,lv,,38.0,48.0,False,Generic Democrat,Generic Republican,False
 NYT-2abdc064-5bf2d7ff,H-AK-01,House,AK,1,Data for Progress (D),,,2025-10-17,2025-10-23,823.0,lv,Text/Nonprobability Panel,37.0,48.0,False,Matt Schultz,Nick Begich,False
@@ -1692,6 +1728,8 @@ NYT-a1d3551f-380d2ce9,H-AK-01,House,AK,1,Fabrizio Ward/Impact Research,AARP,,202
 NYT-c115983e-ea630427,H-AK-01,House,AK,1,New York Times/Siena University,,,2026-09-24,2026-10-01,476.0,lv,Live Phone,46.96,53.04,False,Bill Hill,Nick Begich,True
 NYT-e5216fed-bb141d58,H-AK-01,House,AK,1,Alaska Survey Research,,,2026-10-01,2026-10-03,1512.0,lv,Text-to-Web/Nonprobability Panel,47.3,52.7,False,Bill Hill,Nick Begich,True
 NYT-fa49898d-74e74bba,H-AK-01,House,AK,1,Data for Progress (D),,,2026-10-08,2026-10-16,659.0,lv,Text-to-Web/Nonprobability Panel,49.0,51.0,False,Bill Hill,Nick Begich,True
+NYT-a0d99ae7-604ee3d1,H-AK-01,House,AK,1,New York Times/Siena University,,,2026-10-23,2026-10-30,610.0,lv,Live Phone,5.6,44.0,False,Eric Hafner,Nick Begich,False
+NYT-a0d99ae7-521dd9f5,H-AK-01,House,AK,1,New York Times/Siena University,,,2026-10-23,2026-10-30,562.0,lv,Live Phone,48.2,51.8,False,Bill Hill,Nick Begich,True
 NYT-c51b7de5-47e38a21,H-AL-02,House,AL,2,Impact Research (D),DCCC,DEM,2026-06-22,2026-06-25,400.0,lv,,44.0,45.0,False,Shomari Figures,Rhett Marques,False
 NYT-ea557308-c4a2c64f,H-AL-02,House,AL,2,DCCC Targeting Team (D),,DEM,2026-07-29,2026-07-30,421.0,lv,Live Phone/Text-to-Web,46.0,46.0,False,Shomari Figures,Rhett Marques,False
 NYT-1ecb97e5-dbf87c16,H-AL-02,House,AL,2,Tulchin Research (D),House Majority PAC,DEM,2026-08-24,2026-08-31,,lv,,47.0,47.0,False,Shomari Figures,Rhett Marques,False
@@ -1816,6 +1854,7 @@ NYT-f75e9a78-2f1a62c8,H-KY-06,House,KY,6,Change Research (D),Kentuckians Not Cor
 NYT-3a935783-39dda4df,H-KY-06,House,KY,6,Public Policy Polling (D),House Majority PAC,DEM,2026-10-19,2026-10-20,,lv,,47.0,41.0,False,Zach Dembo,Ralph Alvarado,False
 NYT-93b0e606-1820b92b,H-MD-01,House,MD,1,Z to A Research (D),,DEM,2026-07-23,2026-07-27,482.0,lv,,39.0,52.0,False,Dan Schwartz,Andy Harris,False
 NYT-f25eb113-51fde33d,H-ME-01,House,ME,1,University of New Hampshire,,,2026-09-17,2026-09-21,657.0,lv,Probability Panel,57.0,35.0,False,Chellie Pingree,Ronald Russell,False
+NYT-874e66b5-38da3cc4,H-ME-01,House,ME,1,University of New Hampshire,,,2026-10-27,2026-10-31,839.0,lv,Probability Panel,65.0,32.0,False,Chellie Pingree,Ronald Russell,False
 NYT-fb7e172d-bc01452c,H-ME-02,House,ME,2,Ragnar Research Partners (R),Congressional Leadership Fund,REP,2025-04-13,2025-04-15,400.0,lv,,43.0,48.0,False,Jared Golden,Paul LePage,False
 NYT-61637f40-9a23682e,H-ME-02,House,ME,2,Mellman Group (D),,DEM,2025-06-04,2025-06-10,400.0,lv,,44.0,43.0,False,Jared Golden,Paul LePage,False
 NYT-1a3cbc7a-62d148c5,H-ME-02,House,ME,2,University of New Hampshire,,,2025-06-19,2025-06-23,394.0,a,Probability Panel,47.0,50.0,False,Jared Golden,Paul LePage,False
@@ -1836,6 +1875,7 @@ NYT-b2619401-83c0b726,H-ME-02,House,ME,2,Impact Research (D),House Majority PAC,
 NYT-f25eb113-62fc2a3e,H-ME-02,House,ME,2,University of New Hampshire,,,2026-09-17,2026-09-21,622.0,lv,Probability Panel,51.0,45.0,False,Matt Dunlap,Paul LePage,False
 NYT-83712527-fe35ff91,H-ME-02,House,ME,2,Tulchin Research (D),,DEM,2026-09-27,2026-09-30,500.0,lv,,50.0,48.0,False,Matt Dunlap,Paul LePage,False
 NYT-a126058f-818d190f,H-ME-02,House,ME,2,Tulchin Research (D),,DEM,2026-10-12,2026-10-14,500.0,lv,,50.0,46.0,False,Matt Dunlap,Paul LePage,False
+NYT-874e66b5-99bb9b9d,H-ME-02,House,ME,2,University of New Hampshire,,,2026-10-27,2026-10-31,793.0,lv,Probability Panel,47.0,52.0,False,Matt Dunlap,Paul LePage,False
 NYT-f33c3514-fe110e9b,H-MI-04,House,MI,4,Public Policy Polling (D),,,2025-11-20,2025-11-21,559.0,rv,,42.0,44.0,False,Sean McCann,Bill Huizenga,False
 NYT-4bb2d1b7-a45d8122,H-MI-04,House,MI,4,Ragnar Research Partners (R),Conservatives for America,REP,2026-03-12,2026-03-14,400.0,lv,Live Phone,42.0,48.0,False,Sean McCann,Bill Huizenga,False
 NYT-4bb2d1b7-5926a856,H-MI-04,House,MI,4,Ragnar Research Partners (R),Conservatives for America,REP,2026-03-12,2026-03-14,400.0,lv,Live Phone,42.0,43.0,False,Generic Democrat,Generic Republican,False
@@ -1924,6 +1964,7 @@ NYT-bb94417f-bff1ff17,H-NE-02,House,NE,2,SurveyUSA,"Grant Forbes, LLC",,2026-09-
 NYT-85cb655e-8db7b444,H-NE-02,House,NE,2,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-02,2026-10-05,377.0,lv,Live Phone/Text-to-Web,50.0,38.0,False,Denise Powell,Brinker Harding,False
 NYT-b43da69c-6fc1a7d6,H-NH-01,House,NH,1,University of New Hampshire,,,2026-09-17,2026-09-21,707.0,lv,Probability Panel,46.0,42.0,False,Stefany Shaheen,Anthony DiLorenzo,False
 NYT-2e6c66e4-04c86394,H-NH-01,House,NH,1,St. Anselm,,,2026-10-19,2026-10-20,861.0,lv,Text-to-Web,46.0,42.0,False,Stefany Shaheen,Anthony DiLorenzo,False
+NYT-63516926-19b3b0b4,H-NH-01,House,NH,1,University of New Hampshire,,,2026-10-27,2026-10-31,1029.0,lv,Probability Panel,56.0,43.0,False,Stefany Shaheen,Anthony DiLorenzo,False
 NYT-24096bf7-29a202f9,H-NH-02,House,NH,2,St. Anselm,,,2025-08-26,2025-08-27,881.0,rv,,49.0,31.0,False,Maggie Goodlander,Lily Tang Williams,False
 NYT-ee58b3cf-aeeafceb,H-NH-02,House,NH,2,University of New Hampshire,,,2025-09-17,2025-09-23,508.0,lv,Probability Panel,51.0,39.0,False,Maggie Goodlander,Lily Tang Williams,False
 NYT-0208a971-5ab93d8c,H-NH-02,House,NH,2,St. Anselm,,,2025-11-18,2025-11-19,1102.0,rv,,40.0,35.0,False,Maggie Goodlander,Lily Tang Williams,False
@@ -1933,6 +1974,7 @@ NYT-323ff676-f78d53af,H-NH-02,House,NH,2,St. Anselm,,,2026-06-24,2026-06-25,802.
 NYT-ceea1397-fef3b73a,H-NH-02,House,NH,2,St. Anselm,,,2026-08-17,2026-08-18,701.0,lv,,50.0,35.0,False,Maggie Goodlander,Lily Tang Williams,False
 NYT-b43da69c-11f1f8fd,H-NH-02,House,NH,2,University of New Hampshire,,,2026-09-17,2026-09-21,694.0,lv,Probability Panel,56.0,35.0,False,Maggie Goodlander,Lily Tang Williams,False
 NYT-2e6c66e4-e9ef207a,H-NH-02,House,NH,2,St. Anselm,,,2026-10-19,2026-10-20,811.0,lv,Text-to-Web,54.0,38.0,False,Maggie Goodlander,Lily Tang Williams,False
+NYT-63516926-4d97e2a6,H-NH-02,House,NH,2,University of New Hampshire,,,2026-10-27,2026-10-31,997.0,lv,Probability Panel,56.0,41.0,False,Maggie Goodlander,Lily Tang Williams,False
 NYT-1f1d93d8-e8eb78b3,H-NJ-02,House,NJ,2,Public Policy Polling (D),Voter Protection Project,DEM,2025-05-21,2025-05-22,505.0,rv,,36.0,46.0,False,Generic Democrat,Jeff Van Drew,False
 NYT-b600792e-cc061900,H-NJ-02,House,NJ,2,Impact Research (D),House Majority PAC,DEM,2026-10-07,2026-10-10,,lv,,40.0,50.0,False,Zack Mullock,Jeff Van Drew,False
 NYT-7cf4ffbe-87e7c328,H-NJ-07,House,NJ,7,Z to A Research (D),314 Action,DEM,2026-05-24,2026-05-26,430.0,lv,Text,47.0,43.0,False,Rebecca Bennett,Thomas H. Kean Jr.,False
@@ -2144,6 +2186,7 @@ NYT-e5216fed-e5857108,S-AK,Senate,AK,0,Alaska Survey Research,,,2026-10-01,2026-
 NYT-807a27fa-67e33a5f,S-AK,Senate,AK,0,InsiderAdvantage (R),,,2026-10-09,2026-10-10,1200.0,lv,,50.1,48.0,False,Mary Peltola,Dan Sullivan,False
 NYT-fa49898d-5ec77c8e,S-AK,Senate,AK,0,Data for Progress (D),,,2026-10-08,2026-10-16,671.0,lv,Text-to-Web/Nonprobability Panel,51.0,49.0,False,Mary Peltola,Dan Sullivan,False
 NYT-0c4baea9-3a290d14,S-AK,Senate,AK,0,Alaska Survey Research,,,2026-10-26,2026-10-29,1326.0,lv,,50.8,49.2,False,Mary Peltola,Dan Sullivan,False
+NYT-a0d99ae7-7c25d9d7,S-AK,Senate,AK,0,New York Times/Siena University,,,2026-10-23,2026-10-30,610.0,lv,Live Phone,47.6,46.2,False,Mary Peltola,Dan Sullivan,False
 NYT-b9c13563-00235712,S-AL,Senate,AL,0,yes. every kid. foundation.,,,2026-07-08,2026-07-11,601.0,lv,,32.0,47.0,False,Everett Wess,Barry Moore,False
 NYT-080dacda-5d0de754,S-AL,Senate,AL,0,RMG Research,Alabama Policy Action | Napolitan News Service,REP,2026-09-21,2026-09-25,800.0,rv,,33.0,54.0,False,Everett Wess,Barry Moore,False
 NYT-308785d0-d82624ce,S-AL,Senate,AL,0,The Alabama Poll,,,2026-10-15,2026-10-16,600.0,lv,Live Phone/Text,35.0,56.0,False,Everett Wess,Barry Moore,False
@@ -2156,6 +2199,7 @@ NYT-17f8fc5a-b83dc8e7,S-AR,Senate,AR,0,JL Partners,,,2026-08-14,2026-08-18,803.0
 NYT-df432e8b-386d610d,S-AR,Senate,AR,0,GrayHouse (R),America One Policies,REP,2026-09-30,2026-10-04,550.0,lv,,39.0,50.0,False,Hallie Shoffner,Tom Cotton,False
 NYT-2fe207af-414b10d8,S-AR,Senate,AR,0,Hendrix College,Talk Business & Politics,,2026-10-08,2026-10-13,709.0,lv,Live Phone/Text,41.0,50.0,False,Hallie Shoffner,Tom Cotton,False
 NYT-641ee852-2e1b0d01,S-AR,Senate,AR,0,GrayHouse (R),America One Policies,REP,2026-10-27,2026-10-28,509.0,lv,Text-to-Web/Live Phone,39.0,55.0,False,Hallie Shoffner,Tom Cotton,False
+NYT-b805e995-ff2c70e4,S-CO,Senate,CO,0,Lake Research Partners (D),Ballot Initiative Strategy Center,,2026-09-16,2026-09-30,600.0,rv,,52.0,38.0,False,John Hickenlooper,Mark Baisley,False
 NYT-20d8d9f1-6f3ee713,S-FL-special,Senate,FL,0,The Tyson Group (R),Plymouth Union Public Advocacy,,2025-10-01,2025-10-03,800.0,lv,,37.0,44.0,False,Jennifer Jenkins,Ashley Moody,False
 NYT-85470c38-a627d659,S-FL-special,Senate,FL,0,University of North Florida,Florida Watch,DEM,2025-10-15,2025-10-25,728.0,lv,Live Phone,38.0,49.0,False,Jennifer Jenkins,Ashley Moody,False
 NYT-72690b9b-c8da8e9c,S-FL-special,Senate,FL,0,University of North Florida,,,2026-02-21,2026-03-02,768.0,lv,Live Phone/Text-to-Web,38.0,46.0,False,Angie Nixon,Ashley Moody,False
@@ -2312,6 +2356,9 @@ NYT-ddfffb93-47cd4a04,S-IA,Senate,IA,0,InsiderAdvantage (R),,,2026-10-21,2026-10
 NYT-5fed9be9-b8d0a704,S-IA,Senate,IA,0,Echelon Insights,,,2026-10-16,2026-10-23,403.0,lv,Text-to-Web/Nonprobability Panel,45.0,43.0,False,Josh Turek,Ashley Hinson,False
 NYT-0d52e74a-f1fe613f,S-IA,Senate,IA,0,co/efficient (R),,,2026-10-28,2026-10-28,1020.0,lv,Text/Live Phone,46.0,48.0,False,Josh Turek,Ashley Hinson,False
 NYT-0d52e74a-90c15ee0,S-IA,Senate,IA,0,co/efficient (R),,,2026-10-28,2026-10-28,1020.0,lv,Text/Live Phone,46.0,48.0,False,Josh Turek,Ashley Hinson,False
+NYT-4be09574-d36138b2,S-IA,Senate,IA,0,YouGov,,,2026-10-26,2026-10-29,2016.0,lv,Text-to-Web,50.0,49.0,False,Josh Turek,Ashley Hinson,False
+NYT-00eec46b-e8c46c76,S-IA,Senate,IA,0,GrayHouse (R),,,2026-10-28,2026-10-31,601.0,lv,Live Phone/Text-to-Web,46.0,48.0,False,Josh Turek,Ashley Hinson,False
+NYT-97e6dede-d4215ceb,S-IA,Senate,IA,0,New York Times/Siena University,,,2026-10-26,2026-11-01,705.0,lv,Live Phone,47.6,46.9,False,Josh Turek,Ashley Hinson,False
 NYT-ce0853bf-b3a60e5b,S-ID,Senate,ID,0,Public Policy Polling (D),,IND,2026-03-16,2026-03-17,639.0,rv,,34.0,48.0,False,Todd Achilles,James Risch,True
 NYT-2cefc24c-86bd6638,S-ID,Senate,ID,0,Bullfinch Group,,IND,2026-05-29,2026-06-01,774.0,rv,Text-to-Web/Nonprobability Panel,36.0,40.0,False,Todd Achilles,James Risch,True
 NYT-2cefc24c-b5b3436a,S-ID,Senate,ID,0,Bullfinch Group,,IND,2026-05-29,2026-06-01,774.0,rv,Text-to-Web/Nonprobability Panel,33.0,50.0,False,David Roth,James Risch,False
@@ -2355,6 +2402,8 @@ NYT-57631c63-6d29d6c5,S-KS,Senate,KS,0,The Washington Post/George Mason Universi
 NYT-57631c63-dafb371e,S-KS,Senate,KS,0,The Washington Post/George Mason University Schar School of Policy and Government,,,2026-10-22,2026-10-26,801.0,lv,Live Phone/Text-to-Web,52.0,43.0,False,Adam Hamilton,Roger Marshall,False
 NYT-cc6fe4a3-cb68d6dc,S-KS,Senate,KS,0,CNN/SSRS,,,2026-10-20,2026-10-26,838.0,lv,Live Phone/Probability Panel,49.0,45.0,False,Adam Hamilton,Roger Marshall,False
 NYT-03a5f4fe-83bd4e5f,S-KS,Senate,KS,0,Emerson College,,,2026-10-26,2026-10-28,800.0,lv,IVR/Text-to-Web/Nonprobability Panel,49.5,47.1,False,Adam Hamilton,Roger Marshall,False
+NYT-d12ca396-e1b45bb5,S-KS,Senate,KS,0,YouGov,,,2026-10-26,2026-10-29,2086.0,lv,Text-to-Web,50.0,49.0,False,Adam Hamilton,Roger Marshall,False
+NYT-488d5c04-c3889839,S-KS,Senate,KS,0,New York Times/Siena University,,,2026-10-27,2026-11-01,736.0,lv,Live Phone,49.0,43.9,False,Adam Hamilton,Roger Marshall,False
 NYT-0b7fff34-82a5994a,S-KY,Senate,KY,0,Public Policy Polling (D),,DEM,2025-12-18,2025-12-19,648.0,rv,,35.0,51.0,False,Amy McGrath,Generic Republican,False
 NYT-0b7fff34-e6d3070e,S-KY,Senate,KY,0,Public Policy Polling (D),,DEM,2025-12-18,2025-12-19,649.0,rv,,36.0,50.0,False,Charles Booker,Generic Republican,False
 NYT-0b7fff34-a4daf9fd,S-KY,Senate,KY,0,Public Policy Polling (D),,DEM,2025-12-18,2025-12-19,650.0,rv,,40.0,41.0,False,Charles Booker,Nate Morris,False
@@ -2364,6 +2413,7 @@ NYT-8e8d7685-84c909b8,S-KY,Senate,KY,0,Global Strategy Group (D),,DEM,2026-08-24
 NYT-1be76207-c8f1ad3c,S-LA,Senate,LA,0,Public Policy Polling (D),,DEM,2026-07-21,2026-07-22,518.0,rv,Text-to-Web/IVR,37.0,41.0,False,Jamie Davis,Julia Letlow,False
 NYT-fd9a2472-3cfaf969,S-LA,Senate,LA,0,Hart Research Associates (D),,DEM,2026-09-17,2026-09-19,500.0,lv,Live Phone/Text-to-Web,44.0,48.0,False,Jamie Davis,Julia Letlow,False
 NYT-8336d95c-991ffdf0,S-LA,Senate,LA,0,Hart Research Associates (D),,DEM,2026-10-28,2026-10-29,502.0,lv,Live Phone/Text-to-Web,45.0,45.0,False,Jamie Davis,Julia Letlow,False
+NYT-38f19daa-e8602d71,S-LA,Senate,LA,0,Lincoln Park Strategies (D),Louisiana Democratic Party,DEM,2026-10-29,2026-10-31,,lv,,47.0,47.0,False,Jamie Davis,Julia Letlow,False
 NYT-9e28ae65-af0be288,S-MA,Senate,MA,0,MassINC Polling Group,,,2024-10-29,2024-11-01,582.0,lv,Online Opt-In Panel/Text-to-Web,34.0,40.0,False,Ed Markey,Charles D. Baker,False
 NYT-29d3584e-aa762b68,S-MA,Senate,MA,0,YouGov,UMass Amherst | WCVB-TV,,2025-02-14,2025-02-20,700.0,a,Online Matched Sample,35.0,33.0,False,Ed Markey,Charles D. Baker,False
 NYT-ca567a7a-1cc071d1,S-MA,Senate,MA,0,SurveyUSA,MA Responsible Alliance,,2025-02-28,2025-03-04,775.0,rv,,45.0,26.0,False,Ed Markey,John Deaton,False
@@ -2387,6 +2437,7 @@ NYT-377b9e38-b56c6da5,S-MA,Senate,MA,0,MassINC Polling Group,Commonwealth Beacon
 NYT-c5000c5b-8d58fb28,S-MA,Senate,MA,0,YouGov,UMass Amherst | WCVB-TV,,2026-10-05,2026-10-12,800.0,rv,,56.0,29.0,False,Ed Markey,John Deaton,False
 NYT-d75f0973-e00e1be9,S-MA,Senate,MA,0,UMass Lowell,,,2026-10-07,2026-10-18,850.0,lv,Nonprobability Panel,55.0,26.0,False,Ed Markey,John Deaton,False
 NYT-318ee917-6dab8989,S-MA,Senate,MA,0,Suffolk University,Boston Globe,,2026-10-14,2026-10-18,500.0,lv,Live Phone,60.0,31.8,False,Ed Markey,John Deaton,False
+NYT-7fca87a7-ea5c8770,S-MA,Senate,MA,0,University of New Hampshire,,,2026-10-27,2026-10-31,877.0,lv,Probability Panel,53.0,32.0,False,Ed Markey,John Deaton,False
 NYT-5aee4b52-6794f33e,S-ME,Senate,ME,0,Upswing Research (D),,DEM,2025-03-21,2025-03-25,600.0,lv,,42.0,43.0,False,Jordan Wood,Susan Collins,False
 NYT-44968742-95f29866,S-ME,Senate,ME,0,Public Policy Polling (D),,DEM,2025-09-08,2025-09-09,642.0,rv,,44.0,35.0,False,Dan Kleban,Susan Collins,False
 NYT-b5100979-abb50f20,S-ME,Senate,ME,0,Zenith Research,More Perfect Union,,2025-10-07,2025-10-10,501.0,lv,Nonprobability Panel,42.0,37.0,False,Janet Mills,Susan Collins,False
@@ -2464,6 +2515,9 @@ NYT-0102d73f-922ec5ef,S-ME,Senate,ME,0,Marist University,,,2026-10-22,2026-10-25
 NYT-0102d73f-affd988a,S-ME,Senate,ME,0,Marist University,,,2026-10-22,2026-10-25,1449.0,lv,Live Phone/Text/Nonprobability Panel,49.0,47.0,False,Troy Jackson,Susan Collins,False
 NYT-d65e372a-75fb90ed,S-ME,Senate,ME,0,CNN/SSRS,,,2026-10-20,2026-10-26,783.0,lv,Live Phone/Probability Panel,49.0,45.0,False,Troy Jackson,Susan Collins,False
 NYT-ace5053f-c29ddc73,S-ME,Senate,ME,0,Data for Progress (D),,,2026-10-23,2026-10-27,652.0,lv,Live Phone/Text/Nonprobability Panel,50.0,45.0,False,Troy Jackson,Susan Collins,False
+NYT-29bc618a-edc71465,S-ME,Senate,ME,0,YouGov,,,2026-10-26,2026-10-29,1501.0,lv,Text-to-Web,52.0,47.0,False,Troy Jackson,Susan Collins,False
+NYT-874e66b5-b8779839,S-ME,Senate,ME,0,University of New Hampshire,,,2026-10-27,2026-10-31,1633.0,lv,Probability Panel,54.0,45.0,False,Troy Jackson,Susan Collins,False
+NYT-38454df3-7c5ba4db,S-ME,Senate,ME,0,New York Times/Siena University,,,2026-10-27,2026-11-01,714.0,lv,Live Phone,50.9,45.0,False,Troy Jackson,Susan Collins,False
 NYT-2ed1c72b-62bf14db,S-MI,Senate,MI,0,Target Insyght,MIRS News Service,,2025-03-03,2025-03-06,600.0,rv,,46.0,44.0,False,Pete Buttigieg,Mike Rogers,False
 NYT-2ed1c72b-bfc4f441,S-MI,Senate,MI,0,Target Insyght,MIRS News Service,,2025-03-03,2025-03-06,600.0,rv,,35.0,41.0,False,Haley Stevens,Mike Rogers,False
 NYT-2ed1c72b-cc621385,S-MI,Senate,MI,0,Target Insyght,MIRS News Service,,2025-03-03,2025-03-06,600.0,rv,,42.0,41.0,False,Gretchen Whitmer,Mike Rogers,False
@@ -2570,6 +2624,9 @@ NYT-6aa99f8a-7559da64,S-MI,Senate,MI,0,Data for Progress (D),,,2026-10-23,2026-1
 NYT-4567e642-4353b805,S-MI,Senate,MI,0,Upswing Research (D),Demand Justice,DEM,2026-10-24,2026-10-25,505.0,lv,,50.0,45.0,False,Abdul El-Sayed,Mike Rogers,False
 NYT-e05bf93a-cd1a4a72,S-MI,Senate,MI,0,CNN/SSRS,,,2026-10-20,2026-10-27,768.0,lv,Live Phone/Probability Panel,49.0,42.0,False,Abdul El-Sayed,Mike Rogers,False
 NYT-b8ae6e54-f7998992,S-MI,Senate,MI,0,Mitchell Research and Communications,CBS Detroit,,2026-10-26,2026-10-27,636.0,lv,Text-to-Web,51.0,44.0,False,Abdul El-Sayed,Mike Rogers,False
+NYT-69fc5034-32851709,S-MI,Senate,MI,0,YouGov,,,2026-10-26,2026-10-29,2088.0,lv,Text-to-Web,51.0,47.0,False,Abdul El-Sayed,Mike Rogers,False
+NYT-79c1089e-fe0ea3f7,S-MI,Senate,MI,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,48.0,46.0,False,Abdul El-Sayed,Mike Rogers,False
+NYT-c1d14361-0975d1d6,S-MI,Senate,MI,0,New York Times/Siena University,,,2026-10-23,2026-11-01,1011.0,lv,Live Phone,52.6,41.6,False,Abdul El-Sayed,Mike Rogers,False
 NYT-9c14f96f-dace3e48,S-MN,Senate,MN,0,Impact Research (D),,DEM,2025-07-08,2025-07-11,604.0,lv,Text-to-Web,48.0,45.0,False,Peggy Flanagan,Michele Tafoya,False
 NYT-9c14f96f-488527ac,S-MN,Senate,MN,0,Impact Research (D),,DEM,2025-07-08,2025-07-11,604.0,lv,Text-to-Web,49.0,45.0,False,Angie Craig,Michele Tafoya,False
 NYT-fc2fd45e-18a67da7,S-MN,Senate,MN,0,Public Policy Polling (D),GQR,,2025-09-15,2025-09-16,1015.0,lv,,47.0,43.0,False,Angie Craig,Generic Republican,False
@@ -2597,6 +2654,8 @@ NYT-d5f8e9c0-cb893ddc,S-MN,Senate,MN,0,Trafalgar Group (R),,REP,2026-10-13,2026-
 NYT-d547a305-e580a5af,S-MN,Senate,MN,0,Victory Insights (R),,REP,2026-10-21,2026-10-22,1194.0,lv,Text-to-Web,47.8,44.4,False,Peggy Flanagan,Michele Tafoya,False
 NYT-c2682803-67551c6a,S-MN,Senate,MN,0,New York Times/Siena University,,,2026-10-19,2026-10-26,752.0,lv,Live Phone,54.21,40.31,False,Peggy Flanagan,Michele Tafoya,False
 NYT-913c201c-aa37ab5c,S-MN,Senate,MN,0,SurveyUSA,KSTP-TV Minneapolis,,2026-10-24,2026-10-28,714.0,lv,,48.0,41.0,False,Peggy Flanagan,Michele Tafoya,False
+NYT-d4400760-5fc38d2e,S-MN,Senate,MN,0,InsiderAdvantage (R),,,2026-10-29,2026-10-30,1200.0,lv,,49.3,46.4,False,Peggy Flanagan,Michele Tafoya,False
+NYT-f96cc69b-2dbe44bb,S-MN,Senate,MN,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,48.0,43.0,False,Peggy Flanagan,Michele Tafoya,False
 NYT-bb2c7efc-e3fd7c79,S-MS,Senate,MS,0,Impact Research (D),SPLC Action Fund,DEM,2026-04-08,2026-04-12,500.0,lv,Live Phone/Text-to-Web,39.0,42.0,False,Scott Colom,Cindy Hyde-Smith,False
 NYT-f1934772-855a90ba,S-MS,Senate,MS,0,Data for Progress (D),Way to Lead PAC,DEM,2026-08-05,2026-08-15,1018.0,lv,,41.0,47.0,False,Scott Colom,Cindy Hyde-Smith,False
 NYT-f1934772-be3f1651,S-MS,Senate,MS,0,Data for Progress (D),Way to Lead PAC,DEM,2026-08-05,2026-08-15,1018.0,lv,,38.0,44.0,False,Scott Colom,Cindy Hyde-Smith,False
@@ -2635,11 +2694,11 @@ NYT-2cefcb18-35b4c7e5,S-MT,Senate,MT,0,Peak Insights (R),,REP,2026-10-07,2026-10
 NYT-e0e77acf-3f6e523a,S-MT,Senate,MT,0,Quantus Insights (R),,,2026-10-15,2026-10-18,667.0,lv,Text-to-Web,29.4,45.6,False,Seth Bodnar,Kurt Alme,True
 NYT-81be1cc2-6bca737c,S-MT,Senate,MT,0,Montana State University Billings,,,2026-10-05,2026-10-21,720.0,a,Live Phone/Nonprobability Panel,26.0,30.0,False,Seth Bodnar,Kurt Alme,True
 NYT-9c1f8d43-fc99673a,S-MT,Senate,MT,0,Concord Public Opinion Partners (D),Education Reform Now Advocacy,DEM,2026-10-22,2026-10-23,410.0,lv,Live Phone/Text-to-Web,39.0,38.0,False,Seth Bodnar,Kurt Alme,True
-NYT-24848e76-5d0dbd15,S-NC,Senate,NC,0,Victory Insights,,,2024-11-26,2024-11-29,800.0,lv,IVR/Text-to-Web,45.1,44.1,False,Roy Cooper,Thom Tillis,False
-NYT-24848e76-b236878e,S-NC,Senate,NC,0,Victory Insights,,,2024-11-26,2024-11-29,800.0,lv,IVR/Text-to-Web,45.5,44.3,False,Roy Cooper,Lara Trump,False
+NYT-24848e76-5d0dbd15,S-NC,Senate,NC,0,Victory Insights (R),,,2024-11-26,2024-11-29,800.0,lv,IVR/Text-to-Web,45.1,44.1,False,Roy Cooper,Thom Tillis,False
+NYT-24848e76-b236878e,S-NC,Senate,NC,0,Victory Insights (R),,,2024-11-26,2024-11-29,800.0,lv,IVR/Text-to-Web,45.5,44.3,False,Roy Cooper,Lara Trump,False
 NYT-475bec54-402866b6,S-NC,Senate,NC,0,Public Policy Polling (D),,,2025-03-04,2025-03-05,662.0,rv,,47.0,43.0,False,Roy Cooper,Thom Tillis,False
 NYT-1f2d4e0d-86bf164c,S-NC,Senate,NC,0,Change Research (D),Carolina Forward,DEM,2025-03-31,2025-04-04,867.0,lv,Nonprobability Panel/Probability Panel,48.0,45.0,False,Roy Cooper,Thom Tillis,False
-NYT-b30fc9ac-d1b9e1f9,S-NC,Senate,NC,0,Victory Insights,,,2025-07-28,2025-07-30,600.0,lv,IVR/Text-to-Web/Live Phone,44.4,43.5,False,Roy Cooper,Michael Whatley,False
+NYT-b30fc9ac-d1b9e1f9,S-NC,Senate,NC,0,Victory Insights (R),,,2025-07-28,2025-07-30,600.0,lv,IVR/Text-to-Web/Live Phone,44.4,43.5,False,Roy Cooper,Michael Whatley,False
 NYT-667b6c9d-32afcb45,S-NC,Senate,NC,0,Emerson College,,,2025-07-28,2025-07-30,1000.0,rv,Text-to-Web/Email/Nonprobability Panel,46.7,41.4,False,Roy Cooper,Michael Whatley,False
 NYT-ac767c3a-ecbac7f2,S-NC,Senate,NC,0,Harper Polling (R),Carolina Journal,,2025-08-11,2025-08-12,600.0,lv,Live Phone/Text-to-Web,47.3,39.1,False,Roy Cooper,Michael Whatley,False
 NYT-36fb875b-11a85c1e,S-NC,Senate,NC,0,Change Research (D),Carolina Forward,DEM,2025-09-02,2025-09-08,855.0,lv,,48.0,41.0,False,Roy Cooper,Michael Whatley,False
@@ -2701,6 +2760,8 @@ NYT-18d80fb0-12c5b963,S-NC,Senate,NC,0,Harper Polling (R),Carolina Journal,,2026
 NYT-cde4fbaa-4ad27b69,S-NC,Senate,NC,0,ActiVote,,,2026-10-08,2026-10-20,400.0,lv,App Panel,56.9,43.1,False,Roy Cooper,Michael Whatley,False
 NYT-e8fc52e0-996a17a5,S-NC,Senate,NC,0,Quantus Insights (R),,,2026-10-24,2026-10-25,722.0,lv,Text-to-Web,51.7,42.9,False,Roy Cooper,Michael Whatley,False
 NYT-e8fc52e0-b67ca8ad,S-NC,Senate,NC,0,Quantus Insights (R),,,2026-10-24,2026-10-25,722.0,lv,Text-to-Web,52.4,43.4,False,Roy Cooper,Michael Whatley,False
+NYT-52d83e1b-5c4cb292,S-NC,Senate,NC,0,East Carolina University Center for Survey Research,,,2026-10-26,2026-10-29,1041.0,lv,IVR/Text-to-Web/Nonprobability Panel,54.0,44.9,False,Roy Cooper,Michael Whatley,False
+NYT-affe090f-1e48c04f,S-NC,Senate,NC,0,YouGov,,,2026-10-26,2026-10-29,2123.0,lv,Text-to-Web,55.0,44.0,False,Roy Cooper,Michael Whatley,False
 NYT-9efb685a-f399e2ed,S-NE,Senate,NE,0,Change Research (D),,DEM,2025-03-28,2025-04-01,524.0,lv,,45.0,46.0,False,Dan Osborn,Pete Ricketts,False
 NYT-c4d67e47-527e1310,S-NE,Senate,NE,0,Impact Research (D),,DEM,2026-02-02,2026-02-05,600.0,lv,Live Phone/Text-to-Web,47.0,48.0,False,Dan Osborn,Pete Ricketts,False
 NYT-39e267dd-467cfb4f,S-NE,Senate,NE,0,GBAO (D),Working Class Majority PAC,IND,2026-04-16,2026-04-20,800.0,lv,,46.0,45.0,False,Dan Osborn,Pete Ricketts,False
@@ -2725,6 +2786,9 @@ NYT-7eceef25-f85fcfc3,S-NE,Senate,NE,0,Impact Research (D),,DEM,2026-10-14,2026-
 NYT-7eceef25-44a5fab9,S-NE,Senate,NE,0,Impact Research (D),,DEM,2026-10-14,2026-10-20,600.0,lv,,47.0,49.0,False,Dan Osborn,Pete Ricketts,False
 NYT-f79f220c-bfb5db95,S-NE,Senate,NE,0,GBAO (D),Working Class Majority PAC,IND,2026-10-18,2026-10-22,800.0,lv,Live Phone/Text-to-Web,46.0,45.0,False,Dan Osborn,Pete Ricketts,False
 NYT-fb010920-52c772f8,S-NE,Senate,NE,0,Echelon Insights,NetChoice,,2026-10-16,2026-10-23,407.0,lv,Text-to-Web/Nonprobability Panel,46.0,47.0,False,Dan Osborn,Pete Ricketts,False
+NYT-4413d374-b9cc31b8,S-NE,Senate,NE,0,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-25,2026-10-29,800.0,lv,Live Phone/Text-to-Web,48.0,49.0,False,Dan Osborn,Pete Ricketts,False
+NYT-4413d374-1e27076b,S-NE,Senate,NE,0,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-25,2026-10-29,800.0,lv,Live Phone/Text-to-Web,45.0,48.0,False,Dan Osborn,Pete Ricketts,False
+NYT-261adc4a-408bdfa1,S-NE,Senate,NE,0,YouGov,,,2026-10-26,2026-10-29,1974.0,lv,Text-to-Web,49.0,49.0,False,Dan Osborn,Pete Ricketts,False
 NYT-96d6e3cb-78584ab5,S-NE,Senate,NE,0,New York Times/Siena University,,,2026-10-23,2026-10-29,809.0,lv,Live Phone,43.01,48.7,False,Dan Osborn,Pete Ricketts,False
 NYT-7baaa8e1-1ca96454,S-NH,Senate,NH,0,Praecones Analytica,New Hampshire Journal,,2025-02-26,2025-03-01,626.0,rv,,58.9,41.1,False,Jeanne Shaheen,Frank Edelblut,False
 NYT-7baaa8e1-75096361,S-NH,Senate,NH,0,Praecones Analytica,New Hampshire Journal,,2025-02-26,2025-03-01,626.0,rv,,55.1,44.9,False,Jeanne Shaheen,Scott Brown,False
@@ -2778,6 +2842,9 @@ NYT-22e1eaa2-10752c05,S-NH,Senate,NH,0,National Public Affairs (R),"God, Family,
 NYT-22e1eaa2-d44e3e2d,S-NH,Senate,NH,0,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-08,2026-10-12,600.0,lv,Live Phone/Text-to-Web,50.0,43.0,False,Chris Pappas,John Sununu,False
 NYT-9ca6ae7a-2efc158b,S-NH,Senate,NH,0,UMass Lowell,,,2026-10-02,2026-10-19,600.0,lv,Nonprobability Panel,48.0,41.0,False,Chris Pappas,John Sununu,False
 NYT-2e6c66e4-9cd4fde3,S-NH,Senate,NH,0,St. Anselm,,,2026-10-19,2026-10-20,1672.0,lv,Text-to-Web,50.0,43.0,False,Chris Pappas,John Sununu,False
+NYT-e03c576a-f6c6a69f,S-NH,Senate,NH,0,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-25,2026-10-29,800.0,lv,Live Phone/Text-to-Web,51.0,46.0,False,Chris Pappas,John Sununu,False
+NYT-e03c576a-cf14202e,S-NH,Senate,NH,0,National Public Affairs (R),"God, Family, & Country PAC",REP,2026-10-25,2026-10-29,800.0,lv,Live Phone/Text-to-Web,51.0,45.0,False,Chris Pappas,John Sununu,False
+NYT-63516926-e72f5efd,S-NH,Senate,NH,0,University of New Hampshire,,,2026-10-27,2026-10-31,2035.0,lv,Probability Panel,54.0,42.0,False,Chris Pappas,John Sununu,False
 NYT-361a1729-afa5f143,S-NM,Senate,NM,0,Research & Polling Inc.,Albuquerque Journal,,2026-08-21,2026-08-28,516.0,lv,Live Phone,53.0,38.0,False,Ben Ray Luján,Larry Marker,False
 NYT-6374ca46-4490659f,S-NM,Senate,NM,0,SurveyUSA,KOB-TV (Albuquerque),,2026-09-25,2026-09-30,567.0,lv,,54.0,36.0,False,Ben Ray Luján,Larry Marker,False
 NYT-ec82f919-b1ab46eb,S-NM,Senate,NM,0,Research & Polling Inc.,Albuquerque Journal,,2026-10-01,2026-10-09,1125.0,lv,Live Phone,53.0,37.0,False,Ben Ray Luján,Larry Marker,False
@@ -2829,8 +2896,13 @@ NYT-a1c11dbe-2d708401,S-OH-special,Senate,OH,0,Verasight,VoteHub,,2026-10-01,202
 NYT-a1c11dbe-bbd20c0e,S-OH-special,Senate,OH,0,Verasight,VoteHub,,2026-10-01,2026-10-20,535.0,rv,Nonprobability Panel,45.7,43.8,False,Sherrod Brown,Jon Husted,False
 NYT-9d36718e-0286e6b4,S-OH-special,Senate,OH,0,InsiderAdvantage (R),,,2026-10-21,2026-10-22,1200.0,lv,,46.7,44.4,False,Sherrod Brown,Jon Husted,False
 NYT-0c92af41-22073fe2,S-OH-special,Senate,OH,0,Echelon Insights,NetChoice,,2026-10-16,2026-10-23,508.0,lv,Text-to-Web/Nonprobability Panel,47.0,47.0,False,Sherrod Brown,Jon Husted,False
+NYT-a516eb44-6f37b46c,S-OH-special,Senate,OH,0,Concord Public Opinion Partners (D),Education Reform Now Advocacy,DEM,2026-10-22,2026-10-24,469.0,lv,Live Phone/Text-to-Web,46.0,42.0,False,Sherrod Brown,Jon Husted,False
 NYT-ef2061ce-2c97932b,S-OH-special,Senate,OH,0,Suffolk University,USA Today,,2026-10-21,2026-10-26,500.0,lv,Live Phone,46.6,43.8,False,Sherrod Brown,Jon Husted,False
+NYT-178f4a20-c3cd310c,S-OH-special,Senate,OH,0,YouGov,,,2026-10-26,2026-10-29,2084.0,lv,Text-to-Web,50.0,48.0,False,Sherrod Brown,Jon Husted,False
+NYT-a6c01fbe-84c90a52,S-OH-special,Senate,OH,0,InsiderAdvantage (R),,,2026-10-29,2026-10-30,1200.0,lv,,48.8,47.0,False,Sherrod Brown,Jon Husted,False
 NYT-dbd1593d-6d483faf,S-OH-special,Senate,OH,0,ActiVote,,,2026-10-18,2026-10-31,400.0,lv,App Panel,50.2,49.8,False,Sherrod Brown,Jon Husted,False
+NYT-2483fb30-11580672,S-OH-special,Senate,OH,0,Research Co,,,2026-10-30,2026-11-01,450.0,lv,,45.0,44.0,False,Sherrod Brown,Jon Husted,False
+NYT-624f1dc6-9a7b6bdd,S-OH-special,Senate,OH,0,New York Times/Siena University,,,2026-10-26,2026-11-01,717.0,lv,Live Phone,49.3,43.7,False,Sherrod Brown,Jon Husted,False
 NYT-3363b2d9-7677461d,S-OK,Senate,OK,0,Cole Hargrave,,,2026-08-03,2026-08-06,500.0,rv,Live Phone/Text-to-Web,27.0,48.0,False,Jim Priest,Kevin Hern,False
 NYT-3363b2d9-8f0b4429,S-OK,Senate,OK,0,Cole Hargrave,,,2026-08-03,2026-08-06,500.0,rv,Live Phone/Text-to-Web,25.0,49.0,False,N'Kiyla Jasmine Thomas,Kevin Hern,False
 NYT-95ceee0c-e3d0c6fc,S-RI,Senate,RI,0,University of New Hampshire,,,2026-04-16,2026-04-20,556.0,lv,Nonprobability Panel,52.0,34.0,False,Jack Reed,Raymond McKay,False
@@ -3011,5 +3083,10 @@ NYT-4dc32c45-4f856b3c,S-TX,Senate,TX,0,A2 Insights,,,2026-10-23,2026-10-27,631.0
 NYT-136e2129-553116ef,S-TX,Senate,TX,0,CNN/SSRS,,,2026-10-20,2026-10-27,923.0,lv,Live Phone/Probability Panel,49.0,43.0,False,James Talarico,Ken Paxton,False
 NYT-efb35ed0-67ab4426,S-TX,Senate,TX,0,Quantus Insights (R),,,2026-10-26,2026-10-28,1207.0,lv,Text-to-Web,48.4,49.4,False,James Talarico,Ken Paxton,False
 NYT-06629328-f17dc189,S-TX,Senate,TX,0,ActiVote,,,2026-10-22,2026-10-28,400.0,lv,App Panel,52.1,47.9,False,James Talarico,Ken Paxton,False
+NYT-4a8b3e3c-21ebde3a,S-TX,Senate,TX,0,YouGov,,,2026-10-26,2026-10-29,2138.0,lv,Text-to-Web,51.0,47.0,False,James Talarico,Ken Paxton,False
 NYT-45558885-a1f09c9b,S-TX,Senate,TX,0,Kreate Strategies,,,2026-10-27,2026-10-30,900.0,lv,Nonprobability Panel,48.0,45.0,False,James Talarico,Ken Paxton,False
+NYT-ec104f8a-5b24bc8a,S-TX,Senate,TX,0,Trafalgar Group (R),,REP,2026-10-31,2026-11-01,1089.0,lv,,47.5,48.1,False,James Talarico,Ken Paxton,False
+NYT-e516bc0a-8eace49a,S-TX,Senate,TX,0,AtlasIntel,,,2026-10-28,2026-11-01,1678.0,a,,51.3,45.4,False,James Talarico,Ken Paxton,False
+NYT-58393008-548fe325,S-TX,Senate,TX,0,New York Times/Siena University,,,2026-10-27,2026-11-01,1215.0,lv,Live Phone,50.2,43.1,False,James Talarico,Ken Paxton,False
+NYT-58393008-d2eb50c0,S-TX,Senate,TX,0,New York Times/Siena University,,,2026-10-27,2026-11-01,1215.0,rv,Live Phone,51.5,39.3,False,James Talarico,Ken Paxton,False
 NYT-524cc84e-d984eab0,S-VA,Senate,VA,0,Responsive Management,Virginia Commonwealth University,,2024-12-18,2025-01-15,806.0,a,Live Phone/Text-to-Web,45.0,38.0,False,Mark Warner,Glenn Youngkin,False
