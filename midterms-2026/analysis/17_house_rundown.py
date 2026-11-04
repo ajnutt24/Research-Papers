@@ -48,7 +48,7 @@ ABBR={s.lower():a for a,s in [
  ("VA","Virginia"),("WA","Washington"),("WV","West Virginia"),("WI","Wisconsin"),("WY","Wyoming")]}
 
 html,prov = fp.fetch_wiki_html("2026_United_States_House_of_Representatives_elections",
-                               "us_house_all", max_age_hours=12)
+                               "wiki_us_house_all.html", max_age_hours=12)
 soup = BeautifulSoup(html, "lxml")
 tables = [t for t in soup.find_all("table")
           if "Candidates" in (t.find("tr").get_text(" ", strip=True) if t.find("tr") else "")]
