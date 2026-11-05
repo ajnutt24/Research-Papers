@@ -25,7 +25,9 @@ from openpyxl.utils import get_column_letter
 
 ROOT="/home/user/Research-Papers/midterms-2026"; sys.path.insert(0,ROOT)
 import config
-S="/tmp/claude-0/-home-user-Research-Papers/6856a5ad-3082-5cc4-a8a8-cce34704eb59/scratchpad"
+# Alongside the workbook, not in a session-specific temp directory:
+# these are inputs the builder needs on any machine.
+S=ROOT+"/outputs"
 ARIAL="Arial"; thin=Side(style="thin", color="BFBFBF")
 FILLS={"R hold":"E06666","R flip":"F4CCCC","D hold":"6FA8DC","D flip":"CFE2F3"}
 

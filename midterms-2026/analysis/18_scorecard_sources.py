@@ -99,8 +99,8 @@ def scrape(title,cache,kind):
 
 sen=scrape("2026_United_States_Senate_elections","wiki_us_senate_all.html","sen")
 gov=scrape("2026_United_States_gubernatorial_elections","wiki_us_gov_all.html","gov")
-sen.to_csv("/tmp/claude-0/-home-user-Research-Papers/6856a5ad-3082-5cc4-a8a8-cce34704eb59/scratchpad/sen_cands.csv",index=False)
-gov.to_csv("/tmp/claude-0/-home-user-Research-Papers/6856a5ad-3082-5cc4-a8a8-cce34704eb59/scratchpad/gov_cands.csv",index=False)
+sen.to_csv(ROOT + "/outputs/sen_cands.csv", index=False)
+gov.to_csv(ROOT + "/outputs/gov_cands.csv", index=False)
 exp_s={f"S-{st}-special" if sp else f"S-{st}" for st,_c,sp,*_ in config.SENATE_2026}
 exp_g={f"G-{st}" for st,*_ in config.GOVERNOR_2026}
 print("  senate  matched %d of %d | missing: %s" % (len(exp_s & set(sen.race_id)), len(exp_s), sorted(exp_s-set(sen.race_id))))
