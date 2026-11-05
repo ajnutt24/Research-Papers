@@ -1,0 +1,43 @@
+# Pinned because the model code targets an API that has since moved on, and a
+# fresh container installs whatever is current. On 2026-11-05 a rebuilt
+# container shipped pymc 6.4.0 / arviz 1.3.0 / pandas 3.0.5 and the pipeline
+# died at stage 09 on:
+#
+#     KeyError: "['hdi_3%', 'hdi_97%'] not in index"
+#
+# because arviz 1.x renamed those summary columns. Nothing was wrong with the
+# model; the floor had moved. Reproducing a published forecast is the whole
+# point of committing the inputs, so the versions that read them belong under
+# version control too.
+#
+#     python3 -m pip install -r requirements.txt
+#
+# Python 3.13 (3.11 also works). A container may ship several interpreters:
+# check that the one running the pipeline is the one these are installed into,
+# since `python3` and `python3.13` were different binaries on that rebuild.
+
+# --- the pins that actually matter -----------------------------------------
+# arviz < 1 for the hdi_3% / hdi_97% summary columns stages 09 and 11 read.
+# pymc 5.x pairs with it; 6.x expects the arviz 1.x API.
+# pandas < 3 because 3.0 changes copy semantics the stages rely on.
+pymc>=5.28,<6
+arviz>=0.17,<1
+pandas>=2.3,<3
+
+# --- everything else the pipeline imports ----------------------------------
+numpy>=2.0,<3
+scipy>=1.14
+pytensor>=2.38,<3
+numba>=0.60
+pyarrow>=16            # parquet, the format every stage hands off in
+openpyxl>=3.1          # the polling workbook, and the scorecard in analysis/19
+beautifulsoup4>=4.12   # Wikipedia scraping in wikipolls.py and data/03
+lxml>=5.0
+requests>=2.31
+matplotlib>=3.8        # imported inside the plotting paths of stages 08 and 11
+PyYAML>=6.0
+
+# Card rendering only (viz/shoot.py). The browser itself is NOT installed by
+# pip here: this container has one at /opt/pw-browsers and shoot.py points at
+# it explicitly, so do not run `playwright install`.
+playwright>=1.40
