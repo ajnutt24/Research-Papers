@@ -92,10 +92,34 @@ for t in tables:
         if not items:
             items = [x for x in re.split(r"▌", cand_cell.get_text(" ", strip=True)) if x.strip()]
         names, others, winner, extra = {}, [], "", {}
+        shares = {}
+        n_ticks, has_runoff_heading = 0, False
         for it in items:
             it = it.replace("▌", "").strip()
+            # Louisiana's cell carries "General election:" / "Runoff:" headings
+            # as <li> items of their own; everything after the runoff heading
+            # repeats the two who advanced.
+            if re.match(r"^Runoff\b", it, re.I):
+                has_runoff_heading = True
+                continue
+            if it.endswith(":"):
+                continue
             is_win = bool(re.match(r"^Y\b", it))
+            if is_win:
+                n_ticks += 1
             it = re.sub(r"^Y\s+", "", it).strip()
+            # Once a race is counted, Wikipedia appends the vote share:
+            # "James Comer (Republican) 67.6%". CAND_RE is anchored on the
+            # closing parenthesis, so leaving that suffix in place makes every
+            # counted district fail to parse — names, party and the winner tick
+            # all silently vanish, and the row reads as uncalled. Capture the
+            # share, then strip it before matching.
+            it = re.sub(r"\[\s*\d+\s*\]", "", it).strip()
+            share = None
+            ms = re.search(r"\s(\d+(?:\.\d+)?)%\s*$", it)
+            if ms:
+                share = float(ms.group(1))
+                it = it[:ms.start()].strip()
             cm = CAND_RE.match(it)
             if not cm:
                 continue
@@ -109,14 +133,32 @@ for t in tables:
             is_rep = party.startswith("Republican")
             if is_dem and "dem" not in names:
                 names["dem"] = nm
+                if share is not None:
+                    shares["dem"] = share
             elif is_rep and "rep" not in names:
                 names["rep"] = nm
+                if share is not None:
+                    shares["rep"] = share
             else:
                 others.append(f"{nm} ({party})")
                 if is_dem:
                     extra["dem"] = extra.get("dem", 0) + 1
                 if is_rep:
                     extra["rep"] = extra.get("rep", 0) + 1
+        # Louisiana runs a two-round system: every candidate of every party
+        # appears in November and the seat is decided then only if someone
+        # clears 50%. Wikipedia ticks BOTH candidates who advance and adds a
+        # "Runoff:" sub-list, so a tick there means "advanced", not "won".
+        # The loop above is last-write-wins, so LA-05 and LA-06 were filed as
+        # Republican holds on 2026-11-11 purely because the Republican happened
+        # to be ticked second -- the Democrat actually led the first round in
+        # both. Scoring them cut both ways: a manufactured miss in LA-06 and a
+        # manufactured hit in LA-05. Two ticks or an explicit runoff heading
+        # means undecided, so emit no winner.
+        if n_ticks > 1 or has_runoff_heading:
+            winner = ""
+            status = (status + " Runoff pending; no candidate reached 50%.").strip()
+
         rows[rid] = dict(race_id=rid, state=st, district=num,
                          pvi_2026=txt[1] if len(txt) > 1 else "",
                          incumbent=inc_name, incumbent_party_wiki=inc_party,
@@ -130,6 +172,8 @@ for t in tables:
                          same_party_contest=("D vs D" if extra.get("dem") and "rep" not in names
                                              else "R vs R" if extra.get("rep") and "dem" not in names
                                              else ""),
+                         actual_dem_pct=shares.get("dem", ""),
+                         actual_rep_pct=shares.get("rep", ""),
                          wiki_winner_marker=winner)
 
 wiki = pd.DataFrame(rows.values())
@@ -152,6 +196,11 @@ out["p_dem_pct"] = (out.p_dem * 100).round(1)
 out["p_rep_pct"] = ((1 - out.p_dem) * 100).round(1)
 out["district"] = out.race_id.str.split("-").str[2].astype(int)
 out["favoured"] = ["D" if x >= 0.5 else "R" for x in out.p_dem]
+# Realised two-party margin where the count is published, on the same
+# Dem-minus-Rep convention as the model's own margin, so the two subtract.
+_ad = pd.to_numeric(out.get("actual_dem_pct"), errors="coerce")
+_ar = pd.to_numeric(out.get("actual_rep_pct"), errors="coerce")
+out["actual_margin"] = (_ad - _ar).round(2)
 out = out.rename(columns={"blend_margin": "model_margin_dem_minus_rep",
                           "margin_p10": "margin_p10", "margin_p90": "margin_p90",
                           "lean": "partisan_lean_pvi", "rating": "cook_rating"})
@@ -160,6 +209,7 @@ cols = ["race_id", "state", "district", "dem_candidate", "rep_candidate",
         "p_dem_pct", "p_rep_pct", "favoured",
         "model_margin_dem_minus_rep", "margin_p10", "margin_p90",
         "cook_rating", "partisan_lean_pvi", "pvi_2026", "n_polls", "last_poll",
+        "actual_dem_pct", "actual_rep_pct", "actual_margin",
         "other_candidates", "same_party_contest", "wiki_winner_marker"]
 out = out[cols].sort_values(["state", "district"])
 for c in ("model_margin_dem_minus_rep", "margin_p10", "margin_p90", "partisan_lean_pvi"):
