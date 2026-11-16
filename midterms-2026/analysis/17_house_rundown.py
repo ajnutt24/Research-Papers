@@ -179,6 +179,22 @@ for t in tables:
 wiki = pd.DataFrame(rows.values())
 print(f"parsed {len(wiki)} districts from Wikipedia ({prov})")
 
+# The national article is edited constantly and its per-state tables have been
+# trimmed before: on 2026-11-16 a fresh fetch parsed 200 districts where the
+# 2026-11-11 cache gave all 435, because results had been moved out to the
+# per-state articles. Nothing raised, the file just quietly lost 228 winner
+# markers. Only the scorecard's never-overwrite rule kept that out of the
+# published numbers. A short parse is a source change, not a result, so say so
+# loudly rather than writing a thinner file over a good one.
+if len(wiki) < 430:
+    sys.stderr.write(
+        f"\nWARNING: parsed only {len(wiki)} of 435 districts ({prov}).\n"
+        "The source page layout has probably changed. Treat this run as\n"
+        "unreliable and read the per-state articles\n"
+        "(2026_United_States_House_of_Representatives_elections_in_<State>),\n"
+        "whose 'District N' > 'General election' > 'Results' tables still\n"
+        "carry full counts.\n\n")
+
 r = pd.read_csv(root+"/outputs/race_probabilities.csv")
 h = r[r.office == "House"].copy()
 f = pd.read_parquet(root+"/data_store/processed/fundamentals_2026.parquet")
