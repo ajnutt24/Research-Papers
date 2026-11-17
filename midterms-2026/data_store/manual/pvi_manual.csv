@@ -2,6 +2,19 @@
 # bridge: lean_538 = -2.09 + 1.024 * lean_2024 (r=0.9680, residual sd=7.92)
 # national 2024 margin used: -1.68
 # regenerate with: python3 fetch_pvi.py
+# GA-06 / GA-07 added 2026-11-17. Georgia was redistricted in 2023 (Alpha Phi
+# Alpha v. Raffensperger) but was not in The Downballot's new-map release, so
+# stage 06 fell back to 538_2022 leans -- which are keyed to the OLD numbering,
+# where GA-06 was the Republican seat and GA-07 the Democratic one. The 2023
+# remap swapped that: McBath moved to GA-06 (D) and McCormick to GA-07 (R).
+# The published 2026 forecast therefore ran GA-06 at R+24 and GA-07 at D+16,
+# the reverse of reality, and called both wrong (GA-07 at 94.4% confidence).
+# 2024 presidential by current district: GA-06 Harris 75-25 (D+50),
+# GA-07 Harris 38-60 (R+22). Bridged with this file's own formula.
+# Cross-check: the 2024 House margins already in fundamentals_2026.csv were
+# correct (GA-06 D+49.4, GA-07 R+29.7); only `lean` was inverted. A scan of
+# all 435 districts for lean/result sign conflicts >10pts flagged these two
+# and no others.
 race_id,pvi
 H-AL-01,-37.24
 H-AL-02,-15.04
@@ -90,6 +103,8 @@ H-FL-25,-9.72
 H-FL-26,-19.19
 H-FL-27,-15.29
 H-FL-28,-26.42
+H-GA-06,50.83
+H-GA-07,-22.90
 H-LA-01,-39.5
 H-LA-02,48.12
 H-LA-03,-37.21
